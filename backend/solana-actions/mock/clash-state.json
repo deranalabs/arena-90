@@ -1,0 +1,109 @@
+{
+  "agents": [
+    {
+      "agentId": "isagi",
+      "confidenceBps": 5991,
+      "decidedAtUtc": "2026-06-27T12:00:00.000Z",
+      "displayName": "ISAGI",
+      "marketId": "total_goals_2_5",
+      "matchId": "wc2026-arg-fra-group-001",
+      "position": "over_2_5",
+      "prediction": "Over 2.5",
+      "rationale": "Argentina vs France carries 6990 bps non-draw pressure, so ISAGI leans into an open match script and attacks Over 2.5.",
+      "scores": {
+        "aikuConfidenceBps": 6008,
+        "attackingPressureBps": 6990,
+        "awayProbabilityBps": 3331,
+        "drawProbabilityBps": 3010,
+        "homeProbabilityBps": 3659,
+        "isagiConfidenceBps": 5991,
+        "marketBalanceBps": 9673
+      },
+      "selectedOutcome": "home",
+      "stakeLamports": "10000000",
+      "zeroclaw": {
+        "command": "zeroclaw agent --config-dir <runtime> -a isagi --temperature 0 --message <arena-prompt>",
+        "exitCode": 0,
+        "stderr": "",
+        "stdout": "{\"agentRuntime\": \"zeroclaw\", \"decisionSource\": \"tools/read_odds.py\", \"status\": \"ack\"}\n",
+        "usedDeterministicToolDecision": true
+      }
+    },
+    {
+      "agentId": "aiku",
+      "confidenceBps": 6008,
+      "decidedAtUtc": "2026-06-27T12:00:00.000Z",
+      "displayName": "AIKU",
+      "marketId": "total_goals_2_5",
+      "matchId": "wc2026-arg-fra-group-001",
+      "position": "under_2_5",
+      "prediction": "Under 2.5",
+      "rationale": "AIKU sees 3010 bps draw resistance and 9673 bps market balance, favoring a compact defensive script on Under 2.5.",
+      "scores": {
+        "aikuConfidenceBps": 6008,
+        "attackingPressureBps": 6990,
+        "awayProbabilityBps": 3331,
+        "drawProbabilityBps": 3010,
+        "homeProbabilityBps": 3659,
+        "isagiConfidenceBps": 5991,
+        "marketBalanceBps": 9673
+      },
+      "selectedOutcome": "draw",
+      "stakeLamports": "10000000",
+      "zeroclaw": {
+        "command": "zeroclaw agent --config-dir <runtime> -a aiku --temperature 0 --message <arena-prompt>",
+        "exitCode": 0,
+        "stderr": "",
+        "stdout": "{\"agentRuntime\": \"zeroclaw\", \"decisionSource\": \"tools/read_odds.py\", \"status\": \"ack\"}\n",
+        "usedDeterministicToolDecision": true
+      }
+    }
+  ],
+  "clash": {
+    "headline": "ISAGI Over 2.5 vs AIKU Under 2.5",
+    "id": "wc2026-arg-fra-group-001-total-goals-2-5",
+    "isDeterministic": true,
+    "mockSource": "txodds-mock",
+    "status": "ready"
+  },
+  "generatedAtUtc": "2026-06-27T12:00:00.000Z",
+  "market": {
+    "id": "total_goals_2_5",
+    "label": "Total Goals 2.5",
+    "line": 2.5,
+    "outcomes": [
+      "Over 2.5",
+      "Under 2.5"
+    ]
+  },
+  "match": {
+    "awayTeam": {
+      "fifaCode": "FRA",
+      "name": "France"
+    },
+    "competition": "FIFA World Cup 2026",
+    "homeTeam": {
+      "fifaCode": "ARG",
+      "name": "Argentina"
+    },
+    "impliedProbability": {
+      "away": 0.3571,
+      "draw": 0.3226,
+      "home": 0.3922
+    },
+    "kickoffUtc": "2026-06-27T19:00:00.000Z",
+    "marketUpdatedAtUtc": "2026-06-27T11:58:30.000Z",
+    "matchId": "wc2026-arg-fra-group-001",
+    "odds": {
+      "away": 2.8,
+      "draw": 3.1,
+      "home": 2.55
+    },
+    "season": "2026",
+    "source": "txodds-mock",
+    "status": "scheduled",
+    "venue": "MetLife Stadium, East Rutherford"
+  },
+  "schemaVersion": 1,
+  "source": "zeroclaw"
+}
