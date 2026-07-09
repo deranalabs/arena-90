@@ -5,58 +5,42 @@ export function BlinkExperienceSection() {
   return (
     <section className="relative z-10 mx-auto w-full max-w-6xl px-6 py-32 border-t border-white/5">
       {/* Ticker / Top HUD */}
-      <div className="mb-12 flex items-center gap-4 font-mono text-[10px] uppercase tracking-[0.2em] text-arena-muted">
+      <div className="mb-16 flex items-center justify-center gap-4 font-mono text-[10px] uppercase tracking-[0.2em] text-arena-muted">
         <span className="text-system-success animate-pulse">■</span>
         <span>{`// SEAMLESS EXECUTION // WEB3 INVISIBLE // SOCIAL LAYER`}</span>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-        {/* Left: Copywriting */}
-        <div className="flex flex-col gap-6">
-          <div>
-            <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-arena-muted mb-2">
-              03. <span className="text-arena-cyan">THE TROJAN</span> HORSE
-            </h3>
-            <h2 className="font-display text-5xl md:text-6xl leading-[0.9] text-arena-text uppercase">
-              BET FROM YOUR <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-system-success to-white/20">TIMELINE</span>
-            </h2>
-          </div>
-          
-          <div className="space-y-6 font-sans text-arena-muted/80 text-lg leading-relaxed mt-4">
-            <p>
-              <span className="text-arena-text font-bold">Problem:</span> Traditional dApps force you through 5 clicks just to sign a transaction. You miss the odds shift while waiting for the page to load.
-            </p>
-            <p>
-              <span className="text-arena-text font-bold">Solution:</span> Arena90 uses Solana Actions (Blinks). When the agents clash, the arena opens directly on your X/Twitter timeline. Read the logic, pick ISAGI or AIKU, and stake your USDC in one click.
-            </p>
-          </div>
+      {/* Center Copywriting */}
+      <div className="flex flex-col items-center text-center gap-4 mb-20">
+        <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-arena-muted">
+          03. <span className="text-arena-cyan">THE TROJAN</span> HORSE
+        </h3>
+        <h2 className="font-display text-5xl md:text-7xl leading-[0.9] text-arena-text uppercase">
+          BET FROM YOUR <br className="sm:hidden" />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-system-success to-white/20">TIMELINE</span>
+        </h2>
+      </div>
 
-          <div className="mt-8">
-            <Button className="font-mono text-sm uppercase tracking-widest font-bold bg-white/5 text-white border border-white/10 hover:bg-white/10 hover:border-white/20 clip-chamfer-sm px-6 py-6 h-auto">
-              [ BLINK_PREVIEW ] <ArrowRightIcon className="ml-3 h-4 w-4" />
-            </Button>
-          </div>
-        </div>
+      <div className="relative mx-auto w-full max-w-3xl flex flex-col lg:flex-row items-center justify-center gap-12">
 
-        {/* Right: Blink Mockup Card */}
-        <div className="relative w-full p-[1px] bg-gradient-to-br from-white/20 to-transparent clip-chamfer">
-          <div className="bg-[#0D0D11] p-6 lg:p-8 clip-chamfer h-full w-full flex flex-col gap-4 shadow-2xl relative overflow-hidden">
+        {/* Center: Blink Mockup Card */}
+        <div className="relative w-full max-w-lg p-[1px] bg-gradient-to-br from-white/20 to-transparent clip-chamfer z-20">
+          <div className="bg-[#0D0D11] p-6 clip-chamfer w-full flex flex-col gap-4 shadow-2xl relative overflow-hidden">
             {/* Ambient Background Glow for the card */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-system-success/5 blur-3xl rounded-full pointer-events-none" />
+            <div className="absolute top-0 right-0 w-48 h-48 bg-system-success/5 blur-3xl rounded-full pointer-events-none" />
 
             {/* Mock Tweet Header */}
             <div className="flex items-center gap-3 mb-2 relative z-10">
-              <div className="w-12 h-12 bg-arena-base clip-chamfer-sm border border-white/10 flex items-center justify-center">
+              <div className="w-10 h-10 bg-arena-base clip-chamfer-sm border border-white/10 flex items-center justify-center">
                 <span className="font-display text-xl font-bold">A90</span>
               </div>
               <div>
                 <p className="font-sans font-bold text-white text-base">Arena90</p>
-                <p className="font-mono text-xs text-arena-muted">@Arena90_AI</p>
+                <p className="font-mono text-[10px] text-arena-muted">@Arena90_AI</p>
               </div>
             </div>
             
-            <p className="font-sans text-sm md:text-base text-arena-text/90 leading-relaxed relative z-10">
+            <p className="font-sans text-sm text-arena-text/90 leading-relaxed relative z-10">
               World Cup Group A: ARG vs FRA.<br/><br/>
               ISAGI detects massive attacking momentum. AIKU calculates a high-probability low block. The Arena is open. Choose your champion. ⚡️👇
             </p>
@@ -95,6 +79,24 @@ export function BlinkExperienceSection() {
           </div>
         </div>
 
+        {/* Floating Context Blocks */}
+        <div className="absolute -left-12 top-1/4 hidden lg:flex flex-col gap-2 max-w-[200px] text-right z-10">
+          <div className="font-mono text-[10px] text-arena-red uppercase tracking-widest border-r-2 border-arena-red pr-3">The Problem</div>
+          <p className="font-sans text-xs text-arena-muted/80 leading-relaxed">
+            Traditional dApps force 5 clicks. You miss the odds shift while waiting for the page.
+          </p>
+        </div>
+
+        <div className="absolute -right-12 bottom-1/4 hidden lg:flex flex-col gap-2 max-w-[200px] text-left z-10">
+          <div className="font-mono text-[10px] text-system-success uppercase tracking-widest border-l-2 border-system-success pl-3">The Solution</div>
+          <p className="font-sans text-xs text-arena-muted/80 leading-relaxed">
+            Solana Actions (Blinks). The arena opens directly on your timeline. One-click stake.
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-16 flex justify-center">
+         <div className="h-24 w-px bg-gradient-to-b from-white/20 to-transparent" />
       </div>
     </section>
   );

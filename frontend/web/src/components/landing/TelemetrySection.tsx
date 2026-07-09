@@ -28,54 +28,33 @@ export function TelemetrySection() {
   }, []);
 
   return (
-    <section className="relative z-10 mx-auto w-full max-w-6xl px-6 py-32 border-t border-white/5">
+    <section className="relative z-10 mx-auto w-full max-w-6xl px-6 py-16 flex flex-col items-center">
       
-      {/* Section Header */}
-      <div className="mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <div>
-          <p className="font-mono text-xs uppercase tracking-[0.2em] text-arena-muted mb-2">
-            04. <span className="text-system-caution">THE BRAIN</span>
-          </p>
-          <h2 className="font-display text-5xl md:text-6xl leading-none text-arena-text">
-            AUTONOMOUS <br className="sm:hidden" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-arena-muted to-white/20">INTELLIGENCE</span>
-          </h2>
-        </div>
-        <div className="text-left md:text-right max-w-md font-sans text-sm leading-relaxed text-arena-muted/80">
+      {/* Center Copywriting */}
+      <div className="flex flex-col items-center text-center gap-4 mb-20 max-w-2xl">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-arena-muted">
+          04. <span className="text-system-caution">THE BRAIN</span>
+        </p>
+        <h2 className="font-display text-5xl md:text-7xl leading-[0.9] text-arena-text uppercase">
+          AUTONOMOUS <br className="sm:hidden" />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-arena-muted to-white/20">INTELLIGENCE</span>
+        </h2>
+        <p className="mt-4 font-sans text-sm text-arena-muted/80 leading-relaxed">
           ISAGI and AIKU aren&apos;t just random scripts. They are autonomous agents running on the ZeroClaw engine. They ingest live market data, evaluate momentum, and lock their positions. They never sleep. They never tilt.
-        </div>
+        </p>
       </div>
 
-      {/* Terminal Mockup */}
-      <HudPanel className="w-full bg-[#0D0D11] border-white/10 p-0 overflow-hidden clip-chamfer group">
+      {/* Floating Terminal Mockup */}
+      <div className="relative w-full max-w-3xl bg-transparent border-l-2 border-system-caution/50 pl-6 group">
         
-        {/* Terminal Header Bar */}
-        <div className="flex items-center justify-between border-b border-white/10 bg-[#14161d] px-4 py-2">
-          <div className="flex items-center gap-3">
-            <div className="flex gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-arena-muted/30" />
-              <div className="w-2 h-2 rounded-full bg-arena-muted/30" />
-              <div className="w-2 h-2 rounded-full bg-arena-muted/30" />
-            </div>
-            <span className="font-mono text-[10px] uppercase tracking-widest text-arena-muted">
-              zeroclaw-agent-daemon // live-logs
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-system-success animate-pulse clip-chamfer-sm" />
-            <span className="font-mono text-[10px] uppercase text-system-success">Connected</span>
-          </div>
+        <div className="font-mono text-[10px] uppercase tracking-widest text-arena-muted mb-4 flex items-center gap-2">
+          <span className="w-2 h-2 bg-system-success animate-pulse clip-chamfer-sm" />
+          zeroclaw-agent-daemon // live-logs
         </div>
 
-        {/* Terminal Body */}
-        <div className="relative p-6 md:p-8 font-mono text-xs md:text-sm leading-loose text-arena-muted bg-[#08080A] min-h-[200px]">
-          
-          {/* Scanline overlay */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0)_50%,rgba(0,0,0,0.1)_50%)] bg-[length:100%_4px] pointer-events-none opacity-20" />
-          
-          <div className="flex flex-col gap-2 relative z-10">
+        <div className="font-mono text-sm md:text-base leading-relaxed text-arena-muted min-h-[200px]">
+          <div className="flex flex-col gap-3">
             {logs.map((log, index) => {
-              // Colorize based on content
               let colorClass = "text-arena-muted";
               if (log.includes("ISAGI_EVAL")) colorClass = "text-agent-isagi";
               if (log.includes("AIKU_EVAL")) colorClass = "text-agent-aiku";
@@ -83,7 +62,7 @@ export function TelemetrySection() {
               if (log.includes("MATCH:")) colorClass = "text-white";
 
               return (
-                <div key={index} className="flex gap-3 items-start animate-fade-in">
+                <div key={index} className="flex gap-4 items-start animate-fade-in drop-shadow-[0_0_8px_rgba(255,255,255,0.1)]">
                   <span className="text-arena-muted/40 shrink-0">~</span>
                   <span className={colorClass}>{log}</span>
                 </div>
@@ -92,12 +71,15 @@ export function TelemetrySection() {
             {/* Blinking cursor */}
             <div className="flex gap-3 items-start">
                <span className="text-arena-muted/40 shrink-0">~</span>
-               <span className="w-2 h-4 bg-white/50 animate-pulse mt-0.5" />
+               <span className="w-3 h-5 bg-white/70 animate-pulse mt-0.5" />
             </div>
           </div>
         </div>
-      </HudPanel>
+      </div>
 
+      <div className="mt-16 flex justify-center">
+         <div className="h-24 w-px bg-gradient-to-b from-white/20 to-transparent" />
+      </div>
     </section>
   );
 }

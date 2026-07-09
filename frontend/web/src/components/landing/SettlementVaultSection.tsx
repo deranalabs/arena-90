@@ -2,9 +2,9 @@ import { HudPanel } from "@/components/ui/hud-panel";
 
 export function SettlementVaultSection() {
   return (
-    <section className="relative z-10 mx-auto w-full max-w-6xl px-6 py-32 border-t border-white/5 bg-[linear-gradient(180deg,transparent_0%,rgba(10,11,16,0.8)_100%)]">
+    <section className="relative z-10 mx-auto w-full max-w-6xl px-6 py-16 flex flex-col items-center bg-[linear-gradient(180deg,transparent_0%,rgba(10,11,16,0.8)_100%)]">
       
-      <div className="text-center mb-20 flex flex-col items-center">
+      <div className="text-center mb-16 flex flex-col items-center max-w-2xl">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-arena-muted mb-4 inline-flex items-center gap-2 border border-white/10 bg-white/5 px-3 py-1 clip-chamfer-sm">
           <span className="w-2 h-2 bg-system-success animate-pulse" />
           06. SETTLEMENT PHASE
@@ -18,48 +18,52 @@ export function SettlementVaultSection() {
         </p>
       </div>
 
-      {/* The 3 Steps Vault Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* The Pipeline (Vertical Diagram) */}
+      <div className="relative w-full max-w-lg flex flex-col items-center gap-4">
         
-        {/* Card 1: ESCROW */}
-        <HudPanel className="bg-[#0D0D11] border-white/10 p-8 clip-chamfer transition-transform duration-300 hover:-translate-y-2 group">
-          <div className="font-mono text-[10px] text-arena-muted uppercase tracking-widest mb-4 opacity-50 group-hover:opacity-100 transition-opacity">
-            Step_01
+        {/* Node 1: ESCROW */}
+        <div className="w-full bg-[#0D0D11]/80 backdrop-blur-sm border border-white/10 p-6 clip-chamfer flex items-center justify-between group">
+          <div className="flex flex-col text-left">
+             <div className="font-mono text-[10px] text-arena-muted uppercase tracking-widest mb-1 opacity-50">Node_01</div>
+             <h3 className="font-display text-2xl text-white">LOCK / ESCROW</h3>
           </div>
-          <h3 className="font-display text-3xl text-white mb-2">LOCK</h3>
-          <p className="font-sans text-sm text-arena-muted/80">
-            Funds secured in a cryptographic PDA Escrow. Not held by Arena90 or any central authority.
+          <p className="font-sans text-xs text-arena-muted/80 max-w-[200px] text-right">
+            Funds secured in a cryptographic PDA Escrow. Not held by Arena90.
           </p>
-        </HudPanel>
+        </div>
 
-        {/* Card 2: YIELD */}
-        <HudPanel className="bg-[#0D0D11] border-agent-aiku/20 p-8 clip-chamfer transition-transform duration-300 hover:-translate-y-2 group relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-agent-aiku/5 blur-2xl rounded-full" />
-          <div className="font-mono text-[10px] text-agent-aiku uppercase tracking-widest mb-4 opacity-50 group-hover:opacity-100 transition-opacity">
-            Step_02
-          </div>
-          <h3 className="font-display text-3xl text-agent-aiku mb-2">YIELD</h3>
-          <p className="font-sans text-sm text-arena-muted/80 relative z-10">
-            Idle liquidity is routed to Kamino Finance to generate interest during the 90-minute match window.
-          </p>
-        </HudPanel>
+        <div className="h-8 w-px bg-agent-aiku/50" />
 
-        {/* Card 3: RESOLVE */}
-        <HudPanel className="bg-[#0D0D11] border-system-success/20 p-8 clip-chamfer transition-transform duration-300 hover:-translate-y-2 group relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-system-success/5 blur-2xl rounded-full" />
-          <div className="font-mono text-[10px] text-system-success uppercase tracking-widest mb-4 opacity-50 group-hover:opacity-100 transition-opacity">
-            Step_03
+        {/* Node 2: YIELD */}
+        <div className="w-full bg-[#0D0D11]/80 backdrop-blur-sm border border-agent-aiku/30 p-6 clip-chamfer flex items-center justify-between group relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-agent-aiku/10 blur-2xl rounded-full" />
+          <div className="flex flex-col text-left relative z-10">
+             <div className="font-mono text-[10px] text-agent-aiku uppercase tracking-widest mb-1 opacity-50">Node_02</div>
+             <h3 className="font-display text-2xl text-agent-aiku">KAMINO YIELD</h3>
           </div>
-          <h3 className="font-display text-3xl text-system-success mb-2">RESOLVE</h3>
-          <p className="font-sans text-sm text-arena-muted/80 relative z-10">
-            Final whistle blows. Oracle triggers P2P payout via TxLINE CPI. Instant, trustless settlement.
+          <p className="font-sans text-xs text-arena-muted/80 max-w-[200px] text-right relative z-10">
+            Idle liquidity routed to Kamino Finance during the 90-min match window.
           </p>
-        </HudPanel>
+        </div>
+
+        <div className="h-8 w-px bg-system-success/50" />
+
+        {/* Node 3: RESOLVE */}
+        <div className="w-full bg-[#0D0D11]/80 backdrop-blur-sm border border-system-success/30 p-6 clip-chamfer flex items-center justify-between group relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-system-success/10 blur-2xl rounded-full" />
+          <div className="flex flex-col text-left relative z-10">
+             <div className="font-mono text-[10px] text-system-success uppercase tracking-widest mb-1 opacity-50">Node_03</div>
+             <h3 className="font-display text-2xl text-system-success">P2P PAYOUT</h3>
+          </div>
+          <p className="font-sans text-xs text-arena-muted/80 max-w-[200px] text-right relative z-10">
+            Oracle triggers settlement. Winner takes pool + yield.
+          </p>
+        </div>
 
       </div>
 
-      {/* Footer / Final CTA */}
-      <div className="mt-32 pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
+      {/* Footer */}
+      <div className="mt-32 w-full pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
         <div className="font-display text-2xl text-arena-text tracking-widest">ARENA90</div>
         <div className="flex gap-6 font-mono text-[10px] uppercase text-arena-muted tracking-widest">
           <span className="hover:text-white transition-colors cursor-pointer">Superteam Earn</span>
