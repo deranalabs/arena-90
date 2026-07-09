@@ -14,7 +14,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body
-        className="antialiased bg-[#050505] text-white font-sans overflow-x-hidden selection:bg-[#FF1E56] selection:text-white"
+        className="antialiased bg-arena-bg text-white font-sans overflow-x-hidden"
       >
         {children}
       </body>

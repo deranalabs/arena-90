@@ -29,12 +29,12 @@ function AgentAssetSlot({
         style={{ borderColor: color }}
       />
       <div
-        className="absolute bottom-0 h-[72%] w-[58%] rounded-t-full opacity-20 blur-3xl"
+        className="absolute bottom-0 h-[72%] w-[58%] opacity-20 blur-3xl clip-panel"
         style={{ backgroundColor: color }}
       />
       <div className="relative z-10 flex flex-col items-center gap-3 px-8 text-center">
         <div
-          className="grid h-24 w-24 place-items-center rounded-full border border-dashed bg-black/50 font-display text-3xl font-black"
+          className="grid h-24 w-24 place-items-center border border-dashed bg-black/50 font-display text-3xl font-black clip-panel-sm"
           style={{ borderColor: color, color }}
         >
           {assetId}
@@ -85,7 +85,7 @@ export function RiotHero() {
             <span className="text-[var(--color-system-success)]">LIVE_MATCH</span>
           </div>
 
-          <h1 className="font-display text-6xl font-black uppercase leading-[0.9] sm:text-7xl lg:text-8xl xl:text-[112px] drop-shadow-2xl">
+          <h1 className="font-display text-6xl font-black uppercase leading-[0.9] sm:text-7xl lg:text-8xl xl:text-[112px]">
             CHOOSE <br />
             <span className="italic text-transparent" style={{ WebkitTextStroke: "2px white" }}>
               CHAMPION
@@ -114,7 +114,7 @@ export function RiotHero() {
       <div className="pointer-events-none absolute inset-x-0 bottom-0 z-30 flex items-end justify-between p-6 sm:p-8">
         <div className="flex flex-col gap-1">
           <div className="flex items-center gap-2">
-            <div className="flex h-6 w-6 items-center justify-center rounded-full border border-white/20 bg-black text-[10px] font-bold">
+            <div className="flex h-6 w-6 items-center justify-center border border-white/20 bg-black text-[10px] font-bold clip-panel-sm">
               A
             </div>
             <div className="font-mono text-[10px] text-[var(--color-agent-isagi)]">

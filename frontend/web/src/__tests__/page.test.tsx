@@ -39,7 +39,7 @@ describe("Home Page", () => {
     render(<LandingPage />);
     
     expect(screen.getByText(/SYSTEM_ONLINE/)).toBeInTheDocument();
-    expect(screen.getByText(/ARENA90/)).toBeInTheDocument();
+    expect(screen.getAllByText(/ARENA90/)[0]).toBeInTheDocument();
   });
   
   it("renders the navigation links", () => {
@@ -56,13 +56,48 @@ describe("Home Page", () => {
     expect(screen.getByText(/JOIN THE ARENA/)).toBeInTheDocument();
   });
 
-  it("renders the agent lock section", () => {
+  it("renders the Agents Section", () => {
     render(<LandingPage />);
+    
+    expect(screen.getByText(/THE COMBATANTS/)).toBeInTheDocument();
+    expect(screen.getAllByText(/ISAGI/)[0]).toBeInTheDocument();
+    expect(screen.getAllByText(/AIKU/)[0]).toBeInTheDocument();
+  });
 
-    expect(screen.getByText(/SECTION_02 \/\/ AGENT_LOCK/)).toBeInTheDocument();
-    expect(screen.getByText(/TWO MODELS/)).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "ISAGI" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "AIKU" })).toBeInTheDocument();
-    expect(screen.getByText(/ACTIVE_MARKET/)).toBeInTheDocument();
+  it("renders the Blink Experience Section", () => {
+    render(<LandingPage />);
+    
+    expect(screen.getByText(/FRICTIONLESS WEB2 UX/)).toBeInTheDocument();
+    expect(screen.getByText(/STAY ON/)).toBeInTheDocument();
+    expect(screen.getByText(/@Arena90_Agents/)).toBeInTheDocument();
+  });
+
+  it("renders the Telemetry Section", () => {
+    render(<LandingPage />);
+    
+    expect(screen.getByText(/100% AUTONOMOUS/)).toBeInTheDocument();
+    expect(screen.getByText(/WATCH THEM/)).toBeInTheDocument();
+    expect(screen.getByText(/zeroclaw-daemon\.log/)).toBeInTheDocument();
+  });
+
+  it("renders the Oracle Section", () => {
+    render(<LandingPage />);
+    
+    expect(screen.getByText(/THE TROJAN/)).toBeInTheDocument();
+    expect(screen.getByText(/txodds_live_intercept\.json/)).toBeInTheDocument();
+  });
+
+  it("renders the Settlement Vault Section", () => {
+    render(<LandingPage />);
+    
+    expect(screen.getByText(/THE SETTLEMENT VAULT/)).toBeInTheDocument();
+    expect(screen.getByText(/SECURED BY ANCHOR & KAMINO/)).toBeInTheDocument();
+  });
+
+  it("renders the Footer Section", () => {
+    render(<LandingPage />);
+    
+    expect(screen.getByText(/INFRASTRUCTURE/)).toBeInTheDocument();
+    expect(screen.getByText(/DERANALABS/)).toBeInTheDocument();
   });
 });
