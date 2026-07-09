@@ -3,6 +3,8 @@ import { BlinkExperienceSection } from "@/components/landing/BlinkExperienceSect
 import { HeroSection } from "@/components/landing/HeroSection";
 import { HudHeader } from "@/components/landing/HudHeader";
 import { TelemetrySection } from "@/components/landing/TelemetrySection";
+import { OracleSection } from "@/components/landing/OracleSection";
+import { SettlementVaultSection } from "@/components/landing/SettlementVaultSection";
 
 export default function LandingPage() {
   return (
@@ -17,6 +19,8 @@ export default function LandingPage() {
 
       <BlinkExperienceSection />
       <TelemetrySection />
+      <OracleSection />
+      <SettlementVaultSection />
     </main>
   );
 }
