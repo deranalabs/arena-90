@@ -9,7 +9,7 @@ Implement the 6 continuous landing page sections using the primitives and visual
 
 ## 2. Scope
 - Section 1: Hero (Choose Champion)
-- Section 2: Agent Lock
+- Section 2: Agent Duel (The Clash)
 - Section 3: Blink Experience
 - Section 4: Telemetry (Agent Brain)
 - Section 5: Oracle (TxLINE Data)
@@ -17,17 +17,17 @@ Implement the 6 continuous landing page sections using the primitives and visual
 - Framer Motion implementations (Strictly NO elastic/bouncy animations).
 
 ## 3. User Stories
-- **US-5B.1:** As a Hackathon Judge, as I scroll from the Hero section down to the Agent Lock, I want the transition to feel like a camera panning down to a tactical board, not a hard page jump.
+- **US-5B.1:** As a Hackathon Judge, as I scroll from the Hero section down to the Agent Duel, I want the transition to feel like a camera panning down to a tactical board, not a hard page jump.
 - **US-5B.2:** As a User, when I reach the Telemetry section, I want to see terminal-style logs typing in to understand that the agents are running autonomously.
 
 ## 4. Functional Requirements
-- **FR-1:** Build the 6 section components using the `Panel` primitive from Phase 05A.
-- **FR-2:** Integrate the placeholder assets (`[2A] ISAGI`, `[2B] AIKU`, `[1A] Banner`) accurately within their designated sections.
+- **FR-1:** Build the 6 section components inside `src/components/landing/` using the `Panel` primitive and brutalist styling from Phase 05A.
+- **FR-2:** Integrate placeholder bounding boxes for assets (`[2A] ISAGI`, `[2B] AIKU`, `[1A] Banner`) using strict brutalist borders so the designer knows exactly where to drop them.
 - **FR-3:** Implement Framer Motion for section transitions:
-  - Panels must slide in linearly (system lock-in feel).
-  - Data rails move horizontally.
-  - Agent auras use a slow, continuous pulse.
-- **FR-4:** Ensure the "Blink Experience" section accurately mocks a Twitter card interface.
+  - Panels must slide in linearly from the bottom or sides.
+  - Tickers/Data rails move horizontally.
+  - Animations must use stiff springs (`type: "spring", stiffness: 300, damping: 30`) or linear tweens. No elastic bouncing.
+- **FR-4:** Ensure the "Blink Experience" section accurately mocks a Twitter card interface but styled in our brutalist theme.
 
 ## 5. Definition of Done
 - All 6 sections are implemented and render sequentially on `/`.
