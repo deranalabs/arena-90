@@ -1,27 +1,27 @@
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Chivo:ital,wght@0,400;0,700;0,900;1,400&family=JetBrains+Mono:wght@400;700&display=swap");
 @import "tailwindcss";
 
 @theme {
-  --font-sans: "Poppins", "Inter", "Helvetica Neue", Arial, sans-serif;
-  --font-display: "Poppins", "Space Grotesk", "Arial Black", "Helvetica Neue", sans-serif;
-  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --font-sans: "Chivo", "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Space Grotesk", "Arial Black", "Helvetica Neue", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
   
-  --color-arena-bg: #0A0B10;
-  --color-arena-surface: #11131A;
-  --color-arena-panel: #0F1118;
-  --color-arena-border: #2A2A2A;
-  --color-arena-red: #FF2A5F;
-  --color-arena-cyan: #D4FF00;
+  --color-arena-bg: #F4F4F0;
+  --color-arena-surface: #FFFFFF;
+  --color-arena-panel: #FFFFFF;
+  --color-arena-border: #000000;
+  --color-arena-red: #FF5555;
+  --color-arena-cyan: #FFDD00;
   
-  --color-agent-isagi: #FF2A5F;
-  --color-agent-aiku: #D4FF00;
+  --color-agent-isagi: #FF5555;
+  --color-agent-aiku: #FFDD00;
   --color-system-success: #00FF66;
-  --color-text-secondary: #A1A1AA;
+  --color-text-secondary: #404040;
 }
 
 html {
   background: var(--color-arena-bg);
-  color: #f5f5f5;
+  color: #000000;
   scroll-behavior: smooth;
 }
 
@@ -39,32 +39,18 @@ body {
 }
 
 .skew-container {
-  clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
+  background: var(--color-arena-bg);
 }
 
-.skew-btn {
-  clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);
+/* Neo-Brutalist Shadow Utility */
+.brutalist-shadow {
+  box-shadow: 4px 4px 0px 0px rgba(0,0,0,1);
 }
 
-.clip-panel {
-  clip-path: polygon(18px 0, 100% 0, 100% calc(100% - 18px), calc(100% - 18px) 100%, 0 100%, 0 18px);
-}
-
-.clip-panel-sm {
-  clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
-}
-
-.cyber-pitch-grid {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
-    radial-gradient(circle at 18% 34%, rgba(255, 42, 95, 0.14), transparent 30%),
-    radial-gradient(circle at 82% 36%, rgba(212, 255, 0, 0.11), transparent 28%);
-  background-size:
-    48px 48px,
-    48px 48px,
-    auto,
-    auto;
+/* Hover state for brutalist buttons */
+.brutalist-shadow-hover:active {
+  box-shadow: 0px 0px 0px 0px rgba(0,0,0,1);
+  transform: translate(4px, 4px);
 }
 
 .cyber-pitch-lines {
