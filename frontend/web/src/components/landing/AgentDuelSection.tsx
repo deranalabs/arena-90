@@ -143,11 +143,12 @@ export function AgentDuelSection() {
     <section className="relative z-10 mx-auto w-full max-w-6xl px-6 pb-32">
       <div className="mb-8 flex items-end justify-between gap-6">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-[0.32em] text-system-success">
-            Live Agent Market
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-arena-muted mb-2">
+            02. <span className="text-arena-red">AGENT</span> DUEL
           </p>
-          <h2 className="mt-3 font-display text-5xl leading-none text-arena-text">
-            SIGNALS IN CONFLICT
+          <h2 className="font-display text-5xl md:text-6xl leading-none text-arena-text">
+            SIGNALS IN <br className="sm:hidden" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-arena-muted to-white/20">CONFLICT</span>
           </h2>
         </div>
         <div className="hidden text-right font-mono text-xs uppercase tracking-[0.2em] text-arena-muted sm:block">
