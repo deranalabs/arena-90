@@ -1,24 +1,18 @@
-"use client";
-
 import { GlobalArenaLayout } from "@/components/layout/GlobalArenaLayout";
-import { RiotHero } from "@/components/landing/Hero";
-import { AgentsSection } from "@/components/landing/AgentsSection";
-import { BlinkExperienceSection } from "@/components/landing/BlinkExperienceSection";
-import { AgentTelemetrySection } from "@/components/landing/AgentTelemetrySection";
-import { OracleSection } from "@/components/landing/OracleSection";
-import { SettlementVaultSection } from "@/components/landing/SettlementVaultSection";
-import { FooterSection } from "@/components/landing/FooterSection";
 
 export default function LandingPage() {
   return (
     <GlobalArenaLayout>
-      <RiotHero />
-      <AgentsSection />
-      <BlinkExperienceSection />
-      <AgentTelemetrySection />
-      <OracleSection />
-      <SettlementVaultSection />
-      <FooterSection />
+      <div className="flex min-h-screen items-center justify-center px-5">
+        <div className="border-2 border-black bg-white px-8 py-4 brutalist-shadow">
+          <h1 className="font-display text-4xl font-bold uppercase tracking-tight text-black">
+            ARENA90: READY FOR SECTIONS
+          </h1>
+          <p className="mt-2 font-mono text-sm text-zinc-600">
+            Global layout and Anti-Slop tokens initialized.
+          </p>
+        </div>
+      </div>
     </GlobalArenaLayout>
   );
 }
