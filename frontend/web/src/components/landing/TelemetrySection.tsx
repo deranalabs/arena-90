@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+
+import { cn } from "@/lib/utils";
 
 const BRAIN_LOGS = [
   "[SYS_INIT] ZERO_CLAW RUNTIME V1.0.0 ENGAGED...",
@@ -18,87 +20,202 @@ const BRAIN_LOGS = [
 ];
 
 export function TelemetrySection() {
-  const [logs, setLogs] = useState<string[]>([BRAIN_LOGS[0]]);
-  const [isTyping, setIsTyping] = useState(true);
+  const sectionRef = useRef<HTMLElement>(null);
+  const [hasStarted, setHasStarted] = useState(false);
+  const [logs, setLogs] = useState<string[]>([""]);
+  const [isTyping, setIsTyping] = useState(false);
 
   useEffect(() => {
-    let currentIndex = 1;
-    const interval = setInterval(() => {
-      setLogs((prev) => {
-        if (currentIndex >= BRAIN_LOGS.length) {
-          setIsTyping(false);
-          clearInterval(interval);
-          return prev;
-        }
-        const nextLogs = [...prev, BRAIN_LOGS[currentIndex]];
-        return nextLogs;
-      });
-      currentIndex++;
-    }, 1200); // Ticking speed
+    const section = sectionRef.current;
+    if (!section) return;
 
-    return () => clearInterval(interval);
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return;
+        setHasStarted(true);
+        observer.disconnect();
+      },
+      { rootMargin: "0px 0px -20% 0px", threshold: 0.25 },
+    );
+
+    observer.observe(section);
+
+    return () => observer.disconnect();
   }, []);
 
+  useEffect(() => {
+    if (!hasStarted) return;
+
+    let lineIndex = 0;
+    let charIndex = 0;
+    let timeout: ReturnType<typeof setTimeout>;
+
+    setLogs([""]);
+    setIsTyping(true);
+
+    const typeNextCharacter = () => {
+      if (lineIndex >= BRAIN_LOGS.length) {
+        setIsTyping(false);
+        return;
+      }
+
+      const targetLine = BRAIN_LOGS[lineIndex];
+
+      if (targetLine === "") {
+        setLogs((prev) => {
+          const nextLogs = prev.slice(0, lineIndex);
+          nextLogs[lineIndex] = "";
+          return nextLogs;
+        });
+        lineIndex++;
+        charIndex = 0;
+        timeout = setTimeout(typeNextCharacter, 260);
+        return;
+      }
+
+      setLogs((prev) => {
+        const nextLogs = prev.slice(0, lineIndex + 1);
+        nextLogs[lineIndex] = targetLine.slice(0, charIndex);
+        return nextLogs;
+      });
+
+      if (charIndex < targetLine.length) {
+        charIndex++;
+        timeout = setTimeout(typeNextCharacter, targetLine.startsWith(">") ? 16 : 20);
+        return;
+      }
+
+      lineIndex++;
+      charIndex = 0;
+      timeout = setTimeout(typeNextCharacter, 360);
+    };
+
+    timeout = setTimeout(typeNextCharacter, 300);
+
+    return () => clearTimeout(timeout);
+  }, [hasStarted]);
+
   return (
-    <section className="relative z-10 w-full bg-[#050507] border-y border-white/5 py-32 overflow-hidden">
-      
-      {/* Ambient Grid */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px] pointer-events-none" />
+    <section
+      className="relative z-10 w-full overflow-hidden border-y border-white/5 bg-[#07080d] py-28"
+      ref={sectionRef}
+    >
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.018)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.018)_1px,transparent_1px)] bg-[size:56px_56px]" />
 
       <div className="relative mx-auto w-full max-w-5xl px-6">
-        
-        {/* Subtle Header */}
-        <div className="mb-12 flex items-center justify-between border-b border-white/10 pb-4">
-          <div className="font-mono text-xs uppercase tracking-[0.2em] text-arena-muted">
-            04. <span className="text-system-caution">THE BRAIN</span>
+        <div className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-arena-muted">
+              04. <span className="text-system-caution">THE BRAIN</span>
+            </p>
+            <h2 className="mt-4 font-display text-5xl uppercase leading-none text-arena-text md:text-6xl">
+              LIVE AGENT TRACE
+            </h2>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 bg-system-success animate-pulse" />
-            <span className="font-mono text-[10px] uppercase tracking-widest text-system-success">TERMINAL_LIVE</span>
+          <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-system-success">
+            <span className="h-2 w-2 bg-system-success animate-pulse" />
+            TxLINE connected
           </div>
         </div>
+      </div>
 
-        {/* Full-width Terminal Text */}
-        <div className="font-mono text-sm md:text-xl lg:text-2xl leading-relaxed md:leading-loose text-arena-muted">
-          <div className="flex flex-col gap-4 md:gap-6">
-            {logs.map((log, index) => {
-              let colorClass = "text-arena-muted/70";
-              let isHighlight = false;
+      <div className="relative border-y border-white/10 bg-[#080a10]/95">
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:28px_28px]" />
+        <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-system-caution/35 to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-system-success/25 to-transparent" />
 
-              if (log.includes("[SYS_INFO]")) {
-                colorClass = "text-white";
-                isHighlight = true;
-              }
-              if (log.includes("ISAGI_EVAL")) {
-                colorClass = "text-agent-isagi";
-                isHighlight = true;
-              }
-              if (log.includes("AIKU_EVAL")) {
-                colorClass = "text-agent-aiku";
-                isHighlight = true;
-              }
-              if (log.includes("CRITICAL:")) {
-                colorClass = "text-system-caution font-bold";
-                isHighlight = true;
-              }
-              if (log === "") return <div key={index} className="h-4 md:h-8" />;
+        <div className="relative mx-auto w-full max-w-5xl px-6">
+          <div className="flex flex-col gap-3 border-b border-white/10 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-arena-muted">
+                zero_claw.runtime
+              </p>
+              <p className="mt-1 font-mono text-xs uppercase tracking-[0.14em] text-white">
+                autonomous evaluation stream
+              </p>
+            </div>
+            <div className="font-mono text-[10px] uppercase tracking-[0.18em] text-arena-muted">
+              ARG vs FRA / 12:00 UTC
+            </div>
+          </div>
 
-              return (
-                <div 
-                  key={index} 
-                  className={`flex items-start animate-fade-in ${isHighlight ? 'drop-shadow-[0_0_12px_rgba(255,255,255,0.15)]' : ''}`}
-                >
-                  <span className={colorClass}>{log}</span>
-                </div>
-              );
-            })}
-            
-            {/* Blinking cursor */}
-            {isTyping && (
-              <div className="flex items-start mt-2">
-                 <span className="w-3 h-6 md:w-4 md:h-8 bg-white/80 animate-pulse" />
-              </div>
-            )}
+          <div className="relative min-h-[390px] overflow-hidden">
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#080a10] to-transparent" />
+
+            <div className="relative flex min-h-[390px] flex-col justify-end gap-2 py-5 font-mono text-[11px] leading-5 text-arena-muted sm:text-xs">
+              {logs.map((log, index) => {
+                const targetLog = BRAIN_LOGS[index] ?? log;
+                let colorClass = "text-arena-muted/70";
+                let isHighlight = false;
+
+                if (targetLog.includes("[SYS_INFO]")) {
+                  colorClass = "text-white";
+                  isHighlight = true;
+                }
+                if (targetLog.includes("ISAGI_EVAL")) {
+                  colorClass = "text-agent-isagi";
+                  isHighlight = true;
+                }
+                if (targetLog.includes("AIKU_EVAL")) {
+                  colorClass = "text-agent-aiku";
+                  isHighlight = true;
+                }
+                if (targetLog.includes("CRITICAL:")) {
+                  colorClass = "text-system-caution font-bold";
+                  isHighlight = true;
+                }
+                if (log === "") {
+                  return (
+                    <div
+                      className="grid grid-cols-[2.25rem_minmax(0,1fr)] gap-3 animate-fade-in"
+                      key={index}
+                    >
+                      <span className="text-arena-muted/35">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      {isTyping && index === logs.length - 1 ? (
+                        <span className="h-4 w-2 translate-y-0.5 bg-white/80 animate-pulse" />
+                      ) : (
+                        <span className="h-3" />
+                      )}
+                    </div>
+                  );
+                }
+
+                return (
+                  <div
+                    className={cn(
+                      "grid grid-cols-[2.25rem_minmax(0,1fr)] gap-3 animate-fade-in",
+                      isHighlight && "drop-shadow-[0_0_10px_rgba(255,255,255,0.12)]",
+                    )}
+                    key={index}
+                  >
+                    <span className="text-arena-muted/35">
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                    <span className={cn("min-w-0 break-words", colorClass)}>
+                      {log}
+                      {isTyping && index === logs.length - 1 && (
+                        <span className="ml-1 inline-block h-4 w-2 translate-y-0.5 bg-white/80 animate-pulse" />
+                      )}
+                    </span>
+                  </div>
+                );
+              })}
+
+            </div>
+          </div>
+
+          <div className="grid gap-3 border-t border-white/10 py-4 md:grid-cols-[1fr_auto_auto] md:items-center">
+            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-system-caution">
+              Clash detected
+            </p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-agent-isagi">
+              ISAGI / Over 2.5
+            </p>
+            <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-agent-aiku">
+              AIKU / Under 2.5
+            </p>
           </div>
         </div>
       </div>
