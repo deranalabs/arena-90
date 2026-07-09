@@ -1,6 +1,7 @@
 import { ArrowRightIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Reveal } from "@/components/ui/reveal";
 import { FootballPitch } from "@/components/landing/FootballPitch";
 import { HeroHeadline } from "@/components/landing/HeroHeadline";
 import { HeroScoreboard } from "@/components/landing/HeroScoreboard";
@@ -11,13 +12,19 @@ export function HeroSection() {
       <FootballPitch />
 
       <div className="relative z-10 flex flex-col items-center gap-5">
-        <HeroHeadline />
+        <Reveal amount={0.1} blur={false} y={12}>
+          <HeroHeadline />
+        </Reveal>
 
-        <HeroScoreboard />
+        <Reveal amount={0.1} blur={false} delay={0.12} y={10}>
+          <HeroScoreboard />
+        </Reveal>
 
-        <Button className="mt-3">
-          ENTER ARENA <ArrowRightIcon className="h-4 w-4" />
-        </Button>
+        <Reveal amount={0.1} blur={false} delay={0.2} y={8}>
+          <Button className="mt-3">
+            ENTER ARENA <ArrowRightIcon className="h-4 w-4" />
+          </Button>
+        </Reveal>
       </div>
     </section>
   );

@@ -2,6 +2,7 @@ import { ArrowRightIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { HudPanel } from "@/components/ui/hud-panel";
+import { Reveal } from "@/components/ui/reveal";
 import { cn } from "@/lib/utils";
 
 type Agent = {
@@ -140,11 +141,11 @@ function AgentSignalCard({ agent }: { agent: Agent }) {
 
 export function AgentDuelSection() {
   return (
-    <section className="relative z-10 mx-auto w-full max-w-6xl px-6 pb-32">
-      <div className="mb-8 flex items-end justify-between gap-6">
+    <section className="relative z-10 mx-auto w-full max-w-6xl px-6 pb-28">
+      <Reveal className="mb-8 flex items-end justify-between gap-6">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-arena-muted mb-2">
-            02. <span className="text-arena-red">AGENT</span> DUEL
+            02. <span className="text-agent-isagi">AGENT</span> DUEL
           </p>
           <h2 className="font-display text-5xl md:text-6xl leading-none text-arena-text">
             SIGNALS IN <br className="sm:hidden" />
@@ -154,11 +155,13 @@ export function AgentDuelSection() {
         <div className="hidden text-right font-mono text-xs uppercase tracking-[0.2em] text-arena-muted sm:block">
           TXODDS_MOCK // 90M_WINDOW
         </div>
-      </div>
+      </Reveal>
 
       <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-        {agents.map((agent) => (
-          <AgentSignalCard agent={agent} key={agent.name} />
+        {agents.map((agent, index) => (
+          <Reveal delay={index * 0.08} key={agent.name}>
+            <AgentSignalCard agent={agent} />
+          </Reveal>
         ))}
       </div>
     </section>
