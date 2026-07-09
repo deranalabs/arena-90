@@ -19,7 +19,7 @@ export function BlinkExperienceSection() {
             <div className="bg-arena-surface border-l-2 border-arena-red p-4 clip-chamfer-sm brutalist-shadow">
               <p className="font-mono text-[10px] text-arena-red uppercase tracking-widest mb-1">The Problem</p>
               <p className="font-sans text-xs text-arena-muted leading-relaxed">
-                Traditional dApps force 5 clicks. Users miss odds shifts waiting for wallet approvals.
+                Algo-trading bots operate in black boxes. Retail users can&apos;t participate.
               </p>
             </div>
             {/* Connection Line */}
@@ -30,7 +30,7 @@ export function BlinkExperienceSection() {
             <div className="bg-arena-surface border-l-2 border-system-success p-4 clip-chamfer-sm brutalist-shadow">
               <p className="font-mono text-[10px] text-system-success uppercase tracking-widest mb-1">Solana Actions</p>
               <p className="font-sans text-xs text-arena-muted leading-relaxed">
-                Dialect wallets expand the payload instantly. 1-click execution.
+                Social media as an open liquidity layer. Users review agent logic and fund the trade via 1-click Blinks.
               </p>
             </div>
             {/* Connection Line */}
@@ -44,13 +44,13 @@ export function BlinkExperienceSection() {
           
           {/* Header Texts above the card */}
           <div className="text-center mb-8">
-             <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-arena-muted mb-2">
-               03. <span className="text-arena-cyan">THE TROJAN</span> HORSE
-             </h3>
-             <h2 className="font-display text-4xl md:text-5xl leading-[0.9] text-arena-text uppercase">
-               BET FROM YOUR <br />
-               <span className="text-transparent bg-clip-text bg-gradient-to-r from-system-success to-white/20">TIMELINE</span>
-             </h2>
+            <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-arena-muted mb-2">
+              03. <span className="text-arena-cyan">LIQUIDITY</span> INJECTION
+            </h3>
+            <h2 className="font-display text-4xl md:text-5xl leading-[0.9] text-arena-text uppercase">
+              FUND FROM YOUR <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-system-success to-white/20">TIMELINE</span>
+            </h2>
           </div>
 
           <div className="bg-[#0D0D11] border border-white/10 p-5 clip-chamfer shadow-2xl relative">
@@ -67,8 +67,8 @@ export function BlinkExperienceSection() {
             </div>
             
             <p className="font-sans text-sm text-arena-text/90 leading-relaxed mb-4">
-              World Cup Group A: ARG vs FRA.<br/>
-              ISAGI detects massive attacking momentum. AIKU calculates a high-probability low block. Choose your champion. ⚡️👇
+              Match: ARG vs FRA.<br/>
+              ISAGI detects massive attacking momentum. AIKU calculates high draw resistance. The algorithms need capital. Fund a strategy. ⚡️👇
             </p>
 
             {/* Blink Action Container */}
@@ -87,15 +87,15 @@ export function BlinkExperienceSection() {
                   <span className="w-3 h-3 bg-system-success clip-chamfer-sm" />
                   <p className="font-mono text-[10px] uppercase text-arena-muted tracking-widest">superteam.fun</p>
                 </div>
-                <h4 className="font-sans font-bold text-white text-base">The 90-Minute Clash</h4>
-                <p className="font-sans text-xs text-arena-muted mt-1 mb-4">Lock in your position. 10 USDC stake.</p>
+                <h4 className="font-sans font-bold text-white text-base">Fund Agent Strategy</h4>
+                <p className="font-sans text-xs text-arena-muted mt-1 mb-4">Provide 10 USDC liquidity.</p>
 
                 <div className="grid grid-cols-2 gap-2">
                   <button className="bg-agent-isagi/10 border border-agent-isagi/30 text-agent-isagi py-2.5 font-mono text-[11px] font-bold uppercase tracking-wider hover:bg-agent-isagi hover:text-white transition-colors clip-chamfer-sm">
-                    Back Isagi
+                    Fund Isagi
                   </button>
                   <button className="bg-agent-aiku/10 border border-agent-aiku/30 text-agent-aiku py-2.5 font-mono text-[11px] font-bold uppercase tracking-wider hover:bg-agent-aiku hover:text-black transition-colors clip-chamfer-sm">
-                    Back Aiku
+                    Fund Aiku
                   </button>
                 </div>
               </div>

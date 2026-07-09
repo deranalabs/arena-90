@@ -19,7 +19,7 @@ const agents: Agent[] = [
   {
     accent: "isagi",
     action: "Back Over",
-    assetLabel: "[2A] ISAGI // 1000x1000 PNG TRANSPARENT",
+    assetLabel: "[2A] ISAGI",
     edge: "+8.4%",
     name: "ISAGI",
     position: "Over 2.5",
@@ -30,7 +30,7 @@ const agents: Agent[] = [
   {
     accent: "aiku",
     action: "Back Under",
-    assetLabel: "[2B] AIKU // 1000x1000 PNG TRANSPARENT",
+    assetLabel: "[2B] AIKU",
     edge: "+6.1%",
     name: "AIKU",
     position: "Under 2.5",
@@ -120,18 +120,18 @@ function AgentSignalCard({ agent }: { agent: Agent }) {
 
       <div className="relative p-5">
         <p className="font-sans text-sm leading-6 text-arena-text">{agent.thesis}</p>
-        <p className="mt-4 border-l border-white/12 pl-4 font-mono text-[11px] uppercase leading-5 tracking-[0.14em] text-arena-muted">
+        <p className="mt-4 border-l-2 border-white/10 pl-4 font-mono text-[10px] uppercase leading-5 tracking-[0.14em] text-arena-muted">
           {agent.signal}
         </p>
 
         <Button
           className={cn(
-            "mt-6 w-full border bg-arena-base/60 shadow-none hover:shadow-none",
-            accent.button,
+            "mt-6 w-full border-2 bg-transparent py-6 font-mono text-sm font-bold tracking-widest clip-chamfer-sm transition-all duration-300",
+            agent.accent === "isagi" ? "border-agent-isagi text-agent-isagi hover:bg-agent-isagi hover:text-white" : "border-agent-aiku text-agent-aiku hover:bg-agent-aiku hover:text-black"
           )}
           variant="ghost"
         >
-          {agent.action} <ArrowRightIcon className="h-4 w-4" />
+          FUND STRATEGY <ArrowRightIcon className="h-4 w-4" />
         </Button>
       </div>
     </HudPanel>
