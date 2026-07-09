@@ -1,10 +1,7 @@
 import { AgentDuelSection } from "@/components/landing/AgentDuelSection";
+import { BlinkExperienceSection } from "@/components/landing/BlinkExperienceSection";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { HudHeader } from "@/components/landing/HudHeader";
-import { BlinkExperienceSection } from "@/components/landing/BlinkExperienceSection";
-import { TelemetrySection } from "@/components/landing/TelemetrySection";
-import { OracleSection } from "@/components/landing/OracleSection";
-import { SettlementVaultSection } from "@/components/landing/SettlementVaultSection";
 
 export default function LandingPage() {
   return (
@@ -17,12 +14,7 @@ export default function LandingPage() {
         <AgentDuelSection />
       </div>
 
-      <div className="relative z-10">
-        <BlinkExperienceSection />
-        <TelemetrySection />
-        <OracleSection />
-        <SettlementVaultSection />
-      </div>
+      <BlinkExperienceSection />
     </main>
   );
 }

@@ -54,3 +54,202 @@ body {
     linear-gradient(90deg, transparent 0 49.8%, rgba(255,255,255,0.12) 49.8% 50.2%, transparent 50.2%),
     linear-gradient(0deg, transparent 0 58%, rgba(255,255,255,0.08) 58% 58.4%, transparent 58.4%);
 }
+
+.arena-ambient-pulse {
+  animation: arena-ambient-pulse 8s ease-in-out infinite;
+}
+
+.arena-stand-pulse {
+  animation: arena-stand-pulse 7s ease-in-out infinite;
+}
+
+.arena-pitch-scan {
+  animation: arena-pitch-scan 14s linear infinite;
+}
+
+.arena-spotlight-left {
+  animation: arena-spotlight-left 5.5s ease-in-out infinite;
+}
+
+.arena-spotlight-right {
+  animation: arena-spotlight-right 6.25s ease-in-out infinite;
+}
+
+.arena-horizon-pulse {
+  animation: arena-horizon-pulse 4s ease-in-out infinite;
+}
+
+.arena-light-sweep {
+  animation: arena-light-sweep 9s ease-in-out infinite;
+}
+
+.arena-crowd-dots {
+  animation: arena-crowd-flicker 5.5s steps(2, end) infinite;
+  background:
+    radial-gradient(circle, rgba(255,255,255,0.34) 0 1px, transparent 1.5px) 0 0 / 18px 16px,
+    radial-gradient(circle, rgba(255,42,95,0.32) 0 1px, transparent 1.5px) 8px 7px / 24px 18px,
+    radial-gradient(circle, rgba(0,229,155,0.24) 0 1px, transparent 1.5px) 4px 11px / 28px 20px,
+    linear-gradient(180deg, rgba(255,255,255,0.08), transparent 72%);
+}
+
+.arena-led-ribbon {
+  animation: arena-led-ribbon 3.8s ease-in-out infinite;
+}
+
+.arena-scoreboard {
+  animation: arena-scoreboard-float 6s ease-in-out infinite;
+}
+
+.arena-field-plane {
+  background:
+    linear-gradient(90deg, transparent 49.86%, rgba(255,255,255,0.12) 49.86% 50.14%, transparent 50.14%),
+    linear-gradient(0deg, transparent 49.75%, rgba(255,255,255,0.08) 49.75% 50.25%, transparent 50.25%),
+    linear-gradient(90deg, rgba(255,42,95,0.18), transparent 22%, transparent 78%, rgba(212,255,0,0.14)),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 72px),
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.028) 0 1px, transparent 1px 62px),
+    radial-gradient(ellipse at center, rgba(0,229,155,0.12), rgba(10,11,16,0.3) 58%, rgba(10,11,16,0.72));
+  box-shadow:
+    0 0 42px rgba(0,229,155,0.12),
+    inset 0 0 38px rgba(255,255,255,0.04);
+}
+
+.arena-fog {
+  animation: arena-fog-drift 10s ease-in-out infinite;
+}
+
+@keyframes arena-ambient-pulse {
+  0%, 100% {
+    opacity: 0.58;
+    filter: brightness(0.95);
+  }
+  50% {
+    opacity: 0.86;
+    filter: brightness(1.25);
+  }
+}
+
+@keyframes arena-stand-pulse {
+  0%, 100% {
+    opacity: 0.58;
+    filter: saturate(0.9);
+  }
+  50% {
+    opacity: 0.82;
+    filter: saturate(1.25);
+  }
+}
+
+@keyframes arena-pitch-scan {
+  0% {
+    background-position: 0 0, 0 0, 0 0, 0 0, 0 0, 0 0;
+  }
+  100% {
+    background-position: 0 0, 0 0, 0 0, 96px 0, 0 72px, 0 0;
+  }
+}
+
+@keyframes arena-spotlight-left {
+  0%, 100% {
+    opacity: 0.28;
+    filter: blur(1px) brightness(0.9);
+  }
+  45% {
+    opacity: 0.7;
+    filter: blur(1px) brightness(1.8);
+  }
+}
+
+@keyframes arena-spotlight-right {
+  0%, 100% {
+    opacity: 0.22;
+    filter: blur(1px) brightness(0.85);
+  }
+  55% {
+    opacity: 0.64;
+    filter: blur(1px) brightness(1.65);
+  }
+}
+
+@keyframes arena-horizon-pulse {
+  0%, 100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 0.9;
+  }
+}
+
+@keyframes arena-light-sweep {
+  0% {
+    opacity: 0;
+    transform: translateX(-140%) skewX(-16deg);
+  }
+  30% {
+    opacity: 0.16;
+  }
+  68% {
+    opacity: 0.1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(340%) skewX(-16deg);
+  }
+}
+
+@keyframes arena-crowd-flicker {
+  0%, 100% {
+    opacity: 0.58;
+    filter: brightness(0.9);
+  }
+  50% {
+    opacity: 0.86;
+    filter: brightness(1.35);
+  }
+}
+
+@keyframes arena-led-ribbon {
+  0%, 100% {
+    opacity: 0.35;
+    filter: saturate(0.8);
+  }
+  50% {
+    opacity: 0.8;
+    filter: saturate(1.45);
+  }
+}
+
+@keyframes arena-scoreboard-float {
+  0%, 100% {
+    transform: translateX(-50%) translateY(0);
+  }
+  50% {
+    transform: translateX(-50%) translateY(-4px);
+  }
+}
+
+@keyframes arena-fog-drift {
+  0%, 100% {
+    opacity: 0.28;
+    transform: translateX(-2%);
+  }
+  50% {
+    opacity: 0.48;
+    transform: translateX(2%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .arena-ambient-pulse,
+  .arena-stand-pulse,
+  .arena-pitch-scan,
+  .arena-spotlight-left,
+  .arena-spotlight-right,
+  .arena-horizon-pulse,
+  .arena-light-sweep,
+  .arena-crowd-dots,
+  .arena-led-ribbon,
+  .arena-scoreboard,
+  .arena-fog {
+    animation: none;
+  }
+}
