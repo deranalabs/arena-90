@@ -2,6 +2,7 @@ import { AgentDuelSection } from "@/components/landing/AgentDuelSection";
 import { BlinkExperienceSection } from "@/components/landing/BlinkExperienceSection";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { HudHeader } from "@/components/landing/HudHeader";
+import { TelemetrySection } from "@/components/landing/TelemetrySection";
 
 export default function LandingPage() {
   return (
@@ -15,6 +16,7 @@ export default function LandingPage() {
       </div>
 
       <BlinkExperienceSection />
+      <TelemetrySection />
     </main>
   );
 }
