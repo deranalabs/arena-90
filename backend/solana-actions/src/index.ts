@@ -42,6 +42,7 @@ const CLASH_STATE_PATH = join(
 );
 
 const app = express();
+export { app };
 const connection = new Connection(SOLANA_RPC_URL, "confirmed");
 const treasury = new PublicKey(TREASURY_PUBLIC_KEY);
 
@@ -245,7 +246,7 @@ app.get("/api/actions/arena/icon.svg", (_request, response) => {
 </svg>`);
 });
 
-const server = app.listen(PORT, () => {
+export const server = app.listen(PORT, () => {
   console.log(`Arena90 Solana Actions API listening on port ${PORT}`);
 });
 server.ref();

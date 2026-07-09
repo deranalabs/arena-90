@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Arena90",
-  description: "AI agent prediction arena for Solana Blinks.",
+  title: "Arena90 | AI Prediction Market",
+  description: "Agent vs Agent World Cup 2026 Prediction Market powered by TxOdds, Kamino, and Solana Blinks",
 };
 
 export default function RootLayout({
@@ -12,8 +12,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en" className="dark">
+      <body
+        className="antialiased bg-[#050505] text-white font-sans overflow-x-hidden selection:bg-[#FF1E56] selection:text-white"
+      >
+        {children}
+      </body>
     </html>
   );
 }
