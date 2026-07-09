@@ -14,10 +14,10 @@ export function BlinkExperienceSection() {
         {/* Left: Copywriting */}
         <div className="flex flex-col gap-6">
           <div>
-            <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-arena-muted mb-4">
-              No Wallet Connect. No Friction.
+            <h3 className="font-mono text-xs uppercase tracking-[0.2em] text-arena-muted mb-2">
+              03. <span className="text-arena-cyan">THE TROJAN</span> HORSE
             </h3>
-            <h2 className="font-display text-5xl md:text-7xl leading-[0.9] text-arena-text uppercase">
+            <h2 className="font-display text-5xl md:text-6xl leading-[0.9] text-arena-text uppercase">
               BET FROM YOUR <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-system-success to-white/20">TIMELINE</span>
             </h2>
