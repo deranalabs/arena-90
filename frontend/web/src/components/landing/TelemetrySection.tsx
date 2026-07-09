@@ -1,84 +1,106 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { HudPanel } from "@/components/ui/hud-panel";
 
-const MOCK_LOGS = [
+const BRAIN_LOGS = [
+  "[SYS_INIT] ZERO_CLAW RUNTIME V1.0.0 ENGAGED...",
+  "[SYS_INIT] ALLOCATING MEMORY FOR AUTONOMOUS AGENTS...",
+  "[SYS_INIT] LOADING AGENT PROFILES: ISAGI (AGGRESSOR) & AIKU (WALL)",
+  "[SYS_INFO] >> AGENTS ARE NOT SCRIPTED. THEY INGEST LIVE DATA AND TRADE AUTONOMOUSLY.",
+  "",
   "> [12:00:01] POLLING TX_LINE STREAM...",
   "> [12:00:04] MATCH: ARG vs FRA [FETCHED]",
   "> [12:00:06] ISAGI_EVAL: 6990 BPS ATTACKING PRESSURE. POSITION: OVER 2.5",
   "> [12:00:08] AIKU_EVAL: 3010 BPS DRAW RESISTANCE. POSITION: UNDER 2.5",
-  "> [12:00:10] CLASH DETECTED. GENERATING BLINK PAYLOAD...",
+  "> [12:00:10] CRITICAL: CLASH DETECTED. STRATEGIES IN CONFLICT.",
+  "> [12:00:11] GENERATING SOLANA BLINK PAYLOAD FOR SOCIAL DISTRIBUTION...",
+  "> [12:00:12] AWAITING CROWD LIQUIDITY INJECTION...",
 ];
 
 export function TelemetrySection() {
-  const [logs, setLogs] = useState<string[]>([MOCK_LOGS[0]]);
+  const [logs, setLogs] = useState<string[]>([BRAIN_LOGS[0]]);
+  const [isTyping, setIsTyping] = useState(true);
 
   useEffect(() => {
     let currentIndex = 1;
     const interval = setInterval(() => {
       setLogs((prev) => {
-        const nextLogs = [...prev, MOCK_LOGS[currentIndex]];
-        return nextLogs.length > 5 ? nextLogs.slice(nextLogs.length - 5) : nextLogs;
+        if (currentIndex >= BRAIN_LOGS.length) {
+          setIsTyping(false);
+          clearInterval(interval);
+          return prev;
+        }
+        const nextLogs = [...prev, BRAIN_LOGS[currentIndex]];
+        return nextLogs;
       });
-      currentIndex = (currentIndex + 1) % MOCK_LOGS.length;
-    }, 2000);
+      currentIndex++;
+    }, 1200); // Ticking speed
 
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <section className="relative z-10 mx-auto w-full max-w-6xl px-6 py-16 flex flex-col items-center">
+    <section className="relative z-10 w-full bg-[#050507] border-y border-white/5 py-32 overflow-hidden">
       
-      {/* Center Copywriting */}
-      <div className="flex flex-col items-center text-center gap-4 mb-20 max-w-2xl">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-arena-muted">
-          04. <span className="text-system-caution">THE BRAIN</span>
-        </p>
-        <h2 className="font-display text-5xl md:text-7xl leading-[0.9] text-arena-text uppercase">
-          AUTONOMOUS <br className="sm:hidden" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-arena-muted to-white/20">INTELLIGENCE</span>
-        </h2>
-        <p className="mt-4 font-sans text-sm text-arena-muted/80 leading-relaxed">
-          ISAGI and AIKU aren&apos;t just random scripts. They are autonomous agents running on the ZeroClaw engine. They ingest live market data, evaluate momentum, and lock their positions. They never sleep. They never tilt.
-        </p>
-      </div>
+      {/* Ambient Grid */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:64px_64px] pointer-events-none" />
 
-      {/* Floating Terminal Mockup */}
-      <div className="relative w-full max-w-3xl bg-transparent border-l-2 border-system-caution/50 pl-6 group">
+      <div className="relative mx-auto w-full max-w-5xl px-6">
         
-        <div className="font-mono text-[10px] uppercase tracking-widest text-arena-muted mb-4 flex items-center gap-2">
-          <span className="w-2 h-2 bg-system-success animate-pulse clip-chamfer-sm" />
-          zeroclaw-agent-daemon // live-logs
+        {/* Subtle Header */}
+        <div className="mb-12 flex items-center justify-between border-b border-white/10 pb-4">
+          <div className="font-mono text-xs uppercase tracking-[0.2em] text-arena-muted">
+            04. <span className="text-system-caution">THE BRAIN</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 bg-system-success animate-pulse" />
+            <span className="font-mono text-[10px] uppercase tracking-widest text-system-success">TERMINAL_LIVE</span>
+          </div>
         </div>
 
-        <div className="font-mono text-sm md:text-base leading-relaxed text-arena-muted min-h-[200px]">
-          <div className="flex flex-col gap-3">
+        {/* Full-width Terminal Text */}
+        <div className="font-mono text-sm md:text-xl lg:text-2xl leading-relaxed md:leading-loose text-arena-muted">
+          <div className="flex flex-col gap-4 md:gap-6">
             {logs.map((log, index) => {
-              let colorClass = "text-arena-muted";
-              if (log.includes("ISAGI_EVAL")) colorClass = "text-agent-isagi";
-              if (log.includes("AIKU_EVAL")) colorClass = "text-agent-aiku";
-              if (log.includes("CLASH DETECTED")) colorClass = "text-system-success";
-              if (log.includes("MATCH:")) colorClass = "text-white";
+              let colorClass = "text-arena-muted/70";
+              let isHighlight = false;
+
+              if (log.includes("[SYS_INFO]")) {
+                colorClass = "text-white";
+                isHighlight = true;
+              }
+              if (log.includes("ISAGI_EVAL")) {
+                colorClass = "text-agent-isagi";
+                isHighlight = true;
+              }
+              if (log.includes("AIKU_EVAL")) {
+                colorClass = "text-agent-aiku";
+                isHighlight = true;
+              }
+              if (log.includes("CRITICAL:")) {
+                colorClass = "text-system-caution font-bold";
+                isHighlight = true;
+              }
+              if (log === "") return <div key={index} className="h-4 md:h-8" />;
 
               return (
-                <div key={index} className="flex gap-4 items-start animate-fade-in drop-shadow-[0_0_8px_rgba(255,255,255,0.1)]">
-                  <span className="text-arena-muted/40 shrink-0">~</span>
+                <div 
+                  key={index} 
+                  className={`flex items-start animate-fade-in ${isHighlight ? 'drop-shadow-[0_0_12px_rgba(255,255,255,0.15)]' : ''}`}
+                >
                   <span className={colorClass}>{log}</span>
                 </div>
               );
             })}
+            
             {/* Blinking cursor */}
-            <div className="flex gap-3 items-start">
-               <span className="text-arena-muted/40 shrink-0">~</span>
-               <span className="w-3 h-5 bg-white/70 animate-pulse mt-0.5" />
-            </div>
+            {isTyping && (
+              <div className="flex items-start mt-2">
+                 <span className="w-3 h-6 md:w-4 md:h-8 bg-white/80 animate-pulse" />
+              </div>
+            )}
           </div>
         </div>
-      </div>
-
-      <div className="mt-16 flex justify-center">
-         <div className="h-24 w-px bg-gradient-to-b from-white/20 to-transparent" />
       </div>
     </section>
   );
