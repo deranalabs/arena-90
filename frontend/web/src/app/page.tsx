@@ -1,5 +1,6 @@
 import { ArrowRightIcon } from "lucide-react";
 
+import { AgentDuelSection } from "@/components/landing/AgentDuelSection";
 export default function LandingPage() {
   return (
     <main className="relative min-h-screen bg-arena-base text-arena-text">
@@ -36,6 +37,9 @@ export default function LandingPage() {
         <button className="mt-10 flex items-center gap-3 bg-arena-text text-arena-base px-6 py-3 font-mono text-sm uppercase font-bold clip-chamfer hover:bg-agent-isagi transition-colors duration-300">
           ENTER ARENA <ArrowRightIcon className="w-4 h-4" />
         </button>
+
+        {/* The Duel Component */}
+        <AgentDuelSection />
       </div>
     </main>
   );
