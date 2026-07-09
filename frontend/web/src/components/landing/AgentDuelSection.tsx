@@ -2,7 +2,7 @@ import React from "react";
 
 export function AgentDuelSection() {
   return (
-    <section className="relative z-10 mx-auto mt-20 w-full max-w-6xl px-6 pb-32">
+    <section className="relative z-10 mx-auto w-full max-w-6xl px-6 pb-32">
       {/* Status Bar */}
       <div className="mb-8 flex items-center justify-between font-mono text-xs uppercase tracking-widest text-arena-muted">
         <div className="flex items-center gap-3">
