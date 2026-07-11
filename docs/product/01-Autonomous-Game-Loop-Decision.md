@@ -6,22 +6,84 @@
 **Fixed-Checkpoint Autonomous Trading** is selected over continuous trading and single-position agents. 
 
 **MVP Paper-Trading Instrument:**
-- `HOME`, `DRAW`, and `AWAY` are long-only synthetic binary shares.
+- `HOME`, `DRAW`, and `AWAY` are long-only synthetic binary shares for the full-match Match Outcome / 1X2 market.
+- `OVER_2_5` and `UNDER_2_5` are long-only synthetic binary shares for the conditionally activated full-match Total Goals 2.5 market.
 - Prices are derived from verified demargined implied probabilities in the canonical TxLINE snapshot.
-- Each winning-outcome share settles to 1 virtual unit at final resolution.
-- Losing-outcome shares settle to 0.
+- For Match Outcome / 1X2:
+  - the winning outcome share settles to 1 virtual unit;
+  - the losing outcome shares settle to 0.
+- For Total Goals 2.5:
+  - `OVER_2_5` settles to 1 virtual unit when the final total goals are 3 or more;
+  - `UNDER_2_5` settles to 1 virtual unit when the final total goals are 2 or fewer;
+  - the losing outcome settles to 0.
+- `CASH` remains unallocated virtual currency and does not require market settlement.
 - No short selling.
 - No leverage.
 - No negative cash.
-- *Exact raw-price normalization remains pending verification.*
+- *Exact raw-price normalization remains pending final verification.*
 
-## 2. Initial Candidate Market
-- **Market:** Match Outcome / 1X2.
-- **Assets:** `HOME`, `DRAW`, `AWAY`, and `CASH`.
-- **Constraint:** Only one active market universe is permitted for the MVP.
+
+## 2. MVP Market Universe
+
+### Core Market 1 — Full-Match Match Outcome / 1X2
+
+Tradable assets:
+- `HOME`
+- `DRAW`
+- `AWAY`
+
+This market is required for the Arena90 MVP.
+
+The arena must not enter `OPEN_FOR_SUPPORT` if the required Full-Match 1X2 market is unavailable, invalid, or stale when the Arena Manifest is locked.
+
+### Conditional Core Market 2 — Full-Match Total Goals 2.5
+
+Tradable assets:
+- `OVER_2_5`
+- `UNDER_2_5`
+
+The Total Goals 2.5 market is conditionally activated only when the exact full-match `line=2.5` contract is available, valid, and fresh when the Arena Manifest is locked.
+
+If Total Goals 2.5 does not satisfy the activation requirements, the arena may proceed with Match Outcome / 1X2 and `CASH` only.
+
+The system must not automatically substitute another totals line such as:
+- `2.25`;
+- `2.75`;
+- `3.0`;
+- or any other alternate line.
+
+### Shared Cash Asset
+
+- `CASH`
+
+### Stretch Market
+
+First-Half Over/Under 0.5 may be introduced later as a stretch market after its lifecycle, tradability window, and halftime settlement behavior are separately approved.
+
+The following remain outside the core MVP:
+- Asian Handicap;
+- quarter-line totals;
+- dynamic line switching;
+- automatic replacement of unavailable contracts;
+- unrestricted alternate-market selection by agents.
+
 
 ## 3. Target Allocation & Agent Actions
-The primary LLM output is a **target portfolio allocation**. Each agent proposes target allocations in basis points (bps) across `HOME`, `DRAW`, `AWAY`, and `CASH`, which must total exactly 10,000 bps.
+The primary LLM output is a **target portfolio allocation**.
+
+Each agent proposes allocations in basis points (bps) across the assets enabled in the immutable Arena Manifest.
+
+When both core markets are enabled, the available allocation assets are:
+- `HOME`;
+- `DRAW`;
+- `AWAY`;
+- `OVER_2_5`;
+- `UNDER_2_5`;
+- `CASH`.
+
+When Total Goals 2.5 is disabled, `OVER_2_5` and `UNDER_2_5` must not receive any allocation.
+
+Only manifest-enabled assets may be selected, and all target allocations must total exactly 10,000 bps.
 
 The deterministic paper engine compares the target portfolio with the previous portfolio and derives the exact executions:
 - `OPEN`
@@ -64,6 +126,13 @@ The exact same immutable market snapshot and snapshot hash are provided to both 
 - raw odds records
 - normalized prices
 - market identifiers
+- market family
+- market period
+- exact market line, where applicable
+- synthetic contract identifier
+- contract activation status
+- enabled allocation assets
+- settlement-rule identifier
 - market availability
 - source timestamps
 - sequence numbers
@@ -143,7 +212,15 @@ A score-feed `suspend` event must not automatically be interpreted as an odds-ma
 ## 9. Portfolio Accounting & Execution Provenance
 At normal trading epochs, the engine calculates and records:
 - Cash
-- Open positions
+- Open positions, keyed by synthetic market contract and including:
+  - market family
+  - market period
+  - exact line, where applicable
+  - outcome
+  - quantity
+  - average entry price
+  - latest marked price
+  - settlement state
 - Realized PnL
 - Marked position value
 - Current equity
@@ -229,6 +306,12 @@ The following parameters are immutable before the arena begins (prior to support
 - Agents and strategy versions
 - Starting virtual bankroll
 - Market universe
+- Full-Match 1X2 activation status
+- Full-Match Total Goals 2.5 activation status
+- Exact enabled market periods and lines
+- Synthetic contract identifiers
+- Settlement-rule identifiers
+- Prohibition on automatic market-line substitution
 - Epoch rules
 - Risk limits
 - Execution rule
@@ -244,3 +327,9 @@ Exact numeric parameters are kept unresolved in this document and will be frozen
 - Retry duration limits.
 - Exact simulated fees or slippage formulas.
 - Maximum consecutive failure thresholds.
+- Exact activation requirements for Full-Match Total Goals 2.5.
+- Behavior when an enabled market disappears or becomes stale after the Arena Manifest is locked.
+- Mark-to-market behavior when an existing position has no fresh market price.
+- Canonical settlement source for final total goals.
+- Whether a conditionally disabled market may remain visible as unavailable in the user interface.
+- Whether an agent may simultaneously allocate to opposing outcomes within the same market family, such as both `OVER_2_5` and `UNDER_2_5`.
