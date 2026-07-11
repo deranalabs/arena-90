@@ -41,12 +41,9 @@ pub struct StakeAgent<'info> {
     pub token_program: Program<'info, Token>,
 }
 
-pub fn handle_stake_agent(
-    ctx: Context<StakeAgent>,
-    agent: AgentSide,
-    amount: u64,
-) -> Result<()> {
+pub fn handle_stake_agent(ctx: Context<StakeAgent>, agent: AgentSide, amount: u64) -> Result<()> {
     require!(amount > 0, ErrorCode::InvalidStakeAmount);
+    require!(!ctx.accounts.arena.is_resolved, ErrorCode::ArenaResolved);
 
     let cpi_accounts = Transfer {
         from: ctx.accounts.bettor_token_account.to_account_info(),

@@ -8,12 +8,13 @@ skip-lint = false
 
 [programs.localnet]
 arena_escrow = "3eaE8RrpNK3Fo9YNj8bSK8VKZ49uWNVceGntzUSgDLsZ"
+kamino_mock = "YLpCb4gCq2NCn3PsxJog7in3J9TZFghvFLojBCgxrh3"
 
 [provider]
 cluster = "localnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]
-test = "cargo test"
+test = "npm test"
 
 [hooks]
