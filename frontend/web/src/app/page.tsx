@@ -13,7 +13,7 @@ export default function LandingPage() {
       <HudHeader />
       <HeroSection />
 
-      <div className="relative z-10 bg-arena-base pt-32 pb-24">
+      <div className="relative z-10 bg-arena-base pt-28 pb-28">
         <AgentDuelSection />
       </div>
 

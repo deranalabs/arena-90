@@ -1,71 +1,122 @@
 import { HudPanel } from "@/components/ui/hud-panel";
+import { Reveal } from "@/components/ui/reveal";
+import { getLandingConfig } from "@/lib/landing-config";
 
 export function OracleSection() {
+  const { isLive, status } = getLandingConfig();
+  const oracleStats = [
+    isLive ? "LIVE_SYNC: 104 MATCHES" : "MODE: SIMULATED FEED",
+    "SOURCE: TX_ODDS",
+    isLive ? "LATENCY: SUB-SECOND" : "SCHEMA: TXLINE-COMPATIBLE",
+  ];
+
   return (
-    <section className="relative z-10 mx-auto w-full max-w-6xl px-6 py-16 flex flex-col items-center">
-      
-      {/* Center Copywriting */}
-      <div className="flex flex-col items-center text-center gap-4 mb-16 max-w-2xl">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-arena-muted">
-          05. <span className="text-white">THE TRUTH</span>
-        </p>
-        <h2 className="font-display text-5xl md:text-7xl leading-[0.9] text-arena-text uppercase">
-          CRYPTOGRAPHIC <br className="sm:hidden" />
-          <span className="text-transparent bg-clip-text bg-gradient-to-r from-arena-muted to-white/20">ORACLE</span>
-        </h2>
-        <p className="mt-4 font-sans text-sm text-arena-muted/80 leading-relaxed">
-          The Arena demands absolute truth. Every sequence and odds shift is pulled directly from the TxLINE data layer. The engine doesn&apos;t guess. It relies entirely on the Oracle for on-chain settlement.
-        </p>
-      </div>
+    <section className="relative z-10 mx-auto w-full max-w-6xl scroll-mt-24 px-6 py-24" id="oracle">
+      <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
+        <Reveal>
+          <p className="font-mono text-xs uppercase tracking-[0.2em] text-arena-muted">
+            05. <span className="text-white">THE TRUTH</span>
+          </p>
+          <h2 className="mt-4 font-display text-5xl uppercase leading-[0.9] text-arena-text md:text-7xl">
+            CRYPTOGRAPHIC <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-arena-muted to-white/20">
+              ORACLE
+            </span>
+          </h2>
 
-      {/* Background Oracle Feed */}
-      <div className="relative w-full max-w-3xl flex justify-center">
-        {/* Transparent floating text */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-arena-base to-arena-base z-10 pointer-events-none" />
-        <pre className="font-mono text-[10px] md:text-xs leading-loose text-arena-muted/40 text-left overflow-hidden h-[300px]">
-                <span className="text-white">{"{"}</span>
-                <br />
-                <span className="text-arena-muted">  &quot;matchId&quot;:</span> <span className="text-system-success">&quot;wc2026-arg-fra-group-001&quot;</span><span className="text-white">,</span>
-                <br />
-                <span className="text-arena-muted">  &quot;status&quot;:</span> <span className="text-system-caution">&quot;live_1st_half&quot;</span><span className="text-white">,</span>
-                <br />
-                <span className="text-arena-muted">  &quot;odds&quot;:</span> <span className="text-white">{"{"}</span>
-                <br />
-                <span className="text-arena-muted">    &quot;home&quot;:</span> <span className="text-agent-isagi">2.55</span><span className="text-white">,</span>
-                <br />
-                <span className="text-arena-muted">    &quot;draw&quot;:</span> <span className="text-agent-aiku">3.10</span><span className="text-white">,</span>
-                <br />
-                <span className="text-arena-muted">    &quot;away&quot;:</span> <span className="text-agent-isagi">2.80</span>
-                <br />
-                <span className="text-white">  {"}"},</span>
-                <br />
-                <span className="text-arena-muted">  &quot;impliedProbability&quot;:</span> <span className="text-white">{"{"}</span>
-                <br />
-                <span className="text-arena-muted">    &quot;home&quot;:</span> <span className="text-white">0.3922</span><span className="text-white">,</span>
-                <br />
-                <span className="text-arena-muted">    &quot;draw&quot;:</span> <span className="text-white">0.3226</span><span className="text-white">,</span>
-                <br />
-                <span className="text-arena-muted">    &quot;away&quot;:</span> <span className="text-white">0.3571</span>
-                <br />
-                <span className="text-white">  {"}"}</span>
-                <br />
-                <span className="text-white">{"}"}</span>
-        </pre>
-        
-        <div className="absolute z-20 flex flex-col gap-3 top-1/3">
-          <div className="bg-arena-base/80 backdrop-blur-md border border-white/20 px-6 py-3 font-mono text-xs uppercase text-white clip-chamfer-sm">
-             SOURCE: TX_ODDS_LIVE
+          <div className="mt-8 space-y-5 border-l border-white/10 pl-5">
+            <p className="font-sans text-base leading-7 text-arena-muted/85">
+              Algorithmic trading is only as good as its data. Off-chain APIs are slow,
+              manipulatable, and require trust.
+            </p>
+            <p className="font-sans text-base leading-7 text-arena-text/90">
+              Arena90 is built on TxLINE&apos;s normalized schema. The current source
+              follows the same decision pipeline from feed to deterministic agent
+              signal and on-chain settlement.
+            </p>
           </div>
-          
-          <div className="bg-arena-base/80 backdrop-blur-md border border-white/20 px-6 py-3 font-mono text-xs uppercase text-system-success clip-chamfer-sm flex items-center justify-center gap-2">
-             <span className="w-2 h-2 bg-system-success animate-pulse" />
-             LATENCY: &lt; 100MS
-          </div>
-        </div>
-      </div>
 
-      <div className="mt-16 flex justify-center">
-         <div className="h-24 w-px bg-gradient-to-b from-white/20 to-transparent" />
+          <div className="mt-8 flex flex-wrap gap-3">
+            {oracleStats.map((stat) => (
+              <div
+                className="border border-system-success/25 bg-system-success/5 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-system-success clip-chamfer-sm"
+                key={stat}
+              >
+                [ {stat} ]
+              </div>
+            ))}
+          </div>
+        </Reveal>
+
+        <Reveal delay={0.12} y={24}>
+          <HudPanel className="relative overflow-hidden">
+            <div className="flex items-center justify-between border-b border-white/10 px-5 py-4">
+              <div>
+                <p className="font-mono text-[10px] uppercase tracking-[0.24em] text-arena-muted">
+                  TxLINE Oracle Feed
+                </p>
+                <p className="mt-1 font-mono text-xs uppercase tracking-[0.14em] text-white">
+                  normalized consensus payload
+                </p>
+              </div>
+              <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-system-success">
+                <span className="h-2 w-2 bg-system-success animate-pulse" />
+                {status.txline}
+              </div>
+            </div>
+
+            <div className="relative bg-[#080a10] p-5">
+              <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.025)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.025)_1px,transparent_1px)] bg-[size:32px_32px]" />
+              <pre className="relative overflow-x-auto font-mono text-[11px] leading-6 text-arena-muted sm:text-xs">
+                <code>
+                  <span className="text-white">{"{"}</span>
+                  {"\n  "}
+                  <span>&quot;source&quot;: </span>
+                  <span className="text-system-success">&quot;{isLive ? "TX_ODDS" : "txodds-mock"}&quot;</span>
+                  <span className="text-white">,</span>
+                  {"\n  "}
+                  <span>&quot;matchId&quot;: </span>
+                  <span className="text-system-success">&quot;wc2026-arg-fra-001&quot;</span>
+                  <span className="text-white">,</span>
+                  {"\n  "}
+                  <span>&quot;state&quot;: </span>
+                  <span className="text-system-caution">&quot;{isLive ? "live_1st_half" : "simulation_ready"}&quot;</span>
+                  <span className="text-white">,</span>
+                  {"\n  "}
+                  <span>&quot;liveSync&quot;: </span>
+                  <span className="text-white">104</span>
+                  <span className="text-white">,</span>
+                  {"\n  "}
+                  <span>&quot;latencyMs&quot;: </span>
+                  <span className="text-white">642</span>
+                  <span className="text-white">,</span>
+                  {"\n  "}
+                  <span>&quot;market&quot;: </span>
+                  <span className="text-white">{"{"}</span>
+                  {"\n    "}
+                  <span>&quot;over_2_5&quot;: </span>
+                  <span className="text-agent-isagi">0.6990</span>
+                  <span className="text-white">,</span>
+                  {"\n    "}
+                  <span>&quot;under_2_5&quot;: </span>
+                  <span className="text-agent-aiku">0.3010</span>
+                  <span className="text-white">,</span>
+                  {"\n    "}
+                  <span>&quot;vig&quot;: </span>
+                  <span className="text-white">0.0000</span>
+                  {"\n  "}
+                  <span className="text-white">{"}"}</span>
+                  <span className="text-white">,</span>
+                  {"\n  "}
+                  <span>&quot;anchor&quot;: </span>
+                  <span className="text-system-success">&quot;verified&quot;</span>
+                  {"\n"}
+                  <span className="text-white">{"}"}</span>
+                </code>
+              </pre>
+            </div>
+          </HudPanel>
+        </Reveal>
       </div>
     </section>
   );
