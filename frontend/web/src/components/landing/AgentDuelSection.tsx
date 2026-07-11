@@ -1,6 +1,5 @@
 import { ArrowRightIcon } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { HudPanel } from "@/components/ui/hud-panel";
 import { Reveal } from "@/components/ui/reveal";
 import { cn } from "@/lib/utils";
@@ -125,15 +124,15 @@ function AgentSignalCard({ agent }: { agent: Agent }) {
           {agent.signal}
         </p>
 
-        <Button
+        <a
           className={cn(
-            "mt-6 w-full border-2 bg-transparent py-6 font-mono text-sm font-bold tracking-widest clip-chamfer-sm transition-all duration-300",
+            "mt-6 flex w-full items-center justify-center gap-3 border-2 bg-transparent py-4 font-mono text-sm font-bold tracking-widest clip-chamfer-sm transition-all duration-300",
             agent.accent === "isagi" ? "border-agent-isagi text-agent-isagi hover:bg-agent-isagi hover:text-white" : "border-agent-aiku text-agent-aiku hover:bg-agent-aiku hover:text-black"
           )}
-          variant="ghost"
+          href="#blink-experience"
         >
-          FUND STRATEGY <ArrowRightIcon className="h-4 w-4" />
-        </Button>
+          VIEW BLINK FLOW <ArrowRightIcon className="h-4 w-4" />
+        </a>
       </div>
     </HudPanel>
   );
@@ -141,7 +140,7 @@ function AgentSignalCard({ agent }: { agent: Agent }) {
 
 export function AgentDuelSection() {
   return (
-    <section className="relative z-10 mx-auto w-full max-w-6xl px-6 pb-28">
+    <section className="relative z-10 mx-auto w-full max-w-6xl scroll-mt-24 px-6 pb-28" id="agents">
       <Reveal className="mb-8 flex items-end justify-between gap-6">
         <div>
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-arena-muted mb-2">

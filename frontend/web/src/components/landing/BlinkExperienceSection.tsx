@@ -5,7 +5,7 @@ const BLINK_BADGES = ["SOLANA ACTIONS", "SOCIAL LIQUIDITY", "1-CLICK FUNDING"];
 
 export function BlinkExperienceSection() {
   return (
-    <section className="relative z-10 mx-auto w-full max-w-6xl px-6 py-28 border-t border-white/5">
+    <section className="relative z-10 mx-auto w-full max-w-6xl scroll-mt-24 px-6 py-28 border-t border-white/5" id="blink-experience">
       <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
         <Reveal>
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-arena-muted">

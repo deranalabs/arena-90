@@ -1,4 +1,5 @@
 import { Reveal } from "@/components/ui/reveal";
+import { getLandingConfig } from "@/lib/landing-config";
 
 const VAULT_STEPS = [
   {
@@ -22,13 +23,15 @@ const VAULT_STEPS = [
 ] as const;
 
 export function SettlementVaultSection() {
+  const { githubUrl, status } = getLandingConfig();
+
   return (
-    <section className="relative z-10 mx-auto w-full max-w-6xl px-6 pt-28 pb-24 bg-[linear-gradient(180deg,transparent_0%,rgba(10,11,16,0.8)_100%)]">
+    <section className="relative z-10 mx-auto w-full max-w-6xl scroll-mt-24 px-6 pt-28 pb-24 bg-[linear-gradient(180deg,transparent_0%,rgba(10,11,16,0.8)_100%)]" id="settlement">
       <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr] lg:items-center">
         <Reveal>
           <p className="inline-flex items-center gap-2 border border-white/10 bg-white/5 px-3 py-1 font-mono text-xs uppercase tracking-[0.2em] text-arena-muted clip-chamfer-sm">
             <span className="h-2 w-2 bg-system-success animate-pulse" />
-            06. SETTLEMENT PHASE
+            06. {status.escrow}
           </p>
           <h2 className="mt-5 max-w-3xl font-display text-5xl uppercase leading-none text-arena-text md:text-7xl">
             NO HOUSE. <br />
@@ -127,9 +130,9 @@ export function SettlementVaultSection() {
       <div className="mt-32 w-full pt-8 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-6">
         <div className="font-display text-2xl text-arena-text tracking-widest">ARENA90</div>
         <div className="flex gap-6 font-mono text-[10px] uppercase text-arena-muted tracking-widest">
-          <span className="hover:text-white transition-colors cursor-pointer">Superteam Earn</span>
-          <span className="hover:text-white transition-colors cursor-pointer">TxODDS</span>
-          <span className="hover:text-white transition-colors cursor-pointer">Github</span>
+          <a className="transition-colors hover:text-white" href="https://superteam.fun/earn/listing/trading-tools-and-agents" rel="noreferrer" target="_blank">Superteam Earn</a>
+          <a className="transition-colors hover:text-white" href="https://txodds.com" rel="noreferrer" target="_blank">TxODDS</a>
+          <a className="transition-colors hover:text-white" href={githubUrl} rel="noreferrer" target="_blank">Github</a>
         </div>
       </div>
 

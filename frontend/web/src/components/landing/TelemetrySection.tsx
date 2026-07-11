@@ -2,9 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 
+import { getLandingConfig } from "@/lib/landing-config";
 import { cn } from "@/lib/utils";
 
-const BRAIN_LOGS = [
+const LIVE_BRAIN_LOGS = [
   "[SYS_INIT] ZERO_CLAW RUNTIME V1.0.0 ENGAGED...",
   "[SYS_INIT] ALLOCATING MEMORY FOR AUTONOMOUS AGENTS...",
   "[SYS_INIT] LOADING AGENT PROFILES: ISAGI (AGGRESSOR) & AIKU (WALL)",
@@ -19,7 +20,24 @@ const BRAIN_LOGS = [
   "> [12:00:12] AWAITING CROWD LIQUIDITY INJECTION...",
 ];
 
+const MOCK_BRAIN_LOGS = [
+  "[SYS_INIT] ZERO_CLAW RUNTIME V1.0.0 ENGAGED...",
+  "[SYS_INIT] ALLOCATING MEMORY FOR AUTONOMOUS AGENTS...",
+  "[SYS_INIT] LOADING AGENT PROFILES: ISAGI (AGGRESSOR) & AIKU (WALL)",
+  "[SYS_INFO] >> DETERMINISTIC TEST RUN USING TXLINE-COMPATIBLE MOCK DATA.",
+  "",
+  "> [12:00:01] READING TXODDS MOCK PAYLOAD...",
+  "> [12:00:04] MATCH: ARG vs FRA [FETCHED]",
+  "> [12:00:06] ISAGI_EVAL: 6990 BPS ATTACKING PRESSURE. POSITION: OVER 2.5",
+  "> [12:00:08] AIKU_EVAL: 3010 BPS DRAW RESISTANCE. POSITION: UNDER 2.5",
+  "> [12:00:10] CRITICAL: CLASH DETECTED. STRATEGIES IN CONFLICT.",
+  "> [12:00:11] GENERATING SOLANA BLINK PAYLOAD FOR DEVNET TEST...",
+  "> [12:00:12] DETERMINISTIC RUN COMPLETE.",
+];
+
 export function TelemetrySection() {
+  const { isLive, status } = getLandingConfig();
+  const brainLogs = isLive ? LIVE_BRAIN_LOGS : MOCK_BRAIN_LOGS;
   const sectionRef = useRef<HTMLElement>(null);
   const [hasStarted, setHasStarted] = useState(false);
   const [logs, setLogs] = useState<string[]>([""]);
@@ -54,12 +72,12 @@ export function TelemetrySection() {
     setIsTyping(true);
 
     const typeNextCharacter = () => {
-      if (lineIndex >= BRAIN_LOGS.length) {
+      if (lineIndex >= brainLogs.length) {
         setIsTyping(false);
         return;
       }
 
-      const targetLine = BRAIN_LOGS[lineIndex];
+      const targetLine = brainLogs[lineIndex];
 
       if (targetLine === "") {
         setLogs((prev) => {
@@ -93,10 +111,11 @@ export function TelemetrySection() {
     timeout = setTimeout(typeNextCharacter, 300);
 
     return () => clearTimeout(timeout);
-  }, [hasStarted]);
+  }, [brainLogs, hasStarted]);
 
   return (
     <section
+      id="agent-trace"
       className="relative z-10 w-full overflow-hidden border-y border-white/5 bg-[#07080d] py-28"
       ref={sectionRef}
     >
@@ -109,12 +128,12 @@ export function TelemetrySection() {
               04. <span className="text-system-caution">THE BRAIN</span>
             </p>
             <h2 className="mt-4 font-display text-5xl uppercase leading-none text-arena-text md:text-6xl">
-              LIVE AGENT TRACE
+              {isLive ? "LIVE AGENT TRACE" : "AGENT EXECUTION TRACE"}
             </h2>
           </div>
           <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-system-success">
             <span className="h-2 w-2 bg-system-success animate-pulse" />
-            TxLINE connected
+            {status.agent}
           </div>
         </div>
       </div>
@@ -144,7 +163,7 @@ export function TelemetrySection() {
 
             <div className="relative flex min-h-[390px] flex-col justify-end gap-2 py-5 font-mono text-[11px] leading-5 text-arena-muted sm:text-xs">
               {logs.map((log, index) => {
-                const targetLog = BRAIN_LOGS[index] ?? log;
+                const targetLog = brainLogs[index] ?? log;
                 let colorClass = "text-arena-muted/70";
                 let isHighlight = false;
 

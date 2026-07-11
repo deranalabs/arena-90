@@ -1,15 +1,17 @@
 import { HudPanel } from "@/components/ui/hud-panel";
 import { Reveal } from "@/components/ui/reveal";
-
-const ORACLE_STATS = [
-  "LIVE_SYNC: 104 MATCHES",
-  "SOURCE: TX_ODDS",
-  "LATENCY: SUB-SECOND",
-];
+import { getLandingConfig } from "@/lib/landing-config";
 
 export function OracleSection() {
+  const { isLive, status } = getLandingConfig();
+  const oracleStats = [
+    isLive ? "LIVE_SYNC: 104 MATCHES" : "MODE: SIMULATED FEED",
+    "SOURCE: TX_ODDS",
+    isLive ? "LATENCY: SUB-SECOND" : "SCHEMA: TXLINE-COMPATIBLE",
+  ];
+
   return (
-    <section className="relative z-10 mx-auto w-full max-w-6xl px-6 py-24">
+    <section className="relative z-10 mx-auto w-full max-w-6xl scroll-mt-24 px-6 py-24" id="oracle">
       <div className="grid gap-10 lg:grid-cols-[0.9fr_1.1fr] lg:items-center">
         <Reveal>
           <p className="font-mono text-xs uppercase tracking-[0.2em] text-arena-muted">
@@ -28,14 +30,14 @@ export function OracleSection() {
               manipulatable, and require trust.
             </p>
             <p className="font-sans text-base leading-7 text-arena-text/90">
-              Arena90 engine relies entirely on TxLINE. Live odds and match state
-              updates are cryptographically anchored. No guessing. Just normalized,
-              vig-free consensus.
+              Arena90 is built on TxLINE&apos;s normalized schema. The current source
+              follows the same decision pipeline from feed to deterministic agent
+              signal and on-chain settlement.
             </p>
           </div>
 
           <div className="mt-8 flex flex-wrap gap-3">
-            {ORACLE_STATS.map((stat) => (
+            {oracleStats.map((stat) => (
               <div
                 className="border border-system-success/25 bg-system-success/5 px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em] text-system-success clip-chamfer-sm"
                 key={stat}
@@ -59,7 +61,7 @@ export function OracleSection() {
               </div>
               <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-system-success">
                 <span className="h-2 w-2 bg-system-success animate-pulse" />
-                Synced
+                {status.txline}
               </div>
             </div>
 
@@ -70,7 +72,7 @@ export function OracleSection() {
                   <span className="text-white">{"{"}</span>
                   {"\n  "}
                   <span>&quot;source&quot;: </span>
-                  <span className="text-system-success">&quot;TX_ODDS&quot;</span>
+                  <span className="text-system-success">&quot;{isLive ? "TX_ODDS" : "txodds-mock"}&quot;</span>
                   <span className="text-white">,</span>
                   {"\n  "}
                   <span>&quot;matchId&quot;: </span>
@@ -78,7 +80,7 @@ export function OracleSection() {
                   <span className="text-white">,</span>
                   {"\n  "}
                   <span>&quot;state&quot;: </span>
-                  <span className="text-system-caution">&quot;live_1st_half&quot;</span>
+                  <span className="text-system-caution">&quot;{isLive ? "live_1st_half" : "simulation_ready"}&quot;</span>
                   <span className="text-white">,</span>
                   {"\n  "}
                   <span>&quot;liveSync&quot;: </span>

@@ -1,103 +1,91 @@
 import { render, screen } from "@testing-library/react";
-import React from "react";
+
 import LandingPage from "../app/page";
 
-// Provide a basic mock for framer-motion to prevent errors in tests
-jest.mock("framer-motion", () => {
-  const createMockElement = (Tag: keyof React.JSX.IntrinsicElements) => {
-    const MotionMock = ({
-      children,
-      ...props
-    }: React.PropsWithChildren<Record<string, unknown>>) => {
-      const domProps = { ...props };
+const originalTxLineMode = process.env.NEXT_PUBLIC_TXLINE_MODE;
+const originalXBlinkUrl = process.env.NEXT_PUBLIC_X_BLINK_URL;
 
-      delete domProps.animate;
-      delete domProps.initial;
-      delete domProps.transition;
-      delete domProps.viewport;
-      delete domProps.whileInView;
+function restoreEnvironment() {
+  if (originalTxLineMode === undefined) {
+    delete process.env.NEXT_PUBLIC_TXLINE_MODE;
+  } else {
+    process.env.NEXT_PUBLIC_TXLINE_MODE = originalTxLineMode;
+  }
 
-      return React.createElement(Tag, domProps, children);
-    };
+  if (originalXBlinkUrl === undefined) {
+    delete process.env.NEXT_PUBLIC_X_BLINK_URL;
+  } else {
+    process.env.NEXT_PUBLIC_X_BLINK_URL = originalXBlinkUrl;
+  }
+}
 
-    MotionMock.displayName = `MotionMock(${Tag})`;
-
-    return MotionMock;
-  };
-
-  return {
-    motion: {
-      article: createMockElement("article"),
-      div: createMockElement("div"),
-      p: createMockElement("p"),
-    },
-  };
-});
-
-describe("Home Page", () => {
-  it("renders the Riot HUD elements", () => {
-    render(<LandingPage />);
-    
-    expect(screen.getByText(/SYSTEM_ONLINE/)).toBeInTheDocument();
-    expect(screen.getAllByText(/ARENA90/)[0]).toBeInTheDocument();
-  });
-  
-  it("renders the navigation links", () => {
-    render(<LandingPage />);
-    
-    expect(screen.getByText(/\[ AGENTS \]/)).toBeInTheDocument();
-    expect(screen.getByText(/\[ ORACLE \]/)).toBeInTheDocument();
+describe("Arena90 landing page", () => {
+  beforeEach(() => {
+    delete process.env.NEXT_PUBLIC_TXLINE_MODE;
+    delete process.env.NEXT_PUBLIC_X_BLINK_URL;
   });
 
-  it("renders the Hero content", () => {
+  afterAll(restoreEnvironment);
+
+  it("explains the product and defaults safely to simulation status", () => {
     render(<LandingPage />);
-    
-    expect(screen.getByText(/CHOOSE/)).toBeInTheDocument();
-    expect(screen.getByText(/JOIN THE ARENA/)).toBeInTheDocument();
+
+    expect(screen.getAllByText(/ARENA90/i)[0]).toBeInTheDocument();
+    expect(
+      screen.getByText(/Two agents\. One feed\. Opposite strategies\./i),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText(/TxLINE simulation/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Deterministic test run/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Live TxLINE/i)).not.toBeInTheDocument();
   });
 
-  it("renders the Agents Section", () => {
-    render(<LandingPage />);
-    
-    expect(screen.getByText(/THE COMBATANTS/)).toBeInTheDocument();
-    expect(screen.getAllByText(/ISAGI/)[0]).toBeInTheDocument();
-    expect(screen.getAllByText(/AIKU/)[0]).toBeInTheDocument();
+  it("provides working internal navigation and repository links", () => {
+    const { container } = render(<LandingPage />);
+
+    expect(screen.getByRole("link", { name: /Watch the clash/i })).toHaveAttribute(
+      "href",
+      "#agents",
+    );
+    expect(
+      screen.getByRole("link", { name: /View Arena90 source code on GitHub/i }),
+    ).toHaveAttribute("href", "https://github.com/deranalabs/arena-90");
+
+    for (const id of ["agents", "blink-experience", "agent-trace", "oracle", "settlement"]) {
+      expect(container.querySelector(`#${id}`)).toBeInTheDocument();
+    }
   });
 
-  it("renders the Blink Experience Section", () => {
+  it("shows the X Blink CTA only for a valid HTTPS URL", () => {
+    process.env.NEXT_PUBLIC_X_BLINK_URL = "https://x.com/arena90/status/123";
+    const { unmount } = render(<LandingPage />);
+
+    expect(screen.getByRole("link", { name: /Open Blink on X/i })).toHaveAttribute(
+      "href",
+      "https://x.com/arena90/status/123",
+    );
+
+    unmount();
+    process.env.NEXT_PUBLIC_X_BLINK_URL = "javascript:alert(1)";
     render(<LandingPage />);
-    
-    expect(screen.getByText(/FRICTIONLESS WEB2 UX/)).toBeInTheDocument();
-    expect(screen.getByText(/STAY ON/)).toBeInTheDocument();
-    expect(screen.getByText(/@Arena90_Agents/)).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: /Open Blink on X/i })).not.toBeInTheDocument();
   });
 
-  it("renders the Telemetry Section", () => {
+  it("renders verified live labels when live mode is enabled", () => {
+    process.env.NEXT_PUBLIC_TXLINE_MODE = "live";
     render(<LandingPage />);
-    
-    expect(screen.getByText(/100% AUTONOMOUS/)).toBeInTheDocument();
-    expect(screen.getByText(/WATCH THEM/)).toBeInTheDocument();
-    expect(screen.getByText(/zeroclaw-daemon\.log/)).toBeInTheDocument();
+
+    expect(screen.getAllByText(/Live TxLINE/i).length).toBeGreaterThan(0);
+    expect(screen.getByText(/Autonomous agents online/i)).toBeInTheDocument();
+    expect(screen.getAllByText(/Devnet escrow armed/i).length).toBeGreaterThan(0);
   });
 
-  it("renders the Oracle Section", () => {
+  it("renders all proof sections", () => {
     render(<LandingPage />);
-    
-    expect(screen.getByText(/THE TROJAN/)).toBeInTheDocument();
-    expect(screen.getByText(/txodds_live_intercept\.json/)).toBeInTheDocument();
-  });
 
-  it("renders the Settlement Vault Section", () => {
-    render(<LandingPage />);
-    
-    expect(screen.getByText(/THE SETTLEMENT VAULT/)).toBeInTheDocument();
-    expect(screen.getByText(/SECURED BY ANCHOR & KAMINO/)).toBeInTheDocument();
-  });
-
-  it("renders the Footer Section", () => {
-    render(<LandingPage />);
-    
-    expect(screen.getByText(/INFRASTRUCTURE/)).toBeInTheDocument();
-    expect(screen.getByText(/DERANALABS/)).toBeInTheDocument();
+    expect(screen.getByText(/SIGNALS IN/i)).toBeInTheDocument();
+    expect(screen.getByText(/FUND FROM YOUR/i)).toBeInTheDocument();
+    expect(screen.getByText(/AGENT EXECUTION TRACE/i)).toBeInTheDocument();
+    expect(screen.getByText(/CRYPTOGRAPHIC/i)).toBeInTheDocument();
+    expect(screen.getByText(/JUST THE ESCROW/i)).toBeInTheDocument();
   });
 });
