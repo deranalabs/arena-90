@@ -2,334 +2,338 @@
 
 **Status:** Approved
 
-## 1. Loop Model & Trading Instrument
-**Fixed-Checkpoint Autonomous Trading** is selected over continuous trading and single-position agents. 
+**Agents:** Agent Alpha and Agent Beta
 
-**MVP Paper-Trading Instrument:**
-- `HOME`, `DRAW`, and `AWAY` are long-only synthetic binary shares for the full-match Match Outcome / 1X2 market.
-- `OVER_2_5` and `UNDER_2_5` are long-only synthetic binary shares for the conditionally activated full-match Total Goals 2.5 market.
-- Prices are derived from verified demargined implied probabilities in the canonical TxLINE snapshot.
-- For Match Outcome / 1X2:
-  - the winning outcome share settles to 1 virtual unit;
-  - the losing outcome shares settle to 0.
-- For Total Goals 2.5:
-  - `OVER_2_5` settles to 1 virtual unit when the final total goals are 3 or more;
-  - `UNDER_2_5` settles to 1 virtual unit when the final total goals are 2 or fewer;
-  - the losing outcome settles to 0.
-- `CASH` remains unallocated virtual currency and does not require market settlement.
-- No short selling.
-- No leverage.
-- No negative cash.
-- *Exact raw-price normalization remains pending final verification.*
+**Scope:** Autonomous competition loop only
 
+## 1. Purpose & Scope
 
-## 2. MVP Market Universe
+This document defines the authoritative autonomous competition loop for Arena90.
 
-### Core Market 1 — Full-Match Match Outcome / 1X2
+It locks:
 
-Tradable assets:
-- `HOME`
-- `DRAW`
-- `AWAY`
+* how Agent Alpha and Agent Beta participate in one arena;
+* when autonomous decisions occur;
+* what shared information both agents receive;
+* what agents may output;
+* how valid outputs become deterministic portfolio actions;
+* how failures affect the competition;
+* how the terminal winner is determined;
+* how Live Mode and Replay Mode remain equivalent.
 
-This market is required for the Arena90 MVP.
+This document does not define:
 
-The arena must not enter `OPEN_FOR_SUPPORT` if the required Full-Match 1X2 market is unavailable, invalid, or stale when the Arena Manifest is locked.
+* exact pricing, fees, slippage, or accounting formulas;
+* detailed TxLINE adapter and snapshot schemas;
+* supporter staking, claims, refunds, or payout mathematics;
+* Anchor account and instruction design;
+* frontend routes or presentation details.
 
-### Conditional Core Market 2 — Full-Match Total Goals 2.5
+Those rules belong to their relevant product documents and technical specifications.
 
-Tradable assets:
-- `OVER_2_5`
-- `UNDER_2_5`
+## 2. Autonomous Loop Model
 
-The Total Goals 2.5 market is conditionally activated only when the exact full-match `line=2.5` contract is available, valid, and fresh when the Arena Manifest is locked.
+Arena90 uses a fixed-checkpoint autonomous portfolio competition.
 
-If Total Goals 2.5 does not satisfy the activation requirements, the arena may proceed with Match Outcome / 1X2 and `CASH` only.
+Agent Alpha and Agent Beta begin each arena with equal virtual bankrolls and independently manage their portfolios throughout one football match.
 
-The system must not automatically substitute another totals line such as:
-- `2.25`;
-- `2.75`;
-- `3.0`;
-- or any other alternate line.
+Agents do not trade continuously. They may submit a new portfolio decision only at:
 
-### Shared Cash Asset
+* Kickoff
+* 15 minutes
+* 30 minutes
+* Halftime
+* 60 minutes
+* 75 minutes
 
-- `CASH`
+Each checkpoint is one autonomous competition round:
 
-### Stretch Market
+1. Arena90 locks one shared canonical market snapshot.
+2. Both agents receive the same snapshot.
+3. Each agent receives its own current portfolio context.
+4. Both agents independently submit a target portfolio.
+5. Valid outputs are converted into deterministic portfolio actions.
+6. Decisions are revealed after both agents resolve or reach their deadlines.
+7. Portfolio states and competition metrics are updated.
 
-First-Half Over/Under 0.5 may be introduced later as a stretch market after its lifecycle, tradability window, and halftime settlement behavior are separately approved.
+Final Settlement is a terminal arena event, not a trading checkpoint. Agents cannot submit a new decision after the 75-minute checkpoint.
 
-The following remain outside the core MVP:
-- Asian Handicap;
-- quarter-line totals;
-- dynamic line switching;
-- automatic replacement of unavailable contracts;
-- unrestricted alternate-market selection by agents.
+Agents control strategy selection only. Pricing, validation, execution, accounting, and settlement remain deterministic system responsibilities.
 
+## 3. Arena Manifest & Enabled Markets
 
-## 3. Target Allocation & Agent Actions
-The primary LLM output is a **target portfolio allocation**.
+Every arena uses an immutable Arena Manifest that is locked before supporter backing opens.
 
-Each agent proposes allocations in basis points (bps) across the assets enabled in the immutable Arena Manifest.
+The manifest defines the shared competition conditions, including:
 
-When both core markets are enabled, the available allocation assets are:
-- `HOME`;
-- `DRAW`;
-- `AWAY`;
-- `OVER_2_5`;
-- `UNDER_2_5`;
-- `CASH`.
+* fixture identity;
+* participating agents and strategy versions;
+* equal starting virtual bankroll;
+* enabled market assets;
+* decision checkpoints;
+* execution rule version;
+* winner rule version;
+* supporter lock time;
+* resolver mode.
 
-When Total Goals 2.5 is disabled, `OVER_2_5` and `UNDER_2_5` must not receive any allocation.
+Once supporter backing opens, these conditions must not change.
 
-Only manifest-enabled assets may be selected, and all target allocations must total exactly 10,000 bps.
+The required MVP market is full-match Match Outcome / 1X2:
 
-The deterministic paper engine compares the target portfolio with the previous portfolio and derives the exact executions:
-- `OPEN`
-- `INCREASE`
-- `REDUCE`
-- `CLOSE`
-- `HOLD`
+* `HOME`
+* `DRAW`
+* `AWAY`
 
-An agent may explicitly select `NO_TRADE` to intentionally retain its existing portfolio without reallocation.
+The arena must not open when the required 1X2 market is unavailable, invalid, or stale at manifest lock.
 
-## 4. Scheduled Trading Checkpoints & Final Settlement
-**Trading Checkpoints:**
-- Kickoff
-- 15 minutes
-- 30 minutes
-- Halftime
-- 60 minutes
-- 75 minutes
+Full-match Total Goals 2.5 is optional:
 
-**Final Settlement** is a terminal lifecycle event, not an agent trading epoch. No new agent trade is created during Final Settlement.
+* `OVER_2_5`
+* `UNDER_2_5`
 
-## 5. Checkpoint Timing Hierarchy
-Scheduled checkpoint targets and lifecycle-aware triggers must follow this hierarchy:
-1. Explicit TxLINE lifecycle or period event.
-2. Observed and verified match-clock field, if available.
-3. Game-state transition and event sequence.
-4. Server wall clock (used only as a watchdog or fallback signal).
+It may be enabled only when the exact full-match `2.5` line is available, valid, and fresh at manifest lock.
 
-*Wall-clock time must never be the sole canonical proof of halftime or finalization.*
+Arena90 must not substitute another totals line such as `2.25`, `2.75`, or `3.0`.
 
-## 6. Symmetrical Starting Conditions, Canonical Snapshot & Decision Context
-Both agents begin with an equal virtual starting bankroll. Unavailable data must not be inferred.
+Every arena also enables:
 
-### Shared Canonical Market Snapshot
-The exact same immutable market snapshot and snapshot hash are provided to both agents. It includes (where observed and available):
-- fixture ID
-- epoch ID
-- lifecycle state
-- score context
-- raw odds records
-- normalized prices
-- market identifiers
-- market family
-- market period
-- exact market line, where applicable
-- synthetic contract identifier
-- contract activation status
-- enabled allocation assets
-- settlement-rule identifier
-- market availability
-- source timestamps
-- sequence numbers
-- freshness status
+* `CASH`
 
-**Snapshot Hashing:**
-The canonical snapshot payload is serialized deterministically. The `snapshotHash` is excluded from the hashed payload used to calculate itself. The resulting hash is then attached to the snapshot record. Both agents receive the exact same canonical payload and resulting snapshot hash.
+Agents may allocate only to assets enabled in the manifest.
 
-The shared market snapshot hash must not include agent-specific portfolio state.
+If Total Goals 2.5 is not enabled, the arena proceeds using `HOME`, `DRAW`, `AWAY`, and `CASH`.
 
-### Agent-Specific Decision Context
-Each agent separately receives its own current portfolio context:
-- virtual cash
-- open positions
-- average entry prices
-- realized PnL
-- marked position value
-- current equity
-- maximum drawdown
-- peak exposure
-- previous valid action
-- previous missed-epoch state, if applicable
+Exact manifest fields, freshness limits, identifiers, and activation thresholds belong to the Arena Data specification.
 
-## 7. Halftime, Resume, and Sequence Recovery
-**Halftime Execution:**
-Triggered by an observed TxLINE halftime lifecycle event (e.g., `halftime_finalised`) or equivalent phase transition. When received:
-1. Verify the fixture ID.
-2. Verify that the event sequence is newer than the previously processed sequence.
-3. Record the halftime event timestamp and sequence.
-4. Wait within a bounded freshness window for the latest valid odds snapshot.
-5. Verify that the market is available and not stale.
-6. Freeze one canonical Halftime snapshot.
-7. Give the exact same snapshot and snapshot hash to both agents.
-8. Execute the Halftime epoch.
-*(If no valid odds snapshot becomes available inside the configured window, record a `GLOBAL_MISSED_EPOCH`.)*
+## 4. Shared Snapshot & Independent Decisions
 
-**Second-Half Resume:**
-Triggered by an explicit second-half resume lifecycle event, or a newer score event returning to an in-progress state. The 60-minute and 75-minute targets must be calculated relative to verified second-half progression or observed match clock, not solely from kickoff wall-clock time.
+At every checkpoint, Arena90 freezes one canonical market snapshot.
 
-**Missed-Event and Sequence Recovery:**
-If score-event sequences show a gap:
-- Pause checkpoint processing.
-- Retrieve available historical or current score records.
-- Replay the missing sequence range.
-- Recover any missed halftime, resume, or finalization events.
-- Resume normal processing only after state consistency is restored.
+Agent Alpha and Agent Beta receive the exact same shared snapshot, including the same:
 
-## 8. Agent Failures, Missed Epochs, and Suspensions
-**Failures (`MISSED_EPOCH` and `GLOBAL_MISSED_EPOCH`):**
-If an agent fails (provider timeout, invalid JSON, fabricated evidence) it is allowed **one constrained retry**. A second failure results in a `MISSED_EPOCH` for that specific agent.
+* fixture state;
+* score and match phase;
+* enabled markets;
+* market prices;
+* source timestamps;
+* sequence context;
+* freshness status;
+* snapshot identifier.
 
-`MISSED_EPOCH` is recorded **per agent**. If ISAGI fails but AIKU produces a valid decision, AIKU's epoch execution may still proceed. One agent's failure does not automatically cancel the other agent's execution unless a global feed or market failure affects both.
+Unavailable or unverified data must remain unavailable. The system must not infer or fabricate missing information.
+
+Each agent separately receives its own portfolio context, including:
+
+* current cash;
+* open positions;
+* current equity;
+* realized and unrealized performance;
+* drawdown;
+* exposure;
+* previous valid portfolio decision;
+* previous missed-epoch state, when applicable.
+
+The agents decide independently.
+
+Neither agent may receive the other agent’s current output before submitting its own decision.
+
+Both decisions are revealed only after:
+
+* both agents return valid outputs; or
+* each agent reaches its configured deadline.
+
+The shared snapshot guarantees equal information. Separate strategy instructions and portfolio contexts preserve meaningful strategic differences.
+
+Exact schemas, serialization, hashing, freshness thresholds, and sequence recovery rules belong to the Arena Data specification.
+
+## 5. Agent Output & Deterministic Execution
+
+At each checkpoint, each agent returns one structured decision.
+
+The primary output is a target portfolio allocation across the assets enabled in the Arena Manifest.
+
+All allocations:
+
+* use basis points;
+* must total exactly `10,000 bps`;
+* must not be negative;
+* must use only enabled assets;
+* must satisfy the agent’s approved risk constraints.
+
+An agent may instead return:
+
+* `NO_TRADE`
+
+`NO_TRADE` is an intentional strategy decision that preserves the current portfolio.
+
+Before execution, the system validates:
+
+* output schema;
+* allocation total;
+* enabled assets;
+* risk constraints;
+* unsupported or fabricated evidence.
+
+Agent output does not directly create transactions or modify portfolio balances.
+
+A deterministic engine compares the valid target portfolio with the current portfolio and derives:
+
+* `OPEN`
+* `INCREASE`
+* `REDUCE`
+* `CLOSE`
+* `HOLD`
+
+Pricing, quantity calculation, fees, slippage, accounting, and settlement must not be calculated or controlled by the LLM.
+
+Exact output schemas, strategy policies, risk limits, and accounting formulas belong to the Agent Decision and Paper Engine specifications.
+
+## 6. Failures, Retry & Emergency Pause
+
+Arena90 distinguishes intentional decisions from execution failures.
+
+`NO_TRADE` is valid agent behavior.
+
+A failed or missing response must never be converted into `NO_TRADE` or a hardcoded fallback portfolio.
+
+When an agent returns an invalid output, the system may perform one constrained retry using the same snapshot and portfolio context.
+
+The retry may only request correction of invalid structure or unsupported fields. It must not:
+
+* provide new market information;
+* reveal the other agent’s decision;
+* change the checkpoint snapshot.
+
+If the retry fails, that agent receives:
+
+* `MISSED_EPOCH`
 
 A `MISSED_EPOCH`:
-- preserves the previous portfolio;
-- creates no transaction;
-- records the failure reason;
-- must not be presented as an agent decision;
-- must never trigger a hardcoded fallback position.
 
-A `GLOBAL_MISSED_EPOCH` is used for a shared feed, market, snapshot, or orchestration failure that prevents both agents from executing.
-A `GLOBAL_MISSED_EPOCH`:
-- preserves both portfolios;
-- creates no execution for either agent;
-- records the global failure reason;
-- does not execute a retroactive trade;
-- continues to the next valid checkpoint unless the configurable consecutive-failure threshold triggers Emergency Pause.
+* applies only to the failed agent;
+* preserves its previous portfolio;
+* creates no execution;
+* records the failure reason;
+* remains visible in the arena history;
+* does not cancel the other agent’s valid decision.
 
-**Suspensions:**
-A score-feed `suspend` event must not automatically be interpreted as an odds-market suspension. When a fixture is suspended:
-- Pause new epoch execution.
-- Preserve all portfolios.
-- Do not execute retroactive trades.
-- Wait for a verified resume, finalization, abandonment, or cancellation event.
-- A temporary suspension must not automatically void the arena.
+A shared failure produces:
 
-## 9. Portfolio Accounting & Execution Provenance
-At normal trading epochs, the engine calculates and records:
-- Cash
-- Open positions, keyed by synthetic market contract and including:
-  - market family
-  - market period
-  - exact line, where applicable
-  - outcome
-  - quantity
-  - average entry price
-  - latest marked price
-  - settlement state
-- Realized PnL
-- Marked position value
-- Current equity
-- Maximum drawdown
-- Peak exposure
+* `GLOBAL_MISSED_EPOCH`
 
-`Final Settlement Value` is calculated only during the terminal Final Settlement event.
+Examples include:
 
-**Execution Provenance Requirements (per epoch):**
+* no valid shared snapshot;
+* stale required market data;
+* unresolved sequence inconsistency;
+* shared orchestration failure.
 
-Each epoch ledger record must store shared metadata and agent-specific execution paths separately.
+A `GLOBAL_MISSED_EPOCH` preserves both portfolios and creates no retroactive trade.
 
-**Epoch Hashing:**
-The final `epochHash` must commit to the complete epoch result, proving both the shared market input and the complete execution outcome of both agents. It includes:
-- shared epoch metadata;
-- canonical snapshot hash;
-- ISAGI agent-specific execution record;
-- AIKU agent-specific execution record;
-- portfolio state after execution for both agents;
-- global epoch status;
-- previous epoch hash.
+An Emergency Pause stops new checkpoint execution while preserving existing arena and portfolio state.
 
-**Shared Epoch Record:**
-- arena ID
-- epoch ID
-- fixture ID
-- canonical snapshot hash
-- source timestamps and sequences
-- previous epoch hash
-- epoch hash
+A pause must not:
 
-**Agent-Specific Execution (Stored separately for ISAGI and AIKU):**
-- provider
-- model
-- prompt version
-- strategy version
-- raw agent-response hash
-- validation result
-- final target allocation or NO_TRADE
-- derived executions
-- portfolio before execution
-- portfolio after execution
-- per-agent MISSED_EPOCH reason
+* rewrite previous decisions;
+* alter portfolios manually;
+* select a winner;
+* automatically void the arena.
 
-## 10. Winner Calculation & Terminal Draw
-**Winner Metric:**
-1. Highest final equity.
-2. *First tie-breaker:* Lower maximum drawdown.
-3. *Second tie-breaker:* Lower peak exposure.
-4. *Final tie-breaker:* Draw.
+Detailed resume and void behavior belongs to the Arena Lifecycle specification.
 
-**Terminal Draw Behavior:**
-If final equity and all tie-breakers remain equal, the Arena Result becomes `DRAW`.
-The Settlement Path for a `DRAW` is:
-- Refund supporter principal 1:1.
-- Distribute accrued yield pro-rata based on total supporter principal.
-- No funds or yield may remain indefinitely trapped.
-*(Note: A technical `VOIDED` status remains strictly reserved for cancellation, abandonment, unrecoverable system failure, or explicit administrative void).*
+## 7. Winner & Terminal Result
 
-## 11. Live Mode & Replay Mode
-- **Live Mode** and **Replay Mode** use the exact same engine and rules.
-- Replay Mode accelerates recorded TxLINE data for demos.
-- Agent decisions must be generated during the replay and are not prerecorded.
+Final Settlement begins only after Arena90 receives a verified terminal match state.
 
-## 12. Separation of Capital & Optional Yield
-- **Virtual Agent Bankroll:** Simulated funds used purely for agent accounting and performance metrics.
-- **Supporter Escrow:** An SPL-token supporter vault controlled by the Anchor program’s PDA authority. The LLM agents must never control supporter funds, private keys, or arbitrary transaction execution.
-- **Kamino Yield:** Optional and strictly outside the critical autonomous-agent path.
+It is not an agent decision checkpoint.
 
-## 13. Supporter Lifecycle
-- Before kickoff, users back ISAGI or AIKU through a supported Solana Blink.
-- The Blink transaction must call the Anchor `stake_agent` instruction and transfer the configured SPL settlement token into the program-controlled supporter vault.
-- Supporter staking locks on-chain before autonomous agent trading begins. No in-play staking window is permitted for the MVP.
-- After the supporter lock time, the Blink must no longer offer an active staking transaction and should expose a closed or read-only arena state.
-- Winning-agent supporters share the distributable pool upon resolution.
+During Final Settlement, the deterministic system:
 
-## 14. Emergency Pause vs. Void Arena
-- **Emergency Pause:** Stops new agent epochs and paper executions while preserving state. Invoked automatically on consecutive failure thresholds, or manually by Admin.
-- **Void Arena:** An explicit Admin Action (after review) that results in supporter refunds. Do not automatically void an arena because of a single provider timeout, invalid LLM response, missing epoch, or temporary feed outage.
+1. settles every enabled synthetic market using the verified final result;
+2. calculates each agent’s final portfolio equity;
+3. updates terminal risk metrics;
+4. applies the published winner rules;
+5. records the terminal result and provenance.
 
-## 15. Immutable Arena Manifest
-The following parameters are immutable before the arena begins (prior to supporter staking):
-- Agents and strategy versions
-- Starting virtual bankroll
-- Market universe
-- Full-Match 1X2 activation status
-- Full-Match Total Goals 2.5 activation status
-- Exact enabled market periods and lines
-- Synthetic contract identifiers
-- Settlement-rule identifiers
-- Prohibition on automatic market-line substitution
-- Epoch rules
-- Risk limits
-- Execution rule
-- Fee rule
-- Winner metric
-- Supporter lock timestamp
-- Resolver mode
+The winner is determined in this order:
 
-## 16. Open Product Questions / Pending Paper Exchange Rules
-Exact numeric parameters are kept unresolved in this document and will be frozen in a separate `Paper Exchange Rules` document committed to the Arena Manifest:
-- Exact numeric exposure limits and per-epoch allocation limits.
-- Freshness limits / snapshot waiting windows.
-- Retry duration limits.
-- Exact simulated fees or slippage formulas.
-- Maximum consecutive failure thresholds.
-- Exact activation requirements for Full-Match Total Goals 2.5.
-- Behavior when an enabled market disappears or becomes stale after the Arena Manifest is locked.
-- Mark-to-market behavior when an existing position has no fresh market price.
-- Canonical settlement source for final total goals.
-- Whether a conditionally disabled market may remain visible as unavailable in the user interface.
-- Whether an agent may simultaneously allocate to opposing outcomes within the same market family, such as both `OVER_2_5` and `UNDER_2_5`.
+1. Higher final equity
+2. Lower maximum drawdown
+3. Lower peak exposure
+4. `DRAW`
+
+Possible competition results are:
+
+* `AGENT_ALPHA_WIN`
+* `AGENT_BETA_WIN`
+* `DRAW`
+
+A draw occurs only when final equity and all approved tie-breakers remain equal.
+
+A draw is a valid competitive result. It is not an operational failure or a voided arena.
+
+If the final match result cannot be verified, the arena must remain finalizing or paused. The system must not guess the result or manually select a winning agent.
+
+Exact settlement formulas, supporter payout behavior, and result-attestation mechanisms belong to their relevant specifications.
+
+## 8. Live/Replay Equivalence & Audit
+
+Live Mode and Replay Mode must use the same autonomous competition rules.
+
+Both modes share:
+
+* Arena Manifest structure;
+* enabled market rules;
+* checkpoint schedule;
+* canonical snapshot format;
+* agent input contract;
+* target portfolio output contract;
+* validation rules;
+* deterministic execution engine;
+* portfolio accounting rules;
+* failure states;
+* winner calculation;
+* audit record format.
+
+The only differences are data source and pacing.
+
+Live Mode processes eligible TxLINE updates according to the real fixture lifecycle.
+
+Replay Mode processes recorded canonical snapshots using an accelerated timeline.
+
+Agent decisions must still be generated during replay. Replay Mode must not use prerecorded agent decisions or predetermined portfolio outputs.
+
+Replay must preserve:
+
+* checkpoint order;
+* snapshot order;
+* market state;
+* agent deadlines relative to replay time;
+* execution behavior;
+* terminal settlement rules.
+
+Every arena must produce an auditable event history proving:
+
+* which manifest governed the arena;
+* which snapshot was used at each checkpoint;
+* that both agents received the same shared snapshot;
+* which model and strategy version each agent used;
+* what structured output each agent submitted;
+* whether validation passed;
+* what deterministic actions were derived;
+* portfolio state before and after execution;
+* all missed epochs, pauses, and shared failures;
+* how the terminal winner was calculated.
+
+Audit records must separate:
+
+* shared arena data;
+* Agent Alpha records;
+* Agent Beta records;
+* deterministic system results.
+
+The audit system must not expose private chain-of-thought.
+
+It may expose structured rationale, model metadata, hashes, validation results, and portfolio transitions.
+
+Exact storage schemas, hashing methods, replay persistence, and provenance formats belong to the Arena Data and Audit specifications.
