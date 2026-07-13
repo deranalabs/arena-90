@@ -1,4 +1,7 @@
-export { createFakeAgentAdapter } from "./adapters/agents/index.js";
+export {
+  createFakeAgentAdapter,
+  createZeroClawAgentAdapter,
+} from "./adapters/agents/index.js";
 export { createRecordedDataAdapter } from "./adapters/data/index.js";
 export * from "./contracts/index.js";
 export * from "./engine/index.js";
