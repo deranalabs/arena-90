@@ -9,6 +9,8 @@ specifications, external references, and archived V1 material.
   owns each decision.
 - `specs/01-P0-Arena-Runtime.md` defines the approved implementation contract
   for the hackathon runtime vertical slice.
+- `specs/02-V2-Delivery-Roadmap.md` defines delivery order, slice boundaries,
+  acceptance gates, and branch and deployment progression.
 
 Read only the documents relevant to the current task.
 
@@ -30,6 +32,10 @@ requirements.
   - validation, repair, timeout, and failure behavior;
   - deterministic execution, accounting, settlement, and winner calculation;
   - runtime events, HTTP API, recorded fixture, tests, and P0 acceptance.
+- `specs/02-V2-Delivery-Roadmap.md`
+  - completed and remaining delivery slices;
+  - critical path, slice boundaries, and acceptance gates;
+  - branch policy and deployment progression through final submission.
 
 Technical specifications translate approved product decisions into
 implementation contracts. They must not override approved product decisions.
