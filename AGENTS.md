@@ -21,17 +21,12 @@ terminal, copy-trading product, AI-controlled wallet, or scripted battle.
 
 ## 2. Authoritative Documentation
 
-Only documents marked `Approved` are implementation-authoritative:
+Start with `docs/product/00-Product-Index.md`. It routes each task to the
+approved document that owns the relevant decision.
 
-- `docs/product/01-Autonomous-Game-Loop-Decision.md` — competition mechanics,
-  failures, settlement, and Live/Replay equivalence.
-- `docs/product/02-Product-Definition-V2.md` — product, users, agent identities,
-  Solana participation, scope, and boundaries.
-- `docs/product/03-User-Experience-and-Routes.md` — routes, public states,
-  Live/Replay UX, identity, wallet UX, accessibility, and continuity.
-
-Read only approved documents relevant to the task. Do not implement `Draft`,
-`In Review`, `Deprecated`, or `Archived` material unless explicitly authorized.
+Only documents marked `Approved` are implementation-authoritative. Read only
+the documents relevant to the task. Do not implement `Draft`, `In Review`,
+`Deprecated`, or `Archived` material unless explicitly authorized.
 
 V1 code, mocks, names, comments, and docs do not override approved V2 decisions.
 When requirements conflict or a required specification is missing, stop and
