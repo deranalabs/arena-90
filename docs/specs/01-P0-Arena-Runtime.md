@@ -44,6 +44,11 @@ Excluded:
 
 Do not add excluded work without explicit authorization.
 
+Production TxLINE authentication and live-data integration were excluded from
+the original P0 baseline. They are explicitly authorized for Slice 5 by
+`specs/03-TxLINE-Live-Data-Adapter.md`, which extends this specification without
+changing the historical P0 scope.
+
 ## 3. Module Ownership
 
 Create:
@@ -119,7 +124,9 @@ Rules:
 ```ts
 interface CanonicalSnapshot {
   schemaVersion: 1;
+  providerSequence: number;
   snapshotId: string;
+  snapshotHash: string;
   arenaId: string;
   fixtureId: string;
   checkpointId: Exclude<CheckpointId, "FINAL">;
@@ -145,6 +152,9 @@ interface CanonicalSnapshot {
 Rules:
 
 - both agents receive the exact same snapshot ID and payload;
+- `providerSequence` is a positive integer preserving provider event order;
+- `snapshotHash` is the lowercase SHA-256 hash of the canonical snapshot payload
+  excluding `snapshotHash`;
 - prices must be finite and greater than zero;
 - missing or malformed required fields are rejected;
 - suspended snapshots are not silently replaced;

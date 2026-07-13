@@ -11,6 +11,9 @@ specifications, external references, and archived V1 material.
   for the hackathon runtime vertical slice.
 - `specs/02-V2-Delivery-Roadmap.md` defines delivery order, slice boundaries,
   acceptance gates, and branch and deployment progression.
+- `specs/03-TxLINE-Live-Data-Adapter.md` defines the approved TxLINE client
+  boundaries, normalization, freshness, sequencing, and live-data failure
+  behavior for Slice 5.
 
 Read only the documents relevant to the current task.
 
@@ -36,6 +39,11 @@ requirements.
   - completed and remaining delivery slices;
   - critical path, slice boundaries, and acceptance gates;
   - branch policy and deployment progression through final submission.
+- `specs/03-TxLINE-Live-Data-Adapter.md`
+  - TxLINE client and asynchronous refresh boundaries;
+  - fixture, score, market, sequence, and canonical identity rules;
+  - deterministic price normalization and freshness policy;
+  - live-data retry, suspension, failure, and acceptance behavior.
 
 Technical specifications translate approved product decisions into
 implementation contracts. They must not override approved product decisions.
