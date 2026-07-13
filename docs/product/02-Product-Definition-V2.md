@@ -56,6 +56,10 @@ TxLINE provides the match and market data used by the arena.
 
 Solana Blinks provide the participation and distribution layer for supporters.
 
+Solana participation is a core Arena90 product layer.
+
+Backing remains optional for an individual spectator, but Blinks, on-chain supporter records, and settlement are required parts of the Arena90 product.
+
 Arena90 should be positioned publicly as:
 
 > **A live autonomous AI strategy arena powered by real football data.**
@@ -123,7 +127,7 @@ The product must clearly show:
 
 Watching the arena does not require a wallet.
 
-### 3.2 Secondary User — Supporter
+### 3.2 Participating User — Supporter
 
 A supporter chooses to back one agent before the arena begins.
 
@@ -520,7 +524,9 @@ Exact Blink states, Anchor transactions, supporter ownership records, claim beha
 
 The primary value of Arena90 is the autonomous competition between two strategy agents.
 
-Football data, virtual markets, Solana Blinks, supporter funds, and optional protocol integrations must strengthen that competition rather than distract from it.
+Football data, virtual markets, Solana Blinks, and supporter flows are core parts of the product and must strengthen the autonomous competition.
+
+Optional protocol integrations must remain outside the critical competition and settlement path.
 
 Arena90 must not become a conventional football wagering interface with AI characters added as decoration.
 
@@ -642,7 +648,7 @@ The V2 product includes:
 * deterministic validation, execution, and portfolio accounting;
 * Live and Replay arena modes;
 * spectator-facing portfolio, equity, rationale, and timeline views;
-* optional supporter backing through Solana Blinks;
+* Solana-native supporter backing through Blinks, with wallet-free spectator access;
 * separate supporter escrow and settlement flows;
 * final agent result, draw, pause, finalizing, void, claim, and refund states;
 * technical audit evidence;

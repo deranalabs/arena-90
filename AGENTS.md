@@ -1,86 +1,283 @@
-# Arena90: The 90-Minute AI Combat Arena
-# Subagent-Driven Development Protocol & Rules
+# Arena90 Repository Instructions
 
-## 1. Repository Purpose & Architecture
-Arena90 is an Agent vs Agent prediction market with on-chain settlement via Solana and Kamino Yield, built for the TxODDS Superteam Earn World Cup 2026 Hackathon.
-The architecture is strictly modular, divided into distinct layers:
-- **`frontend/web/` (Next.js 15)**: The Landing Page & Live Arena Dashboard.
-- **`backend/solana-actions/` (Express API)**: The Trojan Horse (Blinks) serving Action metadata to X/Twitter.
-- **`contracts/anchor/arena_escrow/` (Rust/Anchor)**: Settlement Layer escrowing funds and routing Kamino yield.
-- **`agents/zeroclaw/` (Python)**: The Gladiators (ISAGI & AIKU) ingesting TxLINE data and triggering state changes.
-Each directory is owned by a specific role. Boundaries must be respected.
+This file defines the global rules for AI coding agents working in the Arena90 repository.
 
-## 2. Scope & Isolation Rules
-- **Strict Isolation:** Agents must ONLY modify files within their assigned layer directory.
-- **Cross-Layer Changes:** Modifying multiple layers simultaneously requires explicit user authorization.
-- **Global Scope:** Shared files such as `AGENTS.md`, CI/CD workflows (`.github/workflows/`), and root documentation are treated as global scope.
-- **Respect Local Code:** Do not blindly overwrite existing local changes or monolithic structures without inspecting them first.
+Keep this file focused. Product behavior belongs in approved product documents.
+Subsystem-specific commands and conventions belong in the nearest subsystem
+`AGENTS.md`.
 
-## 3. Standard Workflow
-Strictly follow this execution order for every task:
-`inspect` → `implement` → `lint/typecheck` → `test` → `build` → `report`
+## 1. Product Mission
 
-- **Tool Execution:** Always use **absolute paths** when executing terminal commands.
-- **Source Code Paths:** NEVER hardcode absolute machine paths (e.g., `/Users/derana/...`) inside the source code. Use relative paths or environment variables.
-- **Mock First:** Use `txodds-mock.json` to simulate the Oracle API before integrating real endpoints.
-- **No Placeholders:** Write production-ready code. Never leave `YOUR_API_KEY_HERE` or empty function stubs.
-- **No Destructive Git Ops:** Do not force-push, delete branches, or reset history without permission.
+Arena90 is an autonomous AI strategy arena powered by football and market data.
 
-## 4. Layer Validation Commands
-Always validate your changes using the following commands in the respective directories:
+Two autonomous strategy agents receive the same verified arena snapshot,
+independently manage equal virtual portfolios, and compete through deterministic
+execution and winner rules.
+
+Spectators may watch without authentication.
+
+Supporters may back an agent through Solana, but supporter funds remain separate
+from agent virtual capital and must never influence agent decisions.
+
+Do not describe Arena90 as:
+
+- a conventional sportsbook;
+- a user-facing prediction-market trading terminal;
+- a copy-trading product;
+- an AI-controlled wallet;
+- a scripted agent battle.
+
+## 2. Authoritative Documentation
+
+Only documents explicitly marked `Approved` are implementation-authoritative.
+
+Primary product documents:
+
+- `docs/product/01-Autonomous-Game-Loop-Decision.md`
+  - checkpoints;
+  - agent decisions;
+  - deterministic execution;
+  - failures;
+  - winner rules;
+  - Live and Replay equivalence.
+
+- `docs/product/02-Product-Definition-V2.md`
+  - product definition;
+  - target users;
+  - agent roles;
+  - supporter separation;
+  - V2 scope and boundaries.
+
+- `docs/product/03-User-Experience-and-Routes.md`
+  - routes;
+  - page responsibilities;
+  - Live and Replay UX;
+  - identity and wallet UX;
+  - public states;
+  - accessibility and cross-route continuity.
+
+Read only the documents relevant to the current task.
+
+Do not implement documents marked `Draft`, `In Review`, `Deprecated`, or
+`Archived` unless the user explicitly authorizes it.
+
+Existing V1 code, mocks, comments, names, or documentation do not override an
+approved V2 decision.
+
+When requirements conflict or a required specification is missing, stop and
+report the conflict instead of inventing behavior.
+
+## 3. Repository Areas
+
+Current implementation areas:
+
+- `frontend/web/`
+  - Next.js spectator, arena, replay, proof, agent, and participation UX.
+
+- `backend/solana-actions/`
+  - Express API and Solana Action or Blink surfaces.
+
+- `contracts/anchor/arena_escrow/`
+  - Rust and Anchor programs, tests, and local contract tooling.
+
+- `agents/zeroclaw/`
+  - autonomous agent runtime, strategies, and supporting tools.
+
+- `docs/`
+  - product decisions, specifications, plans, and references.
+
+Some files still represent V1 or experimental implementation.
+
+Names such as ISAGI, AIKU, `clash-state.json`, Kamino mocks, and legacy runner
+behavior are not V2 requirements unless an approved current specification
+explicitly retains them.
+
+## 4. Scope and Layer Boundaries
+
+Modify only files required by the authorized task.
+
+Before making a cross-layer change:
+
+1. identify every affected layer;
+2. explain why the change crosses boundaries;
+3. obtain explicit authorization when those layers were not already included;
+4. update affected contracts, consumers, tests, and documentation together.
+
+The following are global changes:
+
+- root instruction files;
+- root documentation;
+- `docs/`;
+- shared schemas;
+- CI workflows;
+- toolchain or dependency-version changes.
+
+A nearer subsystem `AGENTS.md` may add local rules, but it must not override
+approved product invariants or repository safety rules.
+
+## 5. Required Workflow
+
+Use this sequence:
+
+`inspect → requirements → plan → implement → validate → inspect diff → report`
+
+Before editing:
+
+- inspect existing code;
+- inspect uncommitted changes;
+- read the nearest applicable instructions;
+- read relevant approved documents;
+- verify commands in the current package manifest.
+
+Do not build the entire product when the task requests one vertical slice.
+
+Do not overwrite unrelated local changes.
+
+## 6. Product Invariants
+
+Unless an approved decision changes them:
+
+- Agent Alpha and Agent Beta receive the same canonical shared snapshot.
+- Both agents begin with equal virtual bankrolls.
+- Agents decide independently.
+- Decisions occur only at approved checkpoints.
+- Outputs are structured target allocations or `NO_TRADE`.
+- Validation, pricing, execution, accounting, and settlement are deterministic.
+- Invalid output must not become a fabricated fallback trade.
+- Live and Replay use the same competition rules and engine.
+- Replay uses recorded data but generates new autonomous decisions.
+- Supporter funds never become agent virtual portfolio capital.
+- Supporter popularity never becomes agent performance.
+- Agents never control wallets, private keys, or supporter transactions.
+- Watching remains wallet-free.
+- Public UX must label Live, Replay, Simulated, Delayed, Paused, Finalizing,
+  Completed, Claimable, and Refundable states honestly.
+- Private chain-of-thought, secrets, and raw infrastructure logs are not public
+  product output.
+
+## 7. Implementation and Security Rules
+
+Use repository-relative paths or environment configuration in source code.
+
+Never hardcode:
+
+- local machine paths;
+- API secrets;
+- private keys;
+- seed phrases;
+- RPC credentials;
+- production credentials.
+
+Secrets must come from environment variables.
+
+When adding an environment variable:
+
+- update the relevant `.env.example`;
+- document whether it is required;
+- provide safe local behavior when appropriate.
+
+Use mocks before live integrations unless the task explicitly authorizes live
+TxLINE, wallet, RPC, or protocol access.
+
+Do not leave:
+
+- empty function stubs;
+- fake production data;
+- placeholder API keys;
+- silent fallback behavior;
+- fabricated transaction states;
+- fabricated autonomous decisions;
+- misleading production-readiness claims.
+
+Schema changes must update impacted producers, consumers, validators, fixtures,
+tests, and documentation.
+
+## 8. Validation
+
+Use commands declared by the current package or tool configuration.
 
 ### Frontend
+
 Working directory: `frontend/web/`
-- Install: `npm ci`
-- Lint: `npm run lint`
-- Test: `npm test -- --runInBand`
-- Build: `npm run build`
 
-### Backend
+- `npm run lint`
+- `npm test -- --runInBand`
+- `npm run build`
+
+### Solana Actions Backend
+
 Working directory: `backend/solana-actions/`
-- Install: `npm ci`
-- Typecheck: `npm run build`
-- Test: `npm test -- --runInBand`
 
-### Contracts
+- `npm run build`
+- `npm test -- --runInBand`
+
+### Anchor Contracts
+
 Working directory: `contracts/anchor/arena_escrow/`
-- Build: `anchor build`
-- Test: `cargo test`
 
-### Agents
+- `anchor build`
+- `npm test`
+- `cargo test`
+
+Run contract commands only when the required Solana and Anchor tooling is
+available.
+
+### ZeroClaw Agents
+
 Working directory: `agents/zeroclaw/`
-- Shell syntax check: `bash -n run_clash.sh`
-- Smoke test: `ARENA90_ZEROCLAW_REQUIRE_SUCCESS=1 ./run_clash.sh`
-*(Note: Python testing via `pytest` is currently a gap until `pyproject.toml` and a `tests/` directory are fully established. Rely on the shell smoke test for now).*
 
-## 5. Cross-Layer Contracts
-Since isolation is strict, communication between layers must be carefully managed:
-- **`txodds-mock.json`:** Defines the TxLINE input schema. Owned by the backend/agents shared data structure.
-- **`clash-state.json` (Runtime):** Generated and owned by `agents/zeroclaw/`. Read by both `frontend/web/` and `backend/solana-actions/`.
-- **Write Permissions:** Agents operating in `agents/zeroclaw/` are permitted to write state outputs to a shared location accessible by the backend, but must not directly alter backend source code to do so.
-- **Schema Changes:** Any change to a JSON schema must synchronously update the tests and consumers in the impacted layers.
+Inspect the current runner and configuration before execution.
 
-## 6. Environment & Secrets
-- **Strictly `.env`:** All secrets MUST come from environment variables.
-- **No Commits:** Never commit `.env` files.
-- **Maintenance:** Always update `.env.example` when introducing a new configuration variable.
-- **No Hardcoding:** Never hardcode API keys, wallet secrets, RPC credentials, or local machine paths in the source code.
-- **Public Keys:** If a public key or non-secret ID is hardcoded, add a comment explaining why it is safe and intentional.
+The current `run_clash.sh` contains legacy absolute-path assumptions and must
+not be treated as portable until those assumptions are removed.
 
-## 7. Definition of Done
-A task is only considered complete when:
-- Modifications are strictly limited to the authorized scope/layer.
-- The layer's specific Lint, Typecheck, Test, and Build commands pass successfully.
-- Tests have been added or updated to reflect behavioral changes.
-- No secrets, placeholder text, or hardcoded machine paths exist in the code.
-- Documentation and `.env.example` are updated if interfaces/configs change.
-- The agent explicitly reports the commands run, the outcome, and any remaining blockers.
+Do not claim a command passed when it was skipped, unavailable, or failed.
 
-## 8. CI and Global Changes
-Changes to the following are considered **Global**:
-- `.github/workflows/**`
-- `AGENTS.md` and root documentation (`docs/`)
-- Shared schema definitions
-- Cross-layer toolchain or dependency versions (e.g., bumping Node/Rust versions)
+For documentation-only changes, run at minimum:
 
-*Rule:* If you make a Global Change, you must validate ALL impacted layers, not just the one you are currently working on.
+- `git diff --check`
+
+## 9. Git Safety
+
+Do not perform destructive Git operations without explicit permission.
+
+Prohibited without authorization:
+
+- `git reset --hard`;
+- force-push;
+- deleting branches;
+- rewriting history;
+- discarding uncommitted user changes;
+- mass deletion outside task scope.
+
+Do not commit secrets, `.env` files, private keys, wallet files, build output,
+or local ledgers.
+
+Inspect the final diff before reporting completion.
+
+## 10. Definition of Done
+
+A task is complete only when:
+
+- authorized behavior is implemented;
+- changes remain within authorized scope;
+- relevant validation commands were run;
+- behavioral changes have test coverage where practical;
+- interfaces and configuration documentation are updated;
+- no secret, placeholder, fabricated state, or machine-specific path was added;
+- approved product invariants remain intact;
+- remaining blockers are reported honestly.
+
+## 11. Completion Report
+
+Every completion report must state:
+
+- scope;
+- files changed;
+- behavior implemented;
+- commands run;
+- validation results;
+- known gaps or blockers.
+
+Do not describe mocked, trusted, untested, or incomplete behavior as verified,
+autonomous, decentralized, live, or production-ready.
