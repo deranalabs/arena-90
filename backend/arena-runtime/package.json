@@ -14,6 +14,10 @@
       "types": "./dist/contracts/index.d.ts",
       "import": "./dist/contracts/index.js"
     },
+    "./engine": {
+      "types": "./dist/engine/index.d.ts",
+      "import": "./dist/engine/index.js"
+    },
     "./fixed-point": {
       "types": "./dist/fixed-point.d.ts",
       "import": "./dist/fixed-point.js"
