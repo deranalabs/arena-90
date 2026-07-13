@@ -5,6 +5,7 @@ import {
   agentDecisionSchema,
   arenaEventSchema,
   arenaManifestSchema,
+  calculateSnapshotHash,
   canonicalSnapshotSchema,
   createAgentDecisionSchema,
   portfolioStateSchema,
@@ -30,8 +31,9 @@ const validManifest = {
   createdAtUtc: "2026-07-13T10:00:00.000Z",
 } as const;
 
-const validSnapshot = {
+const validSnapshotHashInput = {
   schemaVersion: 1,
+  providerSequence: 2,
   snapshotId: "snapshot-001",
   arenaId: "arena-001",
   fixtureId: "fixture-001",
@@ -56,6 +58,11 @@ const validSnapshot = {
     delayed: false,
     suspended: false,
   },
+} as const;
+
+const validSnapshot = {
+  ...validSnapshotHashInput,
+  snapshotHash: calculateSnapshotHash(validSnapshotHashInput),
 } as const;
 
 const validDecision = {
@@ -149,6 +156,18 @@ describe("canonicalSnapshotSchema", () => {
       }).success,
     ).toBe(false);
   });
+
+  it("rejects non-positive provider sequence and a mismatched snapshot hash", () => {
+    expect(
+      canonicalSnapshotSchema.safeParse({ ...validSnapshot, providerSequence: 0 }).success,
+    ).toBe(false);
+    expect(
+      canonicalSnapshotSchema.safeParse({
+        ...validSnapshot,
+        snapshotHash: "0".repeat(64),
+      }).success,
+    ).toBe(false);
+  });
 });
 
 describe("agentDecisionSchema", () => {
@@ -157,9 +176,26 @@ describe("agentDecisionSchema", () => {
   });
 
   it("accepts NO_TRADE as an explicit structured action", () => {
+    const { targetAllocationBps: _targetAllocationBps, ...identity } = validDecision;
+
     expect(
-      agentDecisionSchema.safeParse({ ...validDecision, action: "NO_TRADE" }).success,
+      agentDecisionSchema.safeParse({ ...identity, action: "NO_TRADE" }).success,
     ).toBe(true);
+  });
+
+  it("enforces action-specific allocation shape", () => {
+    const { targetAllocationBps, ...identity } = validDecision;
+
+    expect(
+      agentDecisionSchema.safeParse({
+        ...identity,
+        action: "NO_TRADE",
+        targetAllocationBps,
+      }).success,
+    ).toBe(false);
+    expect(
+      agentDecisionSchema.safeParse({ ...identity, action: "TARGET_ALLOCATION" }).success,
+    ).toBe(false);
   });
 
   it("rejects allocations that do not total 10000", () => {

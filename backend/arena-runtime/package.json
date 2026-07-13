@@ -10,6 +10,14 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./adapters/agents": {
+      "types": "./dist/adapters/agents/index.d.ts",
+      "import": "./dist/adapters/agents/index.js"
+    },
+    "./adapters/data": {
+      "types": "./dist/adapters/data/index.d.ts",
+      "import": "./dist/adapters/data/index.js"
+    },
     "./contracts": {
       "types": "./dist/contracts/index.d.ts",
       "import": "./dist/contracts/index.js"
@@ -21,6 +29,10 @@
     "./fixed-point": {
       "types": "./dist/fixed-point.d.ts",
       "import": "./dist/fixed-point.js"
+    },
+    "./services": {
+      "types": "./dist/services/index.d.ts",
+      "import": "./dist/services/index.js"
     }
   },
   "scripts": {

@@ -28,18 +28,34 @@ const targetAllocationBpsSchema = z
     }
   });
 
-export const agentDecisionSchema = z
+const agentDecisionIdentityShape = {
+  schemaVersion: z.literal(1),
+  arenaId: nonBlankStringSchema,
+  snapshotId: nonBlankStringSchema,
+  checkpointId: decisionCheckpointIdSchema,
+  agentId: arenaAgentIdSchema,
+  publicExplanation: nonBlankStringSchema,
+} as const;
+
+const noTradeDecisionSchema = z
   .object({
-    schemaVersion: z.literal(1),
-    arenaId: nonBlankStringSchema,
-    snapshotId: nonBlankStringSchema,
-    checkpointId: decisionCheckpointIdSchema,
-    agentId: arenaAgentIdSchema,
-    action: z.enum(["TARGET_ALLOCATION", "NO_TRADE"]),
-    targetAllocationBps: targetAllocationBpsSchema,
-    publicExplanation: nonBlankStringSchema,
+    ...agentDecisionIdentityShape,
+    action: z.literal("NO_TRADE"),
   })
   .strict();
+
+const targetAllocationDecisionSchema = z
+  .object({
+    ...agentDecisionIdentityShape,
+    action: z.literal("TARGET_ALLOCATION"),
+    targetAllocationBps: targetAllocationBpsSchema,
+  })
+  .strict();
+
+export const agentDecisionSchema = z.discriminatedUnion("action", [
+  noTradeDecisionSchema,
+  targetAllocationDecisionSchema,
+]);
 
 export interface AgentDecisionIdentity {
   arenaId: string;

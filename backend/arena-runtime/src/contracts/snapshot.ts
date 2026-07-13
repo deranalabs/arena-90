@@ -1,3 +1,5 @@
+import { createHash } from "node:crypto";
+
 import { z } from "zod";
 
 import {
@@ -24,9 +26,10 @@ const priceMicrosRecordSchema = z
     }
   });
 
-export const canonicalSnapshotSchema = z
+const canonicalSnapshotHashInputSchema = z
   .object({
     schemaVersion: z.literal(1),
+    providerSequence: z.number().int().positive(),
     snapshotId: nonBlankStringSchema,
     arenaId: nonBlankStringSchema,
     fixtureId: nonBlankStringSchema,
@@ -53,5 +56,55 @@ export const canonicalSnapshotSchema = z
       .strict(),
   })
   .strict();
+
+type CanonicalSnapshotHashInput = z.infer<typeof canonicalSnapshotHashInputSchema>;
+
+function canonicalize(value: unknown): unknown {
+  if (Array.isArray(value)) {
+    return value.map(canonicalize);
+  }
+
+  if (value !== null && typeof value === "object") {
+    return Object.fromEntries(
+      Object.entries(value)
+        .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
+        .map(([key, entry]) => [key, canonicalize(entry)]),
+    );
+  }
+
+  return value;
+}
+
+export function calculateSnapshotHash(input: CanonicalSnapshotHashInput): string {
+  const snapshot = canonicalSnapshotHashInputSchema.parse(input);
+  return hashCanonicalSnapshot(snapshot);
+}
+
+function hashCanonicalSnapshot(snapshot: CanonicalSnapshotHashInput): string {
+  const canonicalJson = JSON.stringify(canonicalize(snapshot));
+
+  return createHash("sha256").update(canonicalJson).digest("hex");
+}
+
+export const canonicalSnapshotSchema = canonicalSnapshotHashInputSchema
+  .extend({
+    snapshotHash: z.string().regex(/^[0-9a-f]{64}$/),
+  })
+  .strict()
+  .superRefine((snapshot, context) => {
+    const { snapshotHash, ...hashInput } = snapshot;
+    const validatedHashInput = canonicalSnapshotHashInputSchema.safeParse(hashInput);
+
+    if (
+      validatedHashInput.success &&
+      snapshotHash !== hashCanonicalSnapshot(validatedHashInput.data)
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["snapshotHash"],
+        message: "snapshotHash does not match canonical snapshot payload",
+      });
+    }
+  });
 
 export type CanonicalSnapshot = z.infer<typeof canonicalSnapshotSchema>;

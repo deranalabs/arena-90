@@ -221,12 +221,6 @@ describe("applyDecision", () => {
           checkpointId: "M30",
           agentId: "alpha",
           action: "NO_TRADE",
-          targetAllocationBps: {
-            cash: 5_000,
-            HOME: 5_000,
-            DRAW: 0,
-            AWAY: 0,
-          },
           publicExplanation: "Keep existing positions.",
         },
         { HOME: 600_000, DRAW: 250_000, AWAY: 150_000 },
