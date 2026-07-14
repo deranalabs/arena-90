@@ -304,6 +304,57 @@ describe("checkpoint orchestrator", () => {
     });
   });
 
+  it("merges parallel agent receipt events in deterministic Alpha then Beta order", async () => {
+    const dataAdapter = createRecordedDataAdapter(await loadRecordedFixture());
+    let releaseAlpha!: () => void;
+    const alphaRelease = new Promise<void>((resolve) => {
+      releaseAlpha = resolve;
+    });
+    let notifyBetaReturned!: () => void;
+    const betaReturned = new Promise<void>((resolve) => {
+      notifyBetaReturned = resolve;
+    });
+    const decision = (agentId: "alpha" | "beta") => ({
+      schemaVersion: 1 as const,
+      arenaId: "arena-replay-001",
+      snapshotId: "snapshot-kickoff",
+      checkpointId: "KICKOFF" as const,
+      agentId,
+      action: "NO_TRADE" as const,
+      publicExplanation: "Keep the current portfolio.",
+    });
+    const orchestrator = createCheckpointOrchestrator({
+      arenaId: "arena-replay-001",
+      startingBankrollMicros: "100000000",
+      dataAdapter,
+      agents: {
+        alpha: createFakeAgentAdapter("alpha", async () => {
+          await alphaRelease;
+          return decision("alpha");
+        }),
+        beta: createFakeAgentAdapter("beta", async () => {
+          notifyBetaReturned();
+          return decision("beta");
+        }),
+      },
+      timeoutMs: 1_000,
+    });
+
+    const run = orchestrator.runCheckpoint("KICKOFF", {
+      alpha: initializePortfolio("alpha", "100000000"),
+      beta: initializePortfolio("beta", "100000000"),
+    });
+    await betaReturned;
+    releaseAlpha();
+    const result = await run;
+
+    expect(
+      result.events
+        .filter(({ type }) => type === "DECISION_RECEIVED")
+        .map(({ agentId }) => agentId),
+    ).toEqual(["alpha", "beta"]);
+  });
+
   it("converts a synchronous adapter throw into PROCESS_FAILURE", async () => {
     const dataAdapter = createRecordedDataAdapter(await loadRecordedFixture());
     const betaDecision = {

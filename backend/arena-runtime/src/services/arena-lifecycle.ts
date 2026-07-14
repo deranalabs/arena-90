@@ -24,6 +24,7 @@ export type ArenaLifecycleDataSourceFactory = (
 
 export interface ArenaLifecycleTiming {
   nowMs(): number;
+  wait(delayMs: number, signal: AbortSignal): Promise<void>;
   waitForCheckpoint(
     manifest: ArenaManifest,
     checkpointId: CheckpointId,
