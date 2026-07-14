@@ -37,6 +37,7 @@
   },
   "scripts": {
     "build": "tsc --project tsconfig.json --noEmit && tsc --project tsconfig.build.json",
+    "smoke:lifecycle:replay": "npm run build && node scripts/lifecycle-replay-smoke.mjs",
     "smoke:txline": "npm run build && node scripts/txline-smoke.mjs",
     "smoke:zeroclaw": "npm run build && node scripts/zeroclaw-smoke.mjs",
     "test": "vitest run"

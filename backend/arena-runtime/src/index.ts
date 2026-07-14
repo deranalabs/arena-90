@@ -6,4 +6,8 @@ export { createRecordedDataAdapter } from "./adapters/data/index.js";
 export * from "./contracts/index.js";
 export * from "./engine/index.js";
 export * from "./fixed-point.js";
+export {
+  createNodeArenaLifecycleComposition,
+  type CreateNodeArenaLifecycleCompositionConfig,
+} from "./runtime/node-lifecycle.js";
 export * from "./services/index.js";
