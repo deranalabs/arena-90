@@ -34,6 +34,10 @@ import {
 } from "./arena-capacity.js";
 
 const DEFAULT_BODY_LIMIT_BYTES = 64 * 1024;
+const DEFAULT_SSE_POLL_INTERVAL_MS = 1_000;
+const DEFAULT_SSE_HEARTBEAT_INTERVAL_MS = 15_000;
+const DEFAULT_SSE_DRAIN_TIMEOUT_MS = 5_000;
+const DEFAULT_SSE_MAX_EVENTS_PER_POLL = 64;
 
 const configuredTeamSchema = z
   .object({
@@ -85,6 +89,12 @@ export interface CreateArenaHttpServerConfig {
   readonly bodyLimitBytes?: number;
   /** Share this composition seam and seed persisted occupancy on restart. */
   readonly capacityCoordinator?: ArenaHttpCapacityCoordinator;
+  readonly sse?: Readonly<{
+    pollIntervalMs?: number;
+    heartbeatIntervalMs?: number;
+    drainTimeoutMs?: number;
+    maxEventsPerPoll?: number;
+  }>;
 }
 
 const defaultCapacityByStore = new WeakMap<
@@ -193,6 +203,13 @@ function writeError(response: ServerResponse, error: unknown): void {
     envelope,
     boundary.allow === undefined ? undefined : { allow: boundary.allow },
   );
+}
+
+class SseStreamAbortedError extends Error {
+  constructor() {
+    super("SSE stream aborted");
+    this.name = "SseStreamAbortedError";
+  }
 }
 
 function requireReady(isReady: () => boolean): void {
@@ -332,8 +349,150 @@ function parseEventCursor(url: URL): number {
   return cursor;
 }
 
+function parseLastEventId(request: IncomingMessage): number {
+  const raw = request.headers["last-event-id"];
+  if (raw === undefined) return 0;
+  if (typeof raw !== "string" || !/^(?:0|[1-9]\d*)$/u.test(raw)) {
+    throw new HttpBoundaryError(
+      400,
+      "INVALID_EVENT_CURSOR",
+      "Event cursor is invalid",
+    );
+  }
+  const cursor = Number(raw);
+  if (!Number.isSafeInteger(cursor)) {
+    throw new HttpBoundaryError(
+      400,
+      "INVALID_EVENT_CURSOR",
+      "Event cursor is invalid",
+    );
+  }
+  return cursor;
+}
+
 function requireNoQuery(url: URL): void {
   if (url.search !== "") throw invalidRequest();
+}
+
+function positiveSafeInteger(value: number): boolean {
+  return Number.isSafeInteger(value) && value > 0;
+}
+
+function waitForPoll(delayMs: number, signal: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    let timer: NodeJS.Timeout | undefined;
+    let settled = false;
+    const cleanup = () => {
+      signal.removeEventListener("abort", onAbort);
+      if (timer !== undefined) clearTimeout(timer);
+    };
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve();
+    };
+    const onAbort = () => finish();
+    signal.addEventListener("abort", onAbort, { once: true });
+    if (signal.aborted) {
+      finish();
+      return;
+    }
+    try {
+      timer = setTimeout(finish, delayMs);
+    } catch (error) {
+      settled = true;
+      cleanup();
+      reject(error);
+    }
+  });
+}
+
+function runAbortably<T>(
+  operation: () => Promise<T>,
+  signal: AbortSignal,
+): Promise<T> {
+  if (signal.aborted) return Promise.reject(new SseStreamAbortedError());
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    const cleanup = () => signal.removeEventListener("abort", onAbort);
+    const settle = (
+      outcome: "RESOLVE" | "REJECT",
+      value: T | unknown,
+    ) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      if (outcome === "RESOLVE") resolve(value as T);
+      else reject(value);
+    };
+    const onAbort = () => settle("REJECT", new SseStreamAbortedError());
+    signal.addEventListener("abort", onAbort, { once: true });
+    let pending: Promise<T>;
+    try {
+      pending = operation();
+    } catch (error) {
+      settle("REJECT", error);
+      return;
+    }
+    void pending.then(
+      (value) => settle("RESOLVE", value),
+      (error: unknown) => settle("REJECT", error),
+    );
+  });
+}
+
+function waitForDrain(
+  response: ServerResponse,
+  signal: AbortSignal,
+  timeoutMs: number,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
+    let timer: NodeJS.Timeout | undefined;
+    const cleanup = () => {
+      response.off("drain", onDrain);
+      signal.removeEventListener("abort", onAbort);
+      if (timer !== undefined) clearTimeout(timer);
+    };
+    const onDrain = () => {
+      cleanup();
+      resolve();
+    };
+    const onAbort = () => {
+      cleanup();
+      reject(new Error("SSE stream aborted"));
+    };
+    const onTimeout = () => {
+      cleanup();
+      reject(new Error("SSE drain timed out"));
+    };
+    response.once("drain", onDrain);
+    signal.addEventListener("abort", onAbort, { once: true });
+    if (signal.aborted) {
+      onAbort();
+      return;
+    }
+    try {
+      timer = setTimeout(onTimeout, timeoutMs);
+    } catch (error) {
+      cleanup();
+      reject(error);
+    }
+  });
+}
+
+async function writeSseChunk(
+  response: ServerResponse,
+  chunk: string,
+  signal: AbortSignal,
+  drainTimeoutMs: number,
+): Promise<void> {
+  if (signal.aborted || response.destroyed || response.writableEnded) {
+    throw new Error("SSE stream is closed");
+  }
+  if (!response.write(chunk)) {
+    await waitForDrain(response, signal, drainTimeoutMs);
+  }
 }
 
 export function createArenaHttpServer(
@@ -343,6 +502,14 @@ export function createArenaHttpServer(
     input?.configuredSource,
   );
   const bodyLimitBytes = input?.bodyLimitBytes ?? DEFAULT_BODY_LIMIT_BYTES;
+  const ssePollIntervalMs =
+    input?.sse?.pollIntervalMs ?? DEFAULT_SSE_POLL_INTERVAL_MS;
+  const sseHeartbeatIntervalMs =
+    input?.sse?.heartbeatIntervalMs ?? DEFAULT_SSE_HEARTBEAT_INTERVAL_MS;
+  const sseDrainTimeoutMs =
+    input?.sse?.drainTimeoutMs ?? DEFAULT_SSE_DRAIN_TIMEOUT_MS;
+  const sseMaxEventsPerPoll =
+    input?.sse?.maxEventsPerPoll ?? DEFAULT_SSE_MAX_EVENTS_PER_POLL;
   if (
     configuredSourceResult.success === false ||
     typeof input?.runner?.create !== "function" ||
@@ -353,7 +520,11 @@ export function createArenaHttpServer(
       (typeof input.capacityCoordinator.claim !== "function" ||
         typeof input.capacityCoordinator.settle !== "function")) ||
     !Number.isSafeInteger(bodyLimitBytes) ||
-    bodyLimitBytes < 1
+    bodyLimitBytes < 1 ||
+    !positiveSafeInteger(ssePollIntervalMs) ||
+    !positiveSafeInteger(sseHeartbeatIntervalMs) ||
+    !positiveSafeInteger(sseDrainTimeoutMs) ||
+    !positiveSafeInteger(sseMaxEventsPerPoll)
   ) {
     throw new TypeError("Invalid Arena HTTP server configuration");
   }
@@ -363,6 +534,7 @@ export function createArenaHttpServer(
     string,
     Readonly<{ controller: AbortController; promise: Promise<void> }>
   >();
+  const activeStreams = new Map<AbortController, ServerResponse>();
 
   async function createArena(request: IncomingMessage, response: ServerResponse) {
     requireReady(input.isReady);
@@ -594,6 +766,137 @@ export function createArenaHttpServer(
     );
   }
 
+  async function streamEvents(
+    request: IncomingMessage,
+    response: ServerResponse,
+    arenaId: string,
+  ): Promise<void> {
+    const cursor = parseLastEventId(request);
+    const streamController = new AbortController();
+    activeStreams.set(streamController, response);
+    const abortStream = () => streamController.abort();
+    request.once("aborted", abortStream);
+    response.once("close", abortStream);
+    let nextCursor = cursor;
+    let lastWriteAtMs = Date.now();
+    try {
+      const persisted = await runAbortably(
+        () => input.store.read(arenaId, 0),
+        streamController.signal,
+      );
+      if (persisted === "NOT_FOUND") throw arenaNotFound();
+      if (cursor > persisted.state.lastEventSequence) {
+        throw new HttpBoundaryError(
+          409,
+          "EVENT_CURSOR_AHEAD",
+          "Event cursor is ahead of arena history",
+        );
+      }
+      if (
+        persisted.state.phase === "COMPLETED" &&
+        cursor === persisted.state.lastEventSequence
+      ) {
+        response.writeHead(204, { "cache-control": "no-store" });
+        response.end();
+        return;
+      }
+      const initialEvents = persisted.events.filter(
+        (event) => event.sequence > cursor,
+      );
+      const projected = projectArenaEventHistory(
+        persisted.state,
+        initialEvents.slice(0, sseMaxEventsPerPoll),
+        cursor,
+      );
+      response.writeHead(200, {
+        "cache-control": "no-store",
+        "content-type": "text/event-stream; charset=utf-8",
+        connection: "keep-alive",
+      });
+      response.flushHeaders();
+      let observedLastEventSequence = persisted.state.lastEventSequence;
+      let observedPhase = persisted.state.phase;
+      let nextEvents = projected.events;
+      for (;;) {
+        for (const event of nextEvents) {
+          await writeSseChunk(
+            response,
+            `id: ${event.sequence}\nevent: arena-event\ndata: ${JSON.stringify(event)}\n\n`,
+            streamController.signal,
+            sseDrainTimeoutMs,
+          );
+          nextCursor = event.sequence;
+          lastWriteAtMs = Date.now();
+          if (event.type === "COMPLETED") return;
+        }
+        if (streamController.signal.aborted) return;
+        if (nextCursor >= observedLastEventSequence) {
+          if (Date.now() - lastWriteAtMs >= sseHeartbeatIntervalMs) {
+            await writeSseChunk(
+              response,
+              ": heartbeat\n\n",
+              streamController.signal,
+              sseDrainTimeoutMs,
+            );
+            lastWriteAtMs = Date.now();
+          }
+          await waitForPoll(ssePollIntervalMs, streamController.signal);
+          if (streamController.signal.aborted) return;
+        }
+        const next = await runAbortably(
+          () => input.store.read(arenaId, nextCursor),
+          streamController.signal,
+        );
+        if (next === "NOT_FOUND") throw arenaNotFound();
+        observedLastEventSequence = next.state.lastEventSequence;
+        observedPhase = next.state.phase;
+        const nextBatch = next.events.slice(0, sseMaxEventsPerPoll);
+        if (
+          nextBatch.length === 0 &&
+          nextCursor < observedLastEventSequence
+        ) {
+          throw new HttpBoundaryError(
+            500,
+            "INTERNAL_ERROR",
+            "The request could not be completed",
+          );
+        }
+        nextEvents = projectArenaEventHistory(
+          next.state,
+          nextBatch,
+          nextCursor,
+        ).events;
+        if (
+          nextEvents.length === 0 &&
+          observedPhase === "COMPLETED" &&
+          nextCursor === observedLastEventSequence
+        ) {
+          return;
+        }
+      }
+    } catch (error) {
+      if (
+        streamController.signal.aborted ||
+        error instanceof SseStreamAbortedError
+      ) {
+        return;
+      }
+      if (response.headersSent) response.destroy();
+      else throw error;
+    } finally {
+      request.off("aborted", abortStream);
+      response.off("close", abortStream);
+      activeStreams.delete(streamController);
+      if (
+        response.headersSent &&
+        !response.destroyed &&
+        !response.writableEnded
+      ) {
+        response.end();
+      }
+    }
+  }
+
   const server = createServer((request, response) => {
     void (async () => {
       try {
@@ -621,6 +924,21 @@ export function createArenaHttpServer(
           if (method !== "POST") throw methodNotAllowed("POST");
           requireNoQuery(url);
           await createArena(request, response);
+          return;
+        }
+
+        const streamMatch =
+          /^\/api\/arenas\/([^/]+)\/events\/stream$/u.exec(url.pathname);
+        if (streamMatch !== null) {
+          if (method !== "GET") throw methodNotAllowed("GET");
+          requireNoQuery(url);
+          const encodedStreamArenaId = streamMatch[1];
+          if (encodedStreamArenaId === undefined) throw invalidRequest();
+          await streamEvents(
+            request,
+            response,
+            parseArenaId(encodedStreamArenaId),
+          );
           return;
         }
 
@@ -659,7 +977,17 @@ export function createArenaHttpServer(
   server.on("close", () => {
     for (const active of activeRuns.values()) active.controller.abort();
     activeRuns.clear();
+    activeStreams.clear();
   });
+
+  const closeServer = server.close.bind(server);
+  server.close = ((callback?: (error?: Error) => void) => {
+    for (const [controller, response] of activeStreams) {
+      controller.abort();
+      if (!response.destroyed && !response.writableEnded) response.end();
+    }
+    return closeServer(callback);
+  }) as Server["close"];
 
   return server;
 }
