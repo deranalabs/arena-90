@@ -1,3 +1,10 @@
+import type {
+  ArenaAssetId,
+  CanonicalSnapshot,
+  CheckpointId,
+  DecisionCheckpointId,
+} from "../../../contracts/index.js";
+
 export type TxlineDataErrorCode =
   | "INVALID_PROVIDER_INPUT"
   | "FIXTURE_BINDING_MISMATCH"
@@ -145,6 +152,23 @@ export interface TxlineProviderClient {
     fixtureId: number,
     signal: AbortSignal,
   ): Promise<readonly TxlineSseEvent[]>;
+}
+
+export interface TxlineLiveDataAdapterConfig {
+  readonly arenaId: string;
+  readonly fixtureBinding: TxlineFixtureBinding;
+  readonly delayed: boolean;
+  readonly client: TxlineProviderClient;
+  readonly nowMs: () => number;
+}
+
+export interface TxlineLiveDataAdapter {
+  refreshCheckpoint(
+    checkpointId: CheckpointId,
+    signal: AbortSignal,
+  ): Promise<void>;
+  getSnapshot(checkpointId: DecisionCheckpointId): CanonicalSnapshot;
+  getFinalResult(): ArenaAssetId;
 }
 
 export class TxlineHttpStatusError extends Error {

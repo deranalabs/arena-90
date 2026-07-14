@@ -13,6 +13,8 @@ export {
   type TxlineHttpRequest,
   type TxlineHttpResponse,
   type TxlineHttpTransport,
+  type TxlineLiveDataAdapter,
+  type TxlineLiveDataAdapterConfig,
   type TxlineProviderClient,
   type TxlineProviderClientConfig,
   type TxlineRetryDelay,
@@ -21,6 +23,7 @@ export {
   TxlineHttpStatusError,
 } from "./domain.js";
 export { createTxlineProviderClient } from "./client.js";
+export { createTxlineLiveDataAdapter } from "./live.js";
 export { validateTxlineFixtureBinding } from "./fixture.js";
 export { selectTxlineMarket } from "./market.js";
 export { createTxlineScoreStateReducer } from "./score-state.js";
