@@ -1,5 +1,6 @@
 export * from "./decision.js";
 export * from "./event.js";
+export * from "./lifecycle.js";
 export * from "./manifest.js";
 export * from "./portfolio.js";
 export * from "./primitives.js";
