@@ -24,6 +24,11 @@ export {
 } from "./domain.js";
 export { createTxlineProviderClient } from "./client.js";
 export { createTxlineLiveDataAdapter } from "./live.js";
+export {
+  createTxlineNodeTransports,
+  createTxlineProviderClientFromEnv,
+  type TxlineNodeProviderClientOptions,
+} from "./node.js";
 export { validateTxlineFixtureBinding } from "./fixture.js";
 export { selectTxlineMarket } from "./market.js";
 export { createTxlineScoreStateReducer } from "./score-state.js";
