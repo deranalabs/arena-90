@@ -7,7 +7,16 @@ export type TxlineDataErrorCode =
   | "INVALID_SCORE_STATE"
   | "SEQUENCE_CONFLICT"
   | "LOWER_UNSEEN_SEQUENCE"
-  | "SEQUENCE_GAP";
+  | "SEQUENCE_GAP"
+  | "INVALID_PROVIDER_CONFIG"
+  | "PROVIDER_ABORTED"
+  | "PROVIDER_TIMEOUT"
+  | "PROVIDER_NETWORK_FAILURE"
+  | "PROVIDER_AUTHENTICATION_FAILURE"
+  | "PROVIDER_AUTHORIZATION_FAILURE"
+  | "PROVIDER_HTTP_FAILURE"
+  | "PROVIDER_RESPONSE_LIMIT"
+  | "PROVIDER_INVALID_RESPONSE";
 
 export class TxlineDataError extends Error {
   readonly code: TxlineDataErrorCode;
@@ -73,4 +82,77 @@ export interface CreateTxlineScoreStateReducerInput {
 export interface TxlineScoreStateReducer {
   getState(): TxlineScoreState;
   apply(event: unknown): TxlineScoreApplyResult;
+}
+
+export interface TxlineHttpRequest {
+  readonly method: "GET";
+  readonly url: string;
+  readonly headers: Readonly<{
+    Authorization: string;
+    "X-Api-Token": string;
+  }>;
+  readonly signal: AbortSignal;
+  readonly maxResponseBytes: number;
+}
+
+export interface TxlineHttpResponse {
+  readonly status: number;
+  readonly body: string;
+  readonly bodyLimitExceeded: boolean;
+}
+
+export type TxlineHttpTransport = (
+  request: TxlineHttpRequest,
+) => Promise<TxlineHttpResponse>;
+
+export type TxlineSseTransport = (
+  request: TxlineHttpRequest,
+) => AsyncIterable<Uint8Array>;
+
+export type TxlineRetryDelay = (
+  delayMs: number,
+  signal: AbortSignal,
+) => Promise<void>;
+
+export interface TxlineProviderClientConfig {
+  readonly baseUrl: string;
+  readonly jwt: string;
+  readonly apiToken: string;
+  readonly timeoutMs: number;
+  readonly maxResponseBytes: number;
+  readonly maxSseEvents: number;
+  readonly transport: TxlineHttpTransport;
+  readonly sseTransport: TxlineSseTransport;
+  readonly retryDelay?: TxlineRetryDelay;
+}
+
+export interface TxlineSseEvent {
+  readonly cursor?: string;
+  readonly event?: string;
+  readonly data: unknown;
+}
+
+export interface TxlineProviderClient {
+  getFixtureSnapshot(signal: AbortSignal): Promise<unknown>;
+  getOddsSnapshot(fixtureId: number, signal: AbortSignal): Promise<unknown>;
+  getOddsUpdates(fixtureId: number, signal: AbortSignal): Promise<unknown>;
+  getScoreSnapshot(fixtureId: number, signal: AbortSignal): Promise<unknown>;
+  getScoreStream(
+    fixtureId: number,
+    signal: AbortSignal,
+  ): AsyncIterable<TxlineSseEvent>;
+  getHistoricalScoreReplay(
+    fixtureId: number,
+    signal: AbortSignal,
+  ): Promise<readonly TxlineSseEvent[]>;
+}
+
+export class TxlineHttpStatusError extends Error {
+  readonly status: number;
+
+  constructor(status: number) {
+    super("TxLINE streaming transport returned an HTTP failure");
+    this.name = "TxlineHttpStatusError";
+    this.status = status;
+  }
 }
