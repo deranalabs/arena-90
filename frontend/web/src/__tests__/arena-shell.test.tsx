@@ -235,14 +235,53 @@ describe("canonical arena shell", () => {
     "renders %s truthfully",
     async (phase) => {
       const stream = phase === "COMPLETED" ? { status: "TERMINAL" as const } : followingStream();
+      const terminalPortfolios = {
+        alpha: {
+          ...publicState().portfolios.alpha,
+          updatedAtCheckpoint: "FINAL" as const,
+        },
+        beta: {
+          ...publicState().portfolios.beta,
+          updatedAtCheckpoint: "FINAL" as const,
+        },
+      };
+      const finalResult = {
+        schemaVersion: 1 as const,
+        arenaId,
+        winningAssetId: "DRAW" as const,
+        winner: "DRAW" as const,
+        alphaFinalNavMicros: "100000000",
+        betaFinalNavMicros: "100000000",
+        finalResultHash: "e".repeat(64),
+      };
+      const completed = phase === "COMPLETED"
+        ? {
+            portfolios: terminalPortfolios,
+            leader: { result: "DRAW", provisional: false },
+            finalResult,
+            lastEventSequence: 2,
+          }
+        : {};
+      const state = publicState({
+        phase,
+        nextCheckpointId: phase === "FINALIZING" ? "FINAL" : undefined,
+        ...completed,
+      }) as PublicArenaStateV1;
+      const history = phase === "COMPLETED"
+        ? publicHistory([
+            publicEvent(1) as PublicArenaEventV1,
+            publicEvent(2, "COMPLETED", {
+              checkpointId: "FINAL",
+              payload: { result: finalResult, portfolios: terminalPortfolios },
+            }) as PublicArenaEventV1,
+          ]) as PublicEventHistoryV1
+        : undefined;
       render(
         <ArenaShell
           arenaId={arenaId}
           transport={transportFor({
-            state: publicState({
-              phase,
-              nextCheckpointId: phase === "FINALIZING" ? "FINAL" : undefined,
-            }) as PublicArenaStateV1,
+            state,
+            history,
             stream,
           })}
         />,

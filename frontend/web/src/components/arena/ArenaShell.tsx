@@ -4,11 +4,14 @@ import Link from "next/link";
 
 import { AgentSummaryCard } from "@/components/arena/AgentSummaryCard";
 import { CheckpointProgress } from "@/components/arena/CheckpointProgress";
+import { CheckpointHistory } from "@/components/arena/CheckpointHistory";
 import { ConnectionBanner } from "@/components/arena/ConnectionBanner";
 import { FixtureHeader } from "@/components/arena/FixtureHeader";
+import { FinalResultPanel } from "@/components/arena/FinalResultPanel";
 import { useArenaSession } from "@/components/arena/useArenaSession";
 import { Container } from "@/components/ui/container";
 import type { RuntimeTransport } from "@/lib/arena-api/transport";
+import { validateSpectatorView } from "@/lib/arena-api/view-invariants";
 
 type ArenaShellProps = {
   arenaId: string;
@@ -17,10 +20,15 @@ type ArenaShellProps = {
 
 export function ArenaShell({ arenaId, transport }: ArenaShellProps) {
   const session = useArenaSession(arenaId, transport);
-  const unavailable = session.status === "FAILED";
+  const inconsistent = session.state
+    ? !validateSpectatorView(session.state, session.events)
+    : false;
+  const unavailable = session.status === "FAILED" || inconsistent;
+  const visibleState = unavailable ? undefined : session.state;
+  const connectionStatus = inconsistent ? "FAILED" : session.status;
   const introTitleId = unavailable
     ? "arena-unavailable-title"
-    : session.state
+    : visibleState
       ? "arena-title"
       : "arena-loading-title";
 
@@ -43,9 +51,9 @@ export function ArenaShell({ arenaId, transport }: ArenaShellProps) {
           <div>
             <p className="eyebrow eyebrow--inverse">Canonical spectator arena</p>
             {unavailable ? <h1 id="arena-unavailable-title">Arena unavailable</h1> : null}
-            {!unavailable && !session.state ? <h1 id="arena-loading-title">Arena loading</h1> : null}
+            {!unavailable && !visibleState ? <h1 id="arena-loading-title">Arena loading</h1> : null}
           </div>
-          <ConnectionBanner status={session.status} snapshot={session.state?.currentSnapshot} />
+          <ConnectionBanner status={connectionStatus} snapshot={visibleState?.currentSnapshot} />
         </section>
 
         {unavailable ? (
@@ -53,14 +61,16 @@ export function ArenaShell({ arenaId, transport }: ArenaShellProps) {
             <h2>Verified state unavailable</h2>
             <p>Verified public arena data is unavailable. No unverified fallback is shown.</p>
           </section>
-        ) : session.state ? (
+        ) : visibleState ? (
           <>
-            <FixtureHeader state={session.state} />
-            <CheckpointProgress state={session.state} events={session.events} />
+            <FixtureHeader state={visibleState} />
             <section className="arena-agents" aria-label="Agent comparison">
-              <AgentSummaryCard agentId="alpha" portfolio={session.state.portfolios.alpha} state={session.state} />
-              <AgentSummaryCard agentId="beta" portfolio={session.state.portfolios.beta} state={session.state} />
+              <AgentSummaryCard agentId="alpha" portfolio={visibleState.portfolios.alpha} state={visibleState} />
+              <AgentSummaryCard agentId="beta" portfolio={visibleState.portfolios.beta} state={visibleState} />
             </section>
+            <FinalResultPanel state={visibleState} />
+            <CheckpointHistory state={visibleState} events={session.events} />
+            <CheckpointProgress state={visibleState} events={session.events} />
           </>
         ) : (
           <section className="arena-loading-panel" aria-label="Arena loading">

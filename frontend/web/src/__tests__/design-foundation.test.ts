@@ -76,4 +76,18 @@ describe("frontend design foundation", () => {
       /\.stadium-shell__masthead span:not\(:first-child\)\s*{[^}]*display:\s*none/,
     );
   });
+
+  it("keeps comparison, reveal history, and final result accessible on mobile", () => {
+    const mobileRules = stylesheet.slice(
+      stylesheet.indexOf("@media (max-width: 42rem)"),
+      stylesheet.indexOf("@media (prefers-reduced-motion: reduce)"),
+    );
+
+    expect(mobileRules).toMatch(
+      /\.round-record__decisions(?:,\s*\.[^{]+)?\s*{[^}]*grid-template-columns:\s*1fr/,
+    );
+    expect(mobileRules).not.toMatch(
+      /\.(?:arena-agents|round-history|final-result|round-record)[^{]*{[^}]*display:\s*none/,
+    );
+  });
 });

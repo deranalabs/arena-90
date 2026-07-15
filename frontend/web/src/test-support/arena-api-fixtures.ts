@@ -1,6 +1,13 @@
+import type {
+  PublicPortfolioV1,
+  PublicSnapshotV1,
+} from "@/lib/arena-api/contracts";
+
 const occurredAtUtc = "2026-07-13T12:00:00.000Z";
 
-export function publicPortfolio(agentId: "alpha" | "beta") {
+export function publicPortfolio(
+  agentId: "alpha" | "beta",
+): PublicPortfolioV1 {
   return {
     agentId,
     cashMicros: "100000000",
@@ -11,7 +18,7 @@ export function publicPortfolio(agentId: "alpha" | "beta") {
   };
 }
 
-export function publicSnapshot() {
+export function publicSnapshot(): PublicSnapshotV1 {
   return {
     schemaVersion: 1,
     snapshotId: "snapshot-kickoff",
