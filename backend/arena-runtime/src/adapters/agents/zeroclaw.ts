@@ -133,6 +133,25 @@ export interface ZeroClawAgentAdapterConfig {
 
 const DEFAULT_MAX_OUTPUT_BYTES = 64 * 1024;
 
+export type AgentOutputParseFailureCategory =
+  | "FORMAT_FAILURE"
+  | "AMBIGUOUS_OUTPUT";
+
+export class AgentOutputError extends Error {
+  readonly category: AgentOutputParseFailureCategory;
+  readonly candidateCount: number;
+
+  constructor(
+    category: AgentOutputParseFailureCategory,
+    candidateCount: number,
+  ) {
+    super("ZeroClaw returned an invalid decision format");
+    this.name = "AgentOutputError";
+    this.category = category;
+    this.candidateCount = candidateCount;
+  }
+}
+
 const STRATEGY_PROMPTS: Record<ArenaAgentId, string> = {
   alpha:
     "You are Arena90 Agent Alpha. Follow a momentum and repricing strategy: evaluate recent match-state changes and whether prices have fully repriced them.",
@@ -148,6 +167,72 @@ function sanitizeValidationError(error: string): string {
     .slice(0, 240);
 
   return sanitized === "" ? "Validation failed" : sanitized;
+}
+
+function parseDecisionOutput(stdout: string): unknown {
+  const trimmed = stdout.trim();
+  let directParseSucceeded = false;
+  let directParsed: unknown;
+  try {
+    directParsed = JSON.parse(trimmed) as unknown;
+    directParseSucceeded = true;
+  } catch {}
+  if (directParseSucceeded) {
+    if (
+      typeof directParsed === "object" &&
+      directParsed !== null &&
+      !Array.isArray(directParsed)
+    ) {
+      return directParsed;
+    }
+    throw new AgentOutputError("FORMAT_FAILURE", 0);
+  }
+
+  const candidates: unknown[] = [];
+  let start = -1;
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let index = 0; index < trimmed.length; index += 1) {
+    const character = trimmed[index];
+    if (start < 0) {
+      if (character === "{") {
+        start = index;
+        depth = 1;
+      }
+      continue;
+    }
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (character === "\\") escaped = true;
+      else if (character === '"') inString = false;
+      continue;
+    }
+    if (character === '"') inString = true;
+    else if (character === "{") depth += 1;
+    else if (character === "}") {
+      depth -= 1;
+      if (depth !== 0) continue;
+      try {
+        const parsed = JSON.parse(trimmed.slice(start, index + 1)) as unknown;
+        if (
+          typeof parsed === "object" &&
+          parsed !== null &&
+          !Array.isArray(parsed)
+        ) {
+          candidates.push(parsed);
+        }
+      } catch {}
+      start = -1;
+      inString = false;
+      escaped = false;
+    }
+  }
+  if (candidates.length === 0) throw new AgentOutputError("FORMAT_FAILURE", 0);
+  if (candidates.length > 1) {
+    throw new AgentOutputError("AMBIGUOUS_OUTPUT", candidates.length);
+  }
+  return candidates[0];
 }
 
 function createMessage(
@@ -212,6 +297,8 @@ function createMessage(
     JSON.stringify(targetAllocationShape),
     "INPUT_JSON",
     JSON.stringify(input),
+    "FINAL_RESPONSE_RULE",
+    "Return exactly one raw JSON object matching one shape above. Do not return both shapes, Markdown fences, or surrounding prose.",
   ].join("\n");
 }
 
@@ -251,11 +338,7 @@ export function createZeroClawAgentAdapter(
         throw new Error("ZeroClaw process failed");
       }
 
-      try {
-        return JSON.parse(result.stdout) as unknown;
-      } catch {
-        throw new Error("ZeroClaw returned invalid JSON");
-      }
+      return parseDecisionOutput(result.stdout);
     },
   };
 }

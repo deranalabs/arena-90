@@ -1,4 +1,5 @@
 export * from "./arena-lifecycle.js";
 export { createCheckpointOrchestrator } from "./checkpoint-orchestrator.js";
+export { classifyAgentDecisionOutput } from "./checkpoint-execution.js";
 export * from "./lifecycle-runner.js";
 export * from "./lifecycle-store.js";

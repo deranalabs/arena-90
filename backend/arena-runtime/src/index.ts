@@ -11,4 +11,6 @@ export {
   createNodeArenaLifecycleComposition,
   type CreateNodeArenaLifecycleCompositionConfig,
 } from "./runtime/node-lifecycle.js";
+export * from "./runtime/node-http.js";
+export * from "./runtime/http-replay-smoke.js";
 export * from "./services/index.js";

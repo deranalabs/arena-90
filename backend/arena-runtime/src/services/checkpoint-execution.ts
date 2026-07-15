@@ -2,10 +2,13 @@ import type {
   AgentAdapter,
   AgentInvocationRequest,
 } from "../adapters/agents/fake.js";
+import { AgentOutputError } from "../adapters/agents/zeroclaw.js";
 import {
+  agentDecisionStructureSchema,
   createAgentDecisionSchema,
   persistedArenaEventV1Schema,
   type AgentDecision,
+  type AgentDecisionIdentity,
   type ArenaAgentId,
   type CanonicalSnapshot,
   type CheckpointFailureV1,
@@ -42,6 +45,11 @@ export class CheckpointExecutionAbortedError extends Error {
 type InvocationFailureReason = "TIMEOUT" | "PROCESS_FAILURE" | "MISSING_OUTPUT";
 type InvocationOutcome =
   | { readonly status: "RECEIVED"; readonly output: unknown }
+  | {
+      readonly status: "OUTPUT_FAILED";
+      readonly category: AgentOutputError["category"];
+      readonly candidateCount: number;
+    }
   | { readonly status: "FAILED"; readonly reason: InvocationFailureReason };
 
 interface InitialResolution {
@@ -53,6 +61,49 @@ interface InitialResolution {
 interface FinalResolution {
   readonly decision?: AgentDecision;
   readonly failure?: CheckpointFailureV1;
+}
+
+export type AgentDecisionOutputFailureCategory =
+  | "SCHEMA_FAILURE"
+  | "VALIDATION_FAILURE";
+
+type DecisionValidation =
+  | { readonly outcome: "VALID"; readonly decision: AgentDecision }
+  | {
+      readonly outcome: "INVALID";
+      readonly category: AgentDecisionOutputFailureCategory;
+      readonly candidateCount: 1;
+      readonly validationErrors: readonly string[];
+    };
+
+export function classifyAgentDecisionOutput(
+  output: unknown,
+  expected: AgentDecisionIdentity,
+): DecisionValidation {
+  const structure = agentDecisionStructureSchema.safeParse(output);
+  if (!structure.success) {
+    return {
+      outcome: "INVALID",
+      category: "SCHEMA_FAILURE",
+      candidateCount: 1,
+      validationErrors: [
+        "SCHEMA_FAILURE",
+        ...structure.error.issues.slice(0, 8).map((issue) => issue.message),
+      ],
+    };
+  }
+  const decision = createAgentDecisionSchema(expected).safeParse(structure.data);
+  return decision.success
+    ? { outcome: "VALID", decision: decision.data }
+    : {
+        outcome: "INVALID",
+        category: "VALIDATION_FAILURE",
+        candidateCount: 1,
+        validationErrors: [
+          "VALIDATION_FAILURE",
+          ...decision.error.issues.slice(0, 8).map((issue) => issue.message),
+        ],
+      };
 }
 
 function invokeWithTimeout(
@@ -104,7 +155,16 @@ function invokeWithTimeout(
               : { status: "RECEIVED", output },
           );
         },
-        () => finish({ status: "FAILED", reason: "PROCESS_FAILURE" }),
+        (error) =>
+          finish(
+            error instanceof AgentOutputError
+              ? {
+                  status: "OUTPUT_FAILED",
+                  category: error.category,
+                  candidateCount: error.candidateCount,
+                }
+              : { status: "FAILED", reason: "PROCESS_FAILURE" },
+          ),
       );
   });
 }
@@ -164,6 +224,16 @@ export async function executePreparedCheckpoint(input: {
   readonly signal: AbortSignal;
 }): Promise<PreparedCheckpointExecutionResult> {
   const { snapshot } = input;
+  const validateDecisionOutput = (
+    agentId: ArenaAgentId,
+    output: unknown,
+  ): DecisionValidation =>
+    classifyAgentDecisionOutput(output, {
+      arenaId: snapshot.arenaId,
+      snapshotId: snapshot.snapshotId,
+      checkpointId: snapshot.checkpointId,
+      agentId,
+    });
   const invocationRequest = (
     agentId: ArenaAgentId,
   ): Omit<AgentInvocationRequest, "signal"> => ({
@@ -192,18 +262,19 @@ export async function executePreparedCheckpoint(input: {
     invocation: InvocationOutcome,
   ): InitialResolution {
     if (invocation.status === "FAILED") return { invocation };
-    const decision = createAgentDecisionSchema({
-      arenaId: snapshot.arenaId,
-      snapshotId: snapshot.snapshotId,
-      checkpointId: snapshot.checkpointId,
-      agentId,
-    }).safeParse(invocation.output);
-    return decision.success
-      ? { invocation, decision: decision.data }
-      : {
-          invocation,
-          validationErrors: decision.error.issues.map((issue) => issue.message),
-        };
+    if (invocation.status === "OUTPUT_FAILED") {
+      return {
+        invocation,
+        validationErrors: [
+          invocation.category,
+          `candidateCount=${invocation.candidateCount}`,
+        ],
+      };
+    }
+    const validation = validateDecisionOutput(agentId, invocation.output);
+    return validation.outcome === "VALID"
+      ? { invocation, decision: validation.decision }
+      : { invocation, validationErrors: validation.validationErrors };
   }
 
   const initial = {
@@ -254,14 +325,18 @@ export async function executePreparedCheckpoint(input: {
         },
       };
     }
-    const decision = createAgentDecisionSchema({
-      arenaId: snapshot.arenaId,
-      snapshotId: snapshot.snapshotId,
-      checkpointId: snapshot.checkpointId,
-      agentId,
-    }).safeParse(repaired.output);
-    return decision.success
-      ? { decision: decision.data }
+    if (repaired.status === "OUTPUT_FAILED") {
+      return {
+        failure: {
+          scope: "AGENT",
+          agentId,
+          reason: "INVALID_OUTPUT",
+        },
+      };
+    }
+    const validation = validateDecisionOutput(agentId, repaired.output);
+    return validation.outcome === "VALID"
+      ? { decision: validation.decision }
       : {
           failure: {
             scope: "AGENT",
@@ -312,6 +387,8 @@ export async function executePreparedCheckpoint(input: {
       if (final[agentId].decision === undefined) {
         emit("MISSED_DECISION_ROUND", { reason: "INVALID_OUTPUT" }, agentId);
       }
+    } else if (repaired?.status === "OUTPUT_FAILED") {
+      emit("MISSED_DECISION_ROUND", { reason: "INVALID_OUTPUT" }, agentId);
     } else {
       emit(
         "MISSED_DECISION_ROUND",

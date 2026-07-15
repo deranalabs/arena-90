@@ -2,7 +2,10 @@ import { readFile } from "node:fs/promises";
 
 import { describe, expect, it } from "vitest";
 
-import { createFakeAgentAdapter } from "../src/adapters/agents/index.js";
+import {
+  AgentOutputError,
+  createFakeAgentAdapter,
+} from "../src/adapters/agents/index.js";
 import { createRecordedDataAdapter } from "../src/adapters/data/index.js";
 import { initializePortfolio, settlePortfolio } from "../src/engine/index.js";
 import { createCheckpointOrchestrator } from "../src/services/index.js";
@@ -462,6 +465,225 @@ describe("checkpoint orchestrator", () => {
     });
   });
 
+  it.each([
+    ["FORMAT_FAILURE", 0] as const,
+    ["AMBIGUOUS_OUTPUT", 2] as const,
+  ])("routes %s through exactly one bounded repair", async (category, candidateCount) => {
+    const dataAdapter = createRecordedDataAdapter(await loadRecordedFixture());
+    const alphaAttempts: Array<{
+      attempt: 0 | 1;
+      validationErrors: readonly string[];
+    }> = [];
+    const alphaDecision = {
+      schemaVersion: 1 as const,
+      arenaId: "arena-replay-001",
+      snapshotId: "snapshot-kickoff",
+      checkpointId: "KICKOFF" as const,
+      agentId: "alpha" as const,
+      action: "NO_TRADE" as const,
+      publicExplanation: "Repaired decision.",
+    };
+    const betaDecision = { ...alphaDecision, agentId: "beta" as const };
+    const orchestrator = createCheckpointOrchestrator({
+      arenaId: "arena-replay-001",
+      startingBankrollMicros: "100000000",
+      dataAdapter,
+      agents: {
+        alpha: createFakeAgentAdapter("alpha", async (request) => {
+          alphaAttempts.push({
+            attempt: request.attempt,
+            validationErrors: request.validationErrors,
+          });
+          if (request.attempt === 0) {
+            throw new AgentOutputError(category, candidateCount);
+          }
+          return alphaDecision;
+        }),
+        beta: createFakeAgentAdapter("beta", async () => betaDecision),
+      },
+      timeoutMs: 100,
+    });
+
+    const result = await orchestrator.runCheckpoint("KICKOFF", {
+      alpha: initializePortfolio("alpha", "100000000"),
+      beta: initializePortfolio("beta", "100000000"),
+    });
+    const reveal = result.events.find((event) => event.type === "ROUND_REVEALED");
+
+    expect({
+      attempts: alphaAttempts.map(({ attempt }) => attempt),
+      repairCategories: alphaAttempts[1]?.validationErrors,
+      missed: result.events.some(
+        (event) =>
+          event.type === "MISSED_DECISION_ROUND" && event.agentId === "alpha",
+      ),
+      revealedAlpha: Object.hasOwn(
+        (reveal?.publicPayload as { decisions?: object }).decisions ?? {},
+        "alpha",
+      ),
+    }).toEqual({
+      attempts: [0, 1],
+      repairCategories: [category, `candidateCount=${candidateCount}`],
+      missed: false,
+      revealedAlpha: true,
+    });
+  });
+
+  it.each([
+    ["FORMAT_FAILURE", 0] as const,
+    ["AMBIGUOUS_OUTPUT", 2] as const,
+  ])(
+    "stops after one repair when repaired output has %s",
+    async (category, candidateCount) => {
+      const dataAdapter = createRecordedDataAdapter(await loadRecordedFixture());
+      const alphaAttempts: number[] = [];
+      const betaDecision = {
+        schemaVersion: 1 as const,
+        arenaId: "arena-replay-001",
+        snapshotId: "snapshot-kickoff",
+        checkpointId: "KICKOFF" as const,
+        agentId: "beta" as const,
+        action: "NO_TRADE" as const,
+        publicExplanation: "Keep cash.",
+      };
+      const orchestrator = createCheckpointOrchestrator({
+        arenaId: "arena-replay-001",
+        startingBankrollMicros: "100000000",
+        dataAdapter,
+        agents: {
+          alpha: createFakeAgentAdapter("alpha", async (request) => {
+            alphaAttempts.push(request.attempt);
+            if (request.attempt === 0) return {};
+            throw new AgentOutputError(category, candidateCount);
+          }),
+          beta: createFakeAgentAdapter("beta", async () => betaDecision),
+        },
+        timeoutMs: 100,
+      });
+
+      const result = await orchestrator.runCheckpoint("KICKOFF", {
+        alpha: initializePortfolio("alpha", "100000000"),
+        beta: initializePortfolio("beta", "100000000"),
+      });
+      const missed = result.events.find(
+        (event) =>
+          event.type === "MISSED_DECISION_ROUND" && event.agentId === "alpha",
+      );
+
+      expect({ alphaAttempts, publicFailure: missed?.publicPayload }).toEqual({
+        alphaAttempts: [0, 1],
+        publicFailure: { reason: "INVALID_OUTPUT" },
+      });
+    },
+  );
+
+  it("classifies a structurally invalid decision before one repair", async () => {
+    const dataAdapter = createRecordedDataAdapter(await loadRecordedFixture());
+    const alphaAttempts: Array<{
+      attempt: 0 | 1;
+      validationErrors: readonly string[];
+    }> = [];
+    const alphaDecision = {
+      schemaVersion: 1 as const,
+      arenaId: "arena-replay-001",
+      snapshotId: "snapshot-kickoff",
+      checkpointId: "KICKOFF" as const,
+      agentId: "alpha" as const,
+      action: "NO_TRADE" as const,
+      publicExplanation: "Repaired decision.",
+    };
+    const orchestrator = createCheckpointOrchestrator({
+      arenaId: "arena-replay-001",
+      startingBankrollMicros: "100000000",
+      dataAdapter,
+      agents: {
+        alpha: createFakeAgentAdapter("alpha", async (request) => {
+          alphaAttempts.push({
+            attempt: request.attempt,
+            validationErrors: request.validationErrors,
+          });
+          return request.attempt === 0 ? {} : alphaDecision;
+        }),
+        beta: createFakeAgentAdapter("beta", async () => ({
+          ...alphaDecision,
+          agentId: "beta" as const,
+        })),
+      },
+      timeoutMs: 100,
+    });
+
+    const result = await orchestrator.runCheckpoint("KICKOFF", {
+      alpha: initializePortfolio("alpha", "100000000"),
+      beta: initializePortfolio("beta", "100000000"),
+    });
+
+    expect({
+      attempts: alphaAttempts.map(({ attempt }) => attempt),
+      category: alphaAttempts[1]?.validationErrors[0],
+      missed: result.events.some(
+        (event) =>
+          event.type === "MISSED_DECISION_ROUND" && event.agentId === "alpha",
+      ),
+    }).toEqual({
+      attempts: [0, 1],
+      category: "SCHEMA_FAILURE",
+      missed: false,
+    });
+  });
+
+  it("classifies a schema-valid semantic violation before one repair", async () => {
+    const dataAdapter = createRecordedDataAdapter(await loadRecordedFixture());
+    const categories: Array<string | undefined> = [];
+    const validDecision = {
+      schemaVersion: 1 as const,
+      arenaId: "arena-replay-001",
+      snapshotId: "snapshot-kickoff",
+      checkpointId: "KICKOFF" as const,
+      agentId: "alpha" as const,
+      action: "TARGET_ALLOCATION" as const,
+      targetAllocationBps: { cash: 2_500, HOME: 2_500, DRAW: 2_500, AWAY: 2_500 },
+      publicExplanation: "Repaired allocation.",
+    };
+    const orchestrator = createCheckpointOrchestrator({
+      arenaId: "arena-replay-001",
+      startingBankrollMicros: "100000000",
+      dataAdapter,
+      agents: {
+        alpha: createFakeAgentAdapter("alpha", async (request) => {
+          categories.push(request.validationErrors[0]);
+          if (request.attempt === 1) return validDecision;
+          return {
+            ...validDecision,
+            targetAllocationBps: {
+              cash: 2_500,
+              HOME: 2_500,
+              DRAW: 2_500,
+              AWAY: 2_499,
+            },
+          };
+        }),
+        beta: createFakeAgentAdapter("beta", async () => ({
+          ...validDecision,
+          agentId: "beta" as const,
+        })),
+      },
+      timeoutMs: 100,
+    });
+
+    const result = await orchestrator.runCheckpoint("KICKOFF", {
+      alpha: initializePortfolio("alpha", "100000000"),
+      beta: initializePortfolio("beta", "100000000"),
+    });
+
+    expect({
+      categories,
+      missed: result.events.some(
+        (event) =>
+          event.type === "MISSED_DECISION_ROUND" && event.agentId === "alpha",
+      ),
+    }).toEqual({ categories: [undefined, "VALIDATION_FAILURE"], missed: false });
+  });
+
   it("runs Alpha and Beta repair attempts concurrently", async () => {
     const dataAdapter = createRecordedDataAdapter(await loadRecordedFixture());
     let repairCount = 0;
@@ -602,6 +824,7 @@ describe("checkpoint orchestrator", () => {
   it("times out one agent without blocking or fabricating its decision", async () => {
     const dataAdapter = createRecordedDataAdapter(await loadRecordedFixture());
     let alphaSignalAborted = false;
+    const alphaAttempts: number[] = [];
     const betaDecision = {
       schemaVersion: 1 as const,
       arenaId: "arena-replay-001",
@@ -617,6 +840,7 @@ describe("checkpoint orchestrator", () => {
       dataAdapter,
       agents: {
         alpha: createFakeAgentAdapter("alpha", async (request) => {
+          alphaAttempts.push(request.attempt);
           await new Promise<void>((resolve) => {
             request.signal.addEventListener("abort", () => {
               alphaSignalAborted = request.signal.aborted;
@@ -644,6 +868,7 @@ describe("checkpoint orchestrator", () => {
 
     expect({
       alphaSignalAborted,
+      alphaAttempts,
       alpha: result.portfolios.alpha,
       events: result.events.map(({ type, agentId, publicPayload }) => ({
         type,
@@ -652,6 +877,7 @@ describe("checkpoint orchestrator", () => {
       })),
     }).toEqual({
       alphaSignalAborted: true,
+      alphaAttempts: [0],
       alpha: {
         agentId: "alpha",
         cashMicros: "0",

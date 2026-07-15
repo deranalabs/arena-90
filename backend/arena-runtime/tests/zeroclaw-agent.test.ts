@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { describe, expect, it } from "vitest";
 
 import {
+  AgentOutputError,
   createZeroClawAgentAdapter,
   runChildProcess,
   type ProcessRunRequest,
@@ -67,6 +68,9 @@ describe("ZeroClaw agent adapter", () => {
     expect(message).toContain(
       "No extra keys, markdown, surrounding prose, code fences, or private reasoning.",
     );
+    expect(message).toMatch(
+      /FINAL_RESPONSE_RULE\nReturn exactly one raw JSON object matching one shape above\. Do not return both shapes, Markdown fences, or surrounding prose\.$/u,
+    );
   });
 
   it("demands a corrected full object and sanitizes repair diagnostics", async () => {
@@ -106,7 +110,11 @@ describe("ZeroClaw agent adapter", () => {
     expect(message).toContain(
       "Return a corrected full object matching exactly one shape. Do not return a patch or partial object.",
     );
-    const input = JSON.parse(message.split("INPUT_JSON\n")[1] ?? "null") as {
+    const input = JSON.parse(
+      message
+        .split("INPUT_JSON\n")[1]
+        ?.split("\nFINAL_RESPONSE_RULE\n")[0] ?? "null",
+    ) as {
       repairErrors: unknown;
     };
     expect(input.repairErrors).toEqual([
@@ -168,7 +176,13 @@ describe("ZeroClaw agent adapter", () => {
     const message = processRequest?.args[6];
     expect(processRequest?.args[5]).toBe("--message");
     expect(message).toContain("Alpha");
-    expect(JSON.parse(message?.split("INPUT_JSON\n")[1] ?? "null")).toEqual({
+    expect(
+      JSON.parse(
+        message
+          ?.split("INPUT_JSON\n")[1]
+          ?.split("\nFINAL_RESPONSE_RULE\n")[0] ?? "null",
+      ),
+    ).toEqual({
       snapshot,
       portfolio,
       attempt: 1,
@@ -230,7 +244,194 @@ describe("ZeroClaw agent adapter", () => {
         validationErrors: [],
         signal: new AbortController().signal,
       }),
-    ).rejects.toThrow("ZeroClaw returned invalid JSON");
+    ).rejects.toEqual(
+      expect.objectContaining<Partial<AgentOutputError>>({
+        category: "FORMAT_FAILURE",
+        candidateCount: 0,
+      }),
+    );
+  });
+
+  it("accepts one complete decision wrapped in a JSON code fence", async () => {
+    const decision = {
+      schemaVersion: 1,
+      arenaId: "arena-replay-001",
+      snapshotId: "snapshot-kickoff",
+      checkpointId: "KICKOFF",
+      agentId: "alpha",
+      action: "NO_TRADE",
+      publicExplanation: "No verified edge at kickoff.",
+    } as const;
+    const processRunner: ProcessRunner = async () => ({
+      exitCode: 0,
+      stdout: `\`\`\`json\n${JSON.stringify(decision)}\n\`\`\``,
+      stderr: "",
+      outputLimitExceeded: false,
+    });
+    const snapshot = createRecordedDataAdapter(
+      await loadRecordedFixture(),
+    ).getSnapshot("KICKOFF");
+    const adapter = createZeroClawAgentAdapter({
+      agentId: "alpha",
+      binaryPath: "zeroclaw",
+      configDir: ".zeroclaw",
+      processRunner,
+    });
+
+    await expect(
+      adapter.invoke({
+        snapshot,
+        portfolio: initializePortfolio("alpha", "100000000"),
+        attempt: 0,
+        validationErrors: [],
+        signal: new AbortController().signal,
+      }),
+    ).resolves.toEqual(decision);
+  });
+
+  it("accepts one unambiguous fenced decision with surrounding prose", async () => {
+    const decision = {
+      schemaVersion: 1,
+      arenaId: "arena-replay-001",
+      snapshotId: "snapshot-kickoff",
+      checkpointId: "KICKOFF",
+      agentId: "alpha",
+      action: "NO_TRADE",
+      publicExplanation: "No verified edge at kickoff.",
+    } as const;
+    const processRunner: ProcessRunner = async () => ({
+      exitCode: 0,
+      stdout: `Decision follows:\n\`\`\`json\n${JSON.stringify(decision)}\n\`\`\`\nEnd.`,
+      stderr: "",
+      outputLimitExceeded: false,
+    });
+    const snapshot = createRecordedDataAdapter(
+      await loadRecordedFixture(),
+    ).getSnapshot("KICKOFF");
+    const adapter = createZeroClawAgentAdapter({
+      agentId: "alpha",
+      binaryPath: "zeroclaw",
+      configDir: ".zeroclaw",
+      processRunner,
+    });
+
+    await expect(
+      adapter.invoke({
+        snapshot,
+        portfolio: initializePortfolio("alpha", "100000000"),
+        attempt: 0,
+        validationErrors: [],
+        signal: new AbortController().signal,
+      }),
+    ).resolves.toEqual(decision);
+  });
+
+  it("accepts one unambiguous raw JSON decision with surrounding prose", async () => {
+    const decision = {
+      schemaVersion: 1,
+      arenaId: "arena-replay-001",
+      snapshotId: "snapshot-kickoff",
+      checkpointId: "KICKOFF",
+      agentId: "alpha",
+      action: "NO_TRADE",
+      publicExplanation: "No verified edge at kickoff.",
+    } as const;
+    const processRunner: ProcessRunner = async () => ({
+      exitCode: 0,
+      stdout: `Decision follows:\n${JSON.stringify(decision)}\nEnd.`,
+      stderr: "",
+      outputLimitExceeded: false,
+    });
+    const snapshot = createRecordedDataAdapter(
+      await loadRecordedFixture(),
+    ).getSnapshot("KICKOFF");
+    const adapter = createZeroClawAgentAdapter({
+      agentId: "alpha",
+      binaryPath: "zeroclaw",
+      configDir: ".zeroclaw",
+      processRunner,
+    });
+
+    await expect(
+      adapter.invoke({
+        snapshot,
+        portfolio: initializePortfolio("alpha", "100000000"),
+        attempt: 0,
+        validationErrors: [],
+        signal: new AbortController().signal,
+      }),
+    ).resolves.toEqual(decision);
+  });
+
+  it("rejects multiple fenced JSON candidates", async () => {
+    const processRunner: ProcessRunner = async () => ({
+      exitCode: 0,
+      stdout:
+        '```json\n{"action":"NO_TRADE"}\n```\n```json\n{"action":"NO_TRADE"}\n```',
+      stderr: "",
+      outputLimitExceeded: false,
+    });
+    const snapshot = createRecordedDataAdapter(
+      await loadRecordedFixture(),
+    ).getSnapshot("KICKOFF");
+    const adapter = createZeroClawAgentAdapter({
+      agentId: "alpha",
+      binaryPath: "zeroclaw",
+      configDir: ".zeroclaw",
+      processRunner,
+    });
+
+    await expect(
+      adapter.invoke({
+        snapshot,
+        portfolio: initializePortfolio("alpha", "100000000"),
+        attempt: 0,
+        validationErrors: [],
+        signal: new AbortController().signal,
+      }),
+    ).rejects.toEqual(
+      expect.objectContaining<Partial<AgentOutputError>>({
+        category: "AMBIGUOUS_OUTPUT",
+        candidateCount: 2,
+      }),
+    );
+  });
+
+  it.each([
+    ["array", '[{"action":"NO_TRADE"}]'],
+    ["primitive", '"NO_TRADE"'],
+    ["malformed nesting", '{"action":"NO_TRADE"'],
+  ])("classifies a %s response as a bounded format failure", async (_case, stdout) => {
+    const processRunner: ProcessRunner = async () => ({
+      exitCode: 0,
+      stdout,
+      stderr: "",
+      outputLimitExceeded: false,
+    });
+    const snapshot = createRecordedDataAdapter(
+      await loadRecordedFixture(),
+    ).getSnapshot("KICKOFF");
+    const adapter = createZeroClawAgentAdapter({
+      agentId: "alpha",
+      binaryPath: "zeroclaw",
+      configDir: ".zeroclaw",
+      processRunner,
+    });
+
+    await expect(
+      adapter.invoke({
+        snapshot,
+        portfolio: initializePortfolio("alpha", "100000000"),
+        attempt: 0,
+        validationErrors: [],
+        signal: new AbortController().signal,
+      }),
+    ).rejects.toEqual(
+      expect.objectContaining<Partial<AgentOutputError>>({
+        category: "FORMAT_FAILURE",
+        candidateCount: 0,
+      }),
+    );
   });
 
   it("rejects output that exceeded the configured capture bound", async () => {

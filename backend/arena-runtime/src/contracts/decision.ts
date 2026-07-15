@@ -10,23 +10,14 @@ import {
 
 const allocationBpsSchema = z.number().int().min(0).max(10_000);
 
-const targetAllocationBpsSchema = z
+const targetAllocationBpsStructureSchema = z
   .object({
     cash: allocationBpsSchema,
     HOME: allocationBpsSchema,
     DRAW: allocationBpsSchema,
     AWAY: allocationBpsSchema,
   })
-  .strict()
-  .superRefine((allocation, context) => {
-    const total = allocation.cash + allocation.HOME + allocation.DRAW + allocation.AWAY;
-    if (total !== 10_000) {
-      context.addIssue({
-        code: "custom",
-        message: "Target allocations must sum to 10000 basis points",
-      });
-    }
-  });
+  .strict();
 
 const agentDecisionIdentityShape = {
   schemaVersion: z.literal(1),
@@ -48,14 +39,29 @@ const targetAllocationDecisionSchema = z
   .object({
     ...agentDecisionIdentityShape,
     action: z.literal("TARGET_ALLOCATION"),
-    targetAllocationBps: targetAllocationBpsSchema,
+    targetAllocationBps: targetAllocationBpsStructureSchema,
   })
   .strict();
 
-export const agentDecisionSchema = z.discriminatedUnion("action", [
+export const agentDecisionStructureSchema = z.discriminatedUnion("action", [
   noTradeDecisionSchema,
   targetAllocationDecisionSchema,
 ]);
+
+export const agentDecisionSchema = agentDecisionStructureSchema.superRefine(
+  (decision, context) => {
+    if (decision.action !== "TARGET_ALLOCATION") return;
+    const allocation = decision.targetAllocationBps;
+    const total = allocation.cash + allocation.HOME + allocation.DRAW + allocation.AWAY;
+    if (total !== 10_000) {
+      context.addIssue({
+        code: "custom",
+        path: ["targetAllocationBps"],
+        message: "Target allocations must sum to 10000 basis points",
+      });
+    }
+  },
+);
 
 export interface AgentDecisionIdentity {
   arenaId: string;

@@ -202,14 +202,22 @@ describe("Arena lifecycle runner", () => {
   it("persists pending work and opening events before agents run, then preserves them on abort", async () => {
     const store = createInMemoryArenaLifecycleStore({ nowMs: () => 1_000 });
     let agentCalls = 0;
+    const agentAttempts: string[] = [];
     let notifyBothStarted!: () => void;
     const bothStarted = new Promise<void>((resolve) => {
       notifyBothStarted = resolve;
     });
     const agent = (agentId: "alpha" | "beta") => ({
       agentId,
-      async invoke({ signal }: { signal: AbortSignal }) {
+      async invoke({
+        attempt,
+        signal,
+      }: {
+        attempt: 0 | 1;
+        signal: AbortSignal;
+      }) {
         agentCalls += 1;
+        agentAttempts.push(`${agentId}:${attempt}`);
         if (agentCalls === 2) notifyBothStarted();
         return waitUntilAborted(signal);
       },
@@ -262,6 +270,7 @@ describe("Arena lifecycle runner", () => {
     await expect(store.read(manifest.arenaId, 0)).resolves.toEqual(
       durableBeforeAbort,
     );
+    expect(agentAttempts.sort()).toEqual(["alpha:0", "beta:0"]);
   });
 
   it("joins concurrent calls and completes all Replay checkpoints plus FINAL", async () => {
