@@ -14,7 +14,9 @@ import {
 export type SpectatorSessionStatus =
   | "IDLE"
   | "BOOTSTRAPPING"
+  | "CONNECTING"
   | "FOLLOWING"
+  | "RECONNECTING"
   | "TERMINAL"
   | "FAILED"
   | "DISPOSED";
@@ -285,10 +287,12 @@ export function createSpectatorSession(options: {
   };
 
   const follow = async () => {
-    update({ status: "FOLLOWING" });
+    update({ status: "CONNECTING" });
     while (!controller.signal.aborted) {
       try {
-        const outcome = await consume(await openStream());
+        const stream = await openStream();
+        if (stream.status === "OPEN") update({ status: "FOLLOWING" });
+        const outcome = await consume(stream);
         if (outcome === "TERMINAL") {
           update({ status: "TERMINAL" });
           return;
@@ -297,6 +301,7 @@ export function createSpectatorSession(options: {
         if (isAbort(error)) return;
         if (!isTransient(error)) throw error;
       }
+      update({ status: "RECONNECTING" });
       await waitToReconnect();
     }
   };

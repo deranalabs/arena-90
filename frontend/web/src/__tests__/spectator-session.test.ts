@@ -144,6 +144,34 @@ describe("spectator session coordinator", () => {
     expect(session.getSnapshot().status).toBe("TERMINAL");
   });
 
+  it("announces connecting, following, and reconnecting from real stream transitions", async () => {
+    const transport = scriptedTransport({
+      streamEvents: jest
+        .fn()
+        .mockResolvedValueOnce({ status: "OPEN", events: events() })
+        .mockResolvedValueOnce({ status: "TERMINAL" }),
+    });
+    const session = createSpectatorSession({
+      arenaId: "arena-replay-001",
+      transport,
+      reconnectDelayMs: 0,
+    });
+    const observed: string[] = [];
+    session.subscribe(({ status }) => observed.push(status));
+
+    await session.start();
+
+    expect(observed).toEqual(
+      expect.arrayContaining([
+        "BOOTSTRAPPING",
+        "CONNECTING",
+        "FOLLOWING",
+        "RECONNECTING",
+        "TERMINAL",
+      ]),
+    );
+  });
+
   it("fails closed on a sequence gap instead of reconnecting past it", async () => {
     const transport = scriptedTransport({
       streamEvents: jest

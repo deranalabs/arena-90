@@ -1,29 +1,29 @@
+"use client";
+
 import Link from "next/link";
 
-import { AgentFoundationCard } from "@/components/arena/AgentFoundationCard";
+import { AgentSummaryCard } from "@/components/arena/AgentSummaryCard";
+import { CheckpointProgress } from "@/components/arena/CheckpointProgress";
+import { ConnectionBanner } from "@/components/arena/ConnectionBanner";
+import { FixtureHeader } from "@/components/arena/FixtureHeader";
+import { useArenaSession } from "@/components/arena/useArenaSession";
 import { Container } from "@/components/ui/container";
-import { Surface } from "@/components/ui/surface";
+import type { RuntimeTransport } from "@/lib/arena-api/transport";
 
 type ArenaShellProps = {
   arenaId: string;
+  transport?: RuntimeTransport;
 };
 
-const agents = [
-  {
-    id: "alpha",
-    label: "Agent Alpha",
-    lens: "Momentum & Repricing",
-    descriptor: "Recent change, acceleration, and market response",
-  },
-  {
-    id: "beta",
-    label: "Agent Beta",
-    lens: "Structure & Valuation Control",
-    descriptor: "Baseline structure, consistency, and margin of safety",
-  },
-] as const;
+export function ArenaShell({ arenaId, transport }: ArenaShellProps) {
+  const session = useArenaSession(arenaId, transport);
+  const unavailable = session.status === "FAILED";
+  const introTitleId = unavailable
+    ? "arena-unavailable-title"
+    : session.state
+      ? "arena-title"
+      : "arena-loading-title";
 
-export function ArenaShell({ arenaId }: ArenaShellProps) {
   return (
     <main className="arena-page">
       <header className="arena-header">
@@ -39,61 +39,34 @@ export function ArenaShell({ arenaId }: ArenaShellProps) {
       </header>
 
       <Container className="arena-layout">
-        <section className="arena-intro" aria-labelledby="arena-title">
+        <section className="arena-intro" aria-labelledby={introTitleId}>
           <div>
-            <p className="eyebrow eyebrow--inverse">Spectator foundation</p>
-            <h1 id="arena-title">Arena broadcast</h1>
+            <p className="eyebrow eyebrow--inverse">Canonical spectator arena</p>
+            {unavailable ? <h1 id="arena-unavailable-title">Arena unavailable</h1> : null}
+            {!unavailable && !session.state ? <h1 id="arena-loading-title">Arena loading</h1> : null}
           </div>
-          <div className="arena-state-label" role="status">
-            <span aria-hidden="true" />
-            <div>
-              <strong>Waiting for verified runtime state</strong>
-              <p>Runtime data not connected</p>
-            </div>
-          </div>
+          <ConnectionBanner status={session.status} snapshot={session.state?.currentSnapshot} />
         </section>
 
-        <Surface className="stadium-shell" tone="ink">
-          <div className="stadium-shell__masthead">
-            <span>Fixture not loaded</span>
-            <span>Mode —</span>
-            <span>Lifecycle —</span>
-          </div>
-          <div className="stadium-shell__pitch" aria-hidden="true">
-            <span className="stadium-shell__halfway" />
-            <span className="stadium-shell__circle" />
-            <span className="stadium-shell__spot" />
-          </div>
-          <div className="stadium-shell__message">
-            <p>Canonical match centre</p>
-            <span>
-              Score, minute, source, and freshness appear only after public
-              runtime state is available.
-            </span>
-          </div>
-        </Surface>
-
-        <section className="arena-agents" aria-label="Agent comparison">
-          {agents.map((agent) => (
-            <AgentFoundationCard agent={agent} key={agent.id} />
-          ))}
-        </section>
-
-        <section className="arena-lower-grid">
-          <Surface className="arena-placeholder-panel">
-            <p className="eyebrow">Decision round</p>
-            <h2>Shared snapshot</h2>
-            <p>
-              No snapshot loaded. Agent decisions remain unavailable until an
-              official simultaneous reveal.
-            </p>
-          </Surface>
-          <Surface className="arena-placeholder-panel">
-            <p className="eyebrow">Append-only record</p>
-            <h2>Public event timeline</h2>
-            <p>No public events loaded.</p>
-          </Surface>
-        </section>
+        {unavailable ? (
+          <section className="arena-unavailable" aria-label="Unavailable arena detail">
+            <h2>Verified state unavailable</h2>
+            <p>Verified public arena data is unavailable. No unverified fallback is shown.</p>
+          </section>
+        ) : session.state ? (
+          <>
+            <FixtureHeader state={session.state} />
+            <CheckpointProgress state={session.state} events={session.events} />
+            <section className="arena-agents" aria-label="Agent comparison">
+              <AgentSummaryCard agentId="alpha" portfolio={session.state.portfolios.alpha} state={session.state} />
+              <AgentSummaryCard agentId="beta" portfolio={session.state.portfolios.beta} state={session.state} />
+            </section>
+          </>
+        ) : (
+          <section className="arena-loading-panel" aria-label="Arena loading">
+            <p>Waiting for canonical public state.</p>
+          </section>
+        )}
       </Container>
     </main>
   );

@@ -62,4 +62,18 @@ describe("frontend design foundation", () => {
       /\.format-grid li:nth-child\(3\)\s*{[^}]*border-top:\s*0/,
     );
   });
+
+  it("keeps the arena lifecycle phase visible on mobile", () => {
+    const mobileRules = stylesheet.slice(
+      stylesheet.indexOf("@media (max-width: 42rem)"),
+      stylesheet.indexOf("@media (prefers-reduced-motion: reduce)"),
+    );
+
+    expect(mobileRules).toMatch(
+      /\.stadium-shell__phase\s*{[^}]*display:\s*block/,
+    );
+    expect(mobileRules).not.toMatch(
+      /\.stadium-shell__masthead span:not\(:first-child\)\s*{[^}]*display:\s*none/,
+    );
+  });
 });

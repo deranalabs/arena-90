@@ -300,8 +300,7 @@ select {
   text-transform: uppercase;
 }
 
-.broadcast-card__field,
-.stadium-shell__pitch {
+.broadcast-card__field {
   position: relative;
   overflow: hidden;
   border-bottom: 1px solid var(--color-stadium-line);
@@ -314,16 +313,14 @@ select {
   height: 17rem;
 }
 
-.broadcast-card__field::before,
-.stadium-shell__pitch::before {
+.broadcast-card__field::before {
   position: absolute;
   inset: 12%;
   border: 1px solid rgb(255 255 255 / 36%);
   content: "";
 }
 
-.broadcast-card__line,
-.stadium-shell__halfway {
+.broadcast-card__line {
   position: absolute;
   top: 12%;
   bottom: 12%;
@@ -331,8 +328,7 @@ select {
   border-left: 1px solid rgb(255 255 255 / 36%);
 }
 
-.broadcast-card__circle,
-.stadium-shell__circle {
+.broadcast-card__circle {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -650,6 +646,23 @@ select {
   border-radius: 50%;
 }
 
+.arena-state-label--connected > span,
+.arena-state-label--terminal > span {
+  border-color: #9bd4a7;
+  background: #9bd4a7;
+}
+
+.arena-state-label--reconnecting > span,
+.arena-state-label--degraded > span {
+  border-color: #f0c66d;
+  background: #f0c66d;
+}
+
+.arena-state-label--unavailable > span {
+  border-color: #ff8d91;
+  background: #ff8d91;
+}
+
 .arena-state-label strong {
   display: block;
   font-size: 0.82rem;
@@ -674,43 +687,142 @@ select {
   grid-template-columns: 1fr auto auto;
 }
 
-.stadium-shell__pitch {
-  height: clamp(15rem, 31vw, 25rem);
+.fixture-scoreboard {
+  display: grid;
+  min-height: clamp(15rem, 31vw, 25rem);
+  align-content: center;
+  padding: clamp(1.5rem, 5vw, 4rem);
+  background:
+    linear-gradient(90deg, rgb(190 33 42 / 12%), transparent 38%, transparent 62%, rgb(34 84 190 / 14%)),
+    repeating-linear-gradient(90deg, transparent 0 11.9%, rgb(255 255 255 / 3%) 12% 12.2%),
+    #151816;
+  text-align: center;
 }
 
-.stadium-shell__spot {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0.35rem;
-  aspect-ratio: 1;
-  translate: -50% -50%;
-  border-radius: 50%;
-  background: rgb(255 255 255 / 60%);
-}
-
-.stadium-shell__message {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 2rem;
-  padding: 1.25rem 1.5rem;
-}
-
-.stadium-shell__message p {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 1.8rem;
-  font-weight: 600;
+.fixture-scoreboard__source {
+  margin: 0 0 1rem;
+  color: #aeb2ac;
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
-.stadium-shell__message span {
-  max-width: 34rem;
+.fixture-scoreboard h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(3.2rem, 8vw, 7rem);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  line-height: 0.85;
+  text-transform: uppercase;
+}
+
+.fixture-scoreboard h1 span {
+  display: inline-block;
   color: #aeb2ac;
-  font-size: 0.82rem;
-  line-height: 1.5;
-  text-align: right;
+  font-family: var(--font-mono);
+  font-size: 0.14em;
+  letter-spacing: 0.08em;
+  vertical-align: middle;
+}
+
+.fixture-scoreboard__match {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.fixture-scoreboard__match strong {
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 7vw, 5.5rem);
+  line-height: 0.8;
+}
+
+.fixture-scoreboard__match span {
+  color: #c8cbc6;
+  font-family: var(--font-mono);
+}
+
+.checkpoint-panel {
+  margin-top: 2rem;
+  padding: clamp(1.25rem, 3vw, 2rem);
+  background: #e9e3d8;
+  color: var(--color-ink);
+}
+
+.checkpoint-panel__heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.5rem;
+}
+
+.checkpoint-panel__heading h2 {
+  margin: 0.5rem 0 0;
+  font-family: var(--font-display);
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  line-height: 0.9;
+  text-transform: uppercase;
+}
+
+.checkpoint-panel__heading > strong,
+.checkpoint-track__item strong,
+.checkpoint-panel__notice {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.checkpoint-track {
+  display: grid;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  border-top: 1px solid #6f6b64;
+  border-left: 1px solid #6f6b64;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  list-style: none;
+}
+
+.checkpoint-track__item {
+  min-width: 0;
+  border-right: 1px solid #6f6b64;
+  border-bottom: 1px solid #6f6b64;
+  padding: 0.9rem;
+}
+
+.checkpoint-track__item > span,
+.checkpoint-track__item strong {
+  display: block;
+}
+
+.checkpoint-track__item > span {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.checkpoint-track__item strong {
+  margin-top: 0.6rem;
+  color: var(--color-muted);
+}
+
+.checkpoint-track__item--complete {
+  background: #d7ded4;
+}
+
+.checkpoint-track__item--analyzing,
+.checkpoint-track__item--snapshot-locked {
+  background: #f4efe5;
+  box-shadow: inset 0 0.25rem 0 var(--color-gold);
+}
+
+.checkpoint-panel__notice {
+  margin: 1rem 0 0;
+  color: var(--color-muted);
 }
 
 .arena-agents {
@@ -806,34 +918,34 @@ select {
   font-size: 0.82rem;
 }
 
-.arena-lower-grid {
-  display: grid;
-  margin-top: 2rem;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 2rem;
+.arena-agent__facts--summary {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
-.arena-placeholder-panel {
-  min-height: 13rem;
-  padding: 1.5rem;
-  background: #e9e3d8;
-  color: var(--color-ink);
+.arena-agent__facts--summary div + div {
+  padding-right: 0.5rem;
 }
 
-.arena-placeholder-panel h2 {
-  margin: 2.5rem 0 0.75rem;
+.arena-unavailable,
+.arena-loading-panel {
+  min-height: 18rem;
+  border: 1px solid var(--color-stadium-line);
+  padding: clamp(1.5rem, 5vw, 4rem);
+}
+
+.arena-unavailable h2 {
+  margin: 0;
   font-family: var(--font-display);
-  font-size: 2.5rem;
+  font-size: clamp(3rem, 7vw, 6rem);
   line-height: 0.9;
   text-transform: uppercase;
 }
 
-.arena-placeholder-panel > p:last-child {
+.arena-unavailable p,
+.arena-loading-panel p {
   max-width: 34rem;
-  margin: 0;
-  color: var(--color-muted);
-  font-size: 0.88rem;
-  line-height: 1.55;
+  color: #aeb2ac;
+  line-height: 1.6;
 }
 
 @media (max-width: 56rem) {
@@ -866,14 +978,13 @@ select {
     border-right: 1px solid #55534e;
   }
 
-  .arena-intro,
-  .stadium-shell__message {
+  .arena-intro {
     align-items: flex-start;
     flex-direction: column;
   }
 
-  .stadium-shell__message span {
-    text-align: left;
+  .checkpoint-track {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
@@ -891,8 +1002,7 @@ select {
   }
 
   .agent-grid,
-  .arena-agents,
-  .arena-lower-grid {
+  .arena-agents {
     grid-template-columns: 1fr;
   }
 
@@ -932,12 +1042,35 @@ select {
     font-size: clamp(3.5rem, 18vw, 5.5rem);
   }
 
-  .stadium-shell__masthead {
+  .checkpoint-panel__heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .checkpoint-track {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .arena-agent__facts--summary {
     grid-template-columns: 1fr;
   }
 
-  .stadium-shell__masthead span:not(:first-child) {
+  .arena-agent__facts--summary div + div {
+    border-left: 0;
+    padding-left: 0;
+  }
+
+  .stadium-shell__masthead {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .stadium-shell__mode {
     display: none;
+  }
+
+  .stadium-shell__phase {
+    display: block;
+    text-align: right;
   }
 }
 
