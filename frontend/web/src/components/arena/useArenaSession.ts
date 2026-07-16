@@ -26,18 +26,17 @@ export function useArenaSession(
     defaultTransport.current = createRuntimeTransport();
   }
   const transport = injectedTransport ?? defaultTransport.current!;
-  const [sessionView, setSessionView] = useState<{
+  const [view, setView] = useState<{
     arenaId: string;
     snapshot: SpectatorSessionSnapshot;
   }>(() => ({ arenaId, snapshot: initialSnapshot }));
-  const snapshot =
-    sessionView.arenaId === arenaId ? sessionView.snapshot : initialSnapshot;
+  const snapshot = view.arenaId === arenaId ? view.snapshot : initialSnapshot;
 
   useEffect(() => {
     const session = createSpectatorSession({ arenaId, transport });
-    setSessionView({ arenaId, snapshot: session.getSnapshot() });
-    const unsubscribe = session.subscribe((nextSnapshot) => {
-      setSessionView({ arenaId, snapshot: nextSnapshot });
+    setView({ arenaId, snapshot: session.getSnapshot() });
+    const unsubscribe = session.subscribe((next) => {
+      setView({ arenaId, snapshot: next });
     });
     void session.start();
 

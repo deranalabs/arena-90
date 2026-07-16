@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-import { ArenaShell } from "@/components/arena/ArenaShell";
+import { ArenaExperience } from "@/components/arena/ArenaExperience";
 
 type ArenaPageProps = {
   params: Promise<{ arenaId: string }>;
@@ -17,5 +17,5 @@ export async function generateMetadata({ params }: ArenaPageProps): Promise<Meta
 
 export default async function ArenaPage({ params }: ArenaPageProps) {
   const { arenaId } = await params;
-  return <ArenaShell arenaId={arenaId} />;
+  return <ArenaExperience arenaId={arenaId} experience="arena" />;
 }

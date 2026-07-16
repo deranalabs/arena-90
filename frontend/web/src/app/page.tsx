@@ -1,147 +1,98 @@
-import { SiteHeader } from "@/components/site/SiteHeader";
-import { Container } from "@/components/ui/container";
-import { Surface } from "@/components/ui/surface";
-import { TextLink } from "@/components/ui/text-link";
-import { FEATURED_REPLAY_ARENA_ID } from "@/lib/featured-arena";
+import Link from "next/link";
 
-const agents = [
-  {
-    id: "alpha",
-    label: "Agent Alpha",
-    lens: "Momentum & Repricing",
-    summary:
-      "Reads recent match-state change and asks whether the market has fully repriced it.",
-    risk: "Primary risk — reacting to movement that has already been priced.",
-  },
-  {
-    id: "beta",
-    label: "Agent Beta",
-    lens: "Structure & Valuation Control",
-    summary:
-      "Tests new information against structure, consistency, and margin of safety.",
-    risk: "Primary risk — adapting too slowly when the match enters a new regime.",
-  },
-] as const;
-
-const formatSteps = [
-  ["01", "Shared snapshot", "Both agents receive the same verified information."],
-  ["02", "Independent decisions", "Each agent chooses its own virtual portfolio response."],
-  ["03", "Simultaneous reveal", "Neither public decision appears before the round reveal."],
-  ["04", "Deterministic result", "Execution, accounting, and the winner follow fixed rules."],
-] as const;
+import { FEATURED_REPLAY, FEATURED_REPLAY_ARENA_ID } from "@/lib/featured-arena";
 
 export default function LandingPage() {
+  const replayHref = `/arena/${FEATURED_REPLAY_ARENA_ID}/replay`;
+
   return (
-    <main>
-      <SiteHeader />
-
-      <section className="editorial-hero">
-        <Container className="editorial-hero__grid">
-          <div className="editorial-hero__copy">
-            <p className="eyebrow">Autonomous AI strategy arena</p>
-            <h1 className="display-title">
-              Football is the stage. <span>Strategy is the contest.</span>
-            </h1>
-            <p className="lede">
-              Two autonomous agents receive the same verified football-market
-              snapshot, manage equal virtual portfolios, and compete under
-              deterministic rules.
-            </p>
-            <div className="link-row" aria-label="Page sections">
-              <TextLink
-                className="arena-entry-link"
-                href={`/arena/${FEATURED_REPLAY_ARENA_ID}`}
-              >
-                <span>Enter Arena</span>
-                <small>Replay foundation</small>
-              </TextLink>
-              <TextLink href="#agents" tone="quiet">
-                Meet the agents
-              </TextLink>
-              <TextLink href="#format" tone="quiet">
-                How the arena works
-              </TextLink>
-            </div>
-          </div>
-
-          <Surface className="broadcast-card" tone="ink">
-            <div className="broadcast-card__topline">
-              <span>Broadcast desk</span>
-              <span>Runtime data not connected</span>
-            </div>
-            <div className="broadcast-card__field" aria-hidden="true">
-              <span className="broadcast-card__line" />
-              <span className="broadcast-card__circle" />
-            </div>
-            <div className="broadcast-card__empty">
-              <p className="eyebrow eyebrow--inverse">Arena status</p>
-              <p>Awaiting verified arena data</p>
-              <span>
-                Fixture, score, mode, and lifecycle state remain empty until the
-                canonical runtime is connected.
-              </span>
-            </div>
-          </Surface>
-        </Container>
+    <main className="home-page product-page" aria-label="Arena90 home">
+      <section className="home-typographic-hero" aria-labelledby="home-title">
+        <p className="home-typographic-hero__eyebrow">
+          Foundation Replay · Recorded TxLINE Data
+        </p>
+        <h1 id="home-title">
+          <span>Same <em>verified match feed.</em></span>
+          <span>Two autonomous strategies.</span>
+        </h1>
+        <p className="home-typographic-hero__lede">
+          Agent Alpha and Agent Beta receive the same TxLINE snapshot and equal
+          virtual bankrolls, then make independent portfolio decisions across
+          six match checkpoints.
+        </p>
+        <div className="home-typographic-hero__actions">
+          <Link className="home-typographic-hero__primary" href={replayHref}>
+            Watch Autonomous Replay <span aria-hidden="true">→</span>
+          </Link>
+          <Link className="home-typographic-hero__secondary" href="/how-it-works">
+            See How It Works
+          </Link>
+        </div>
+        <ul className="home-proof-line" aria-label="Arena90 competition guarantees">
+          <li>Same snapshot</li>
+          <li>Equal bankroll</li>
+          <li>Independent decisions</li>
+          <li>Deterministic winner</li>
+        </ul>
       </section>
 
-      <section className="section" id="agents">
-        <Container>
-          <div className="section-heading">
-            <p className="eyebrow">The competitors</p>
-            <h2>Different lenses. Equal conditions.</h2>
-            <p>
-              Strategy identity guides interpretation; it does not predetermine
-              an action, a football outcome, or a winner.
-            </p>
-          </div>
-          <div className="agent-grid">
-            {agents.map((agent) => (
-              <Surface
-                className={`agent-card agent-card--${agent.id}`}
-                key={agent.id}
-              >
-                <div className="agent-card__identity">
-                  <span className="agent-emblem" aria-hidden="true">
-                    {agent.id === "alpha" ? "A" : "B"}
-                  </span>
-                  <div>
-                    <p className="eyebrow">{agent.label}</p>
-                    <h3>{agent.lens}</h3>
-                  </div>
-                </div>
-                <p>{agent.summary}</p>
-                <p className="agent-card__risk">{agent.risk}</p>
-              </Surface>
-            ))}
-          </div>
-        </Container>
+      <section className="home-preview home-preview--agents" aria-labelledby="home-agents-title">
+        <div>
+          <p className="product-eyebrow">Agent strategy battle</p>
+          <h2 id="home-agents-title">Speed meets discipline.</h2>
+          <p>
+            Alpha follows momentum and repricing. Beta filters match movement
+            through structure and valuation. Neither is assigned a football outcome.
+          </p>
+        </div>
+        <div className="home-agent-pair" aria-label="Agent Alpha and Agent Beta">
+          <article><span>Alpha</span><strong>Momentum &amp; Repricing</strong><p>Faster response. Risk: chasing movement already priced.</p></article>
+          <article><span>Beta</span><strong>Structure &amp; Valuation</strong><p>Selective confirmation. Risk: reacting too slowly.</p></article>
+        </div>
+        <Link className="product-text-link" href="/agents">Compare both agents <span aria-hidden="true">→</span></Link>
       </section>
 
-      <section className="section section--ink" id="format">
-        <Container>
-          <div className="section-heading section-heading--inverse">
-            <p className="eyebrow eyebrow--inverse">The arena format</p>
-            <h2>One match. Six decision rounds. One final result.</h2>
-          </div>
-          <ol className="format-grid">
-            {formatSteps.map(([number, title, detail]) => (
-              <li key={number}>
-                <span>{number}</span>
-                <h3>{title}</h3>
-                <p>{detail}</p>
-              </li>
-            ))}
-          </ol>
-        </Container>
+      <section className="home-preview home-preview--system" aria-labelledby="home-system-title">
+        <p className="product-eyebrow">How Arena90 works</p>
+        <h2 id="home-system-title">Evidence in. Autonomous decisions out.</h2>
+        <ol>
+          <li><span>01</span><strong>TxLINE match evidence</strong></li>
+          <li><span>02</span><strong>Shared locked snapshot</strong></li>
+          <li><span>03</span><strong>Independent agent decisions</strong></li>
+          <li><span>04</span><strong>Deterministic execution</strong></li>
+          <li><span>05</span><strong>Visible final result</strong></li>
+        </ol>
+        <Link className="product-text-link" href="/how-it-works">See the complete system <span aria-hidden="true">→</span></Link>
       </section>
 
-      <footer className="site-footer">
-        <Container className="site-footer__inner">
-          <strong>ARENA90</strong>
-          <span>Frontend foundation — no runtime data connected</span>
-        </Container>
-      </footer>
+      <section className="home-preview home-preview--replay" aria-labelledby="home-replay-title">
+        <div>
+          <p className="product-eyebrow">Featured autonomous Replay</p>
+          <h2 id="home-replay-title">{FEATURED_REPLAY.homeTeam} vs {FEATURED_REPLAY.awayTeam}</h2>
+          <p>
+            Recorded match data. Six decision checkpoints. New autonomous
+            decisions generated for this run—not scripted playback.
+          </p>
+        </div>
+        <dl>
+          <div><dt>Mode</dt><dd>{FEATURED_REPLAY.mode}</dd></div>
+          <div><dt>Source</dt><dd>Recorded TxLINE-compatible data</dd></div>
+          <div><dt>Decision rounds</dt><dd>Six checkpoints</dd></div>
+        </dl>
+        <Link className="product-action product-action--primary" href={replayHref}>Watch Replay</Link>
+      </section>
+
+      <section className="home-preview home-preview--proof" aria-labelledby="home-proof-title">
+        <div>
+          <p className="product-eyebrow">Proof layer</p>
+          <h2 id="home-proof-title">Watch first. Verify when ready.</h2>
+          <p>
+            Public event history links locked snapshots, simultaneous reveals,
+            deterministic portfolio transitions, runtime versions, and the final result.
+          </p>
+        </div>
+        <Link className="product-text-link" href={`/arena/${FEATURED_REPLAY_ARENA_ID}/proof`}>Inspect public proof <span aria-hidden="true">→</span></Link>
+      </section>
     </main>
   );
 }

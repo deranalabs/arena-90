@@ -6,88 +6,80 @@ const stylesheet = readFileSync(
   "utf8",
 );
 
-function contrastRatio(foreground: string, background: string) {
-  const luminance = (hex: string) => {
-    const channels = hex
-      .slice(1)
-      .match(/.{2}/g)!
-      .map((channel) => Number.parseInt(channel, 16) / 255)
-      .map((channel) =>
-        channel <= 0.04045
-          ? channel / 12.92
-          : ((channel + 0.055) / 1.055) ** 2.4,
-      );
+describe("Arena90 design foundation", () => {
+  it("uses the Arena90 dark broadcast, rivalry, data, and Replay palette", () => {
+    const tokens = [
+      "--arena-paper: #f2efe6;",
+      "--arena-night: #080b10;",
+      "--arena-surface: #121822;",
+      "--arena-raised: #18212d;",
+      "--arena-line: #303b49;",
+      "--arena-text: #f3efe6;",
+      "--arena-muted: #9ba3ae;",
+      "--arena-alpha: #ff4255;",
+      "--arena-beta: #4a6dff;",
+      "--arena-data: #51d6c0;",
+      "--arena-signal: #d7f541;",
+      "--arena-replay: #a78bfa;",
+    ];
 
-    return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
-  };
+    for (const token of tokens) expect(stylesheet).toContain(token);
+    expect(stylesheet).toMatch(
+      /body\s*{[^}]*background:\s*var\(--arena-night\)[^}]*color:\s*var\(--arena-text\)/,
+    );
+    expect(stylesheet).toMatch(
+      /\.site-header\s*{[^}]*background:\s*var\(--arena-night\)/,
+    );
+    expect(stylesheet).not.toMatch(/#d5eadb|#dfdaec/i);
+  });
 
-  const lighter = Math.max(luminance(foreground), luminance(background));
-  const darker = Math.min(luminance(foreground), luminance(background));
+  it("preserves the neutral canvas and accessibility foundation", () => {
+    expect(stylesheet).toContain("@import \"tailwindcss\";");
+    expect(stylesheet).toMatch(/\.reset-canvas\s*{/);
+    expect(stylesheet).toMatch(/:focus-visible\s*{/);
+    expect(stylesheet).toMatch(/@media \(prefers-reduced-motion: reduce\)/);
+    expect(stylesheet).not.toMatch(
+      /duel-board|fixture-scoreboard|portfolio|final-result|public-page/,
+    );
+  });
 
-  return (lighter + 0.05) / (darker + 0.05);
-}
-
-describe("frontend design foundation", () => {
-  it("uses semantic system font stacks without a runtime font request", () => {
+  it("uses the bundled Poppins family through semantic font tokens", () => {
+    expect(stylesheet).toContain(
+      "--font-display: var(--font-poppins), Arial, Helvetica, sans-serif;",
+    );
+    expect(stylesheet).toContain(
+      "--font-ui: var(--font-poppins), Arial, Helvetica, sans-serif;",
+    );
+    expect(stylesheet).toContain(
+      '--font-mono: ui-monospace, "SFMono-Regular", Consolas, monospace;',
+    );
+    expect(stylesheet).toMatch(
+      /body\s*{[^}]*font-family:\s*var\(--font-ui\)/,
+    );
     expect(stylesheet).not.toMatch(/fonts\.googleapis\.com|@import\s+url\(/i);
-    expect(stylesheet).toMatch(/--font-display:\s*"Arial Narrow"/);
-    expect(stylesheet).toMatch(/--font-ui:\s*system-ui/);
-    expect(stylesheet).toMatch(/--font-mono:\s*ui-monospace/);
-    expect(stylesheet).toMatch(/body\s*{[^}]*font-family:\s*var\(--font-ui\)/);
   });
 
-  it("uses a focus-visible dual ring with contrast on paper and ink", () => {
-    expect(contrastRatio("#fffaf0", "#171918")).toBeGreaterThanOrEqual(3);
-    expect(contrastRatio("#11100d", "#f3efe6")).toBeGreaterThanOrEqual(3);
-    expect(stylesheet).toContain("--color-focus-light: #fffaf0;");
-    expect(stylesheet).toContain("--color-focus-dark: #11100d;");
+  it("keeps the desktop header framed instead of nearly full-width", () => {
+    const headerFrame = stylesheet.match(/\.site-header__frame\s*{([^}]*)}/)?.[1];
 
-    const focusRule = stylesheet.match(/:focus-visible\s*{([^}]*)}/)?.[1];
-
-    expect(focusRule).toMatch(/outline:\s*2px solid var\(--color-focus-light\)/);
-    expect(focusRule).toMatch(/box-shadow:\s*0 0 0 5px var\(--color-focus-dark\)/);
-    expect(stylesheet).not.toMatch(/(^|,)\s*:focus\s*[{,]/m);
+    expect(headerFrame).toMatch(/width:\s*min\(89%, 100rem\)/);
+    expect(headerFrame).toMatch(/min-height:\s*5\.25rem/);
+    expect(headerFrame).not.toMatch(/112rem|100% - 2rem/);
   });
 
-  it("keeps the second format row separators symmetrical at two columns", () => {
-    const tabletRules = stylesheet.slice(
-      stylesheet.indexOf("@media (max-width: 56rem)"),
-      stylesheet.indexOf("@media (max-width: 42rem)"),
-    );
+  it("keeps the Replay CTA integrated with the dark header", () => {
+    const replayCta = stylesheet.match(/\.site-header__cta\s*{([^}]*)}/)?.[1];
 
-    expect(tabletRules).toMatch(
-      /\.format-grid li:nth-child\(2\)\s*{[^}]*border-right:/,
-    );
-    expect(tabletRules).not.toMatch(
-      /\.format-grid li:nth-child\(3\)\s*{[^}]*border-top:\s*0/,
+    expect(replayCta).toMatch(/background:\s*var\(--arena-raised\)/);
+    expect(replayCta).toMatch(/border:\s*1px solid var\(--arena-line\)/);
+    expect(replayCta).toMatch(/color:\s*var\(--arena-text\)/);
+    expect(replayCta).not.toMatch(/background:\s*var\(--arena-text\)/);
+  });
+
+  it("leaves no previous hero composition behind", () => {
+    expect(stylesheet).not.toMatch(
+      /arena-hero|arena-faceoff|arena-competitor|landing-hero__dock|arena-machine/,
     );
   });
 
-  it("keeps the arena lifecycle phase visible on mobile", () => {
-    const mobileRules = stylesheet.slice(
-      stylesheet.indexOf("@media (max-width: 42rem)"),
-      stylesheet.indexOf("@media (prefers-reduced-motion: reduce)"),
-    );
-
-    expect(mobileRules).toMatch(
-      /\.stadium-shell__phase\s*{[^}]*display:\s*block/,
-    );
-    expect(mobileRules).not.toMatch(
-      /\.stadium-shell__masthead span:not\(:first-child\)\s*{[^}]*display:\s*none/,
-    );
-  });
-
-  it("keeps comparison, reveal history, and final result accessible on mobile", () => {
-    const mobileRules = stylesheet.slice(
-      stylesheet.indexOf("@media (max-width: 42rem)"),
-      stylesheet.indexOf("@media (prefers-reduced-motion: reduce)"),
-    );
-
-    expect(mobileRules).toMatch(
-      /\.round-record__decisions(?:,\s*\.[^{]+)?\s*{[^}]*grid-template-columns:\s*1fr/,
-    );
-    expect(mobileRules).not.toMatch(
-      /\.(?:arena-agents|round-history|final-result|round-record)[^{]*{[^}]*display:\s*none/,
-    );
-  });
 });

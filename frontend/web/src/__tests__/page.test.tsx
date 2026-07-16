@@ -1,56 +1,46 @@
 import { render, screen } from "@testing-library/react";
 
-import LandingPage from "../app/page";
+import LandingPage from "@/app/page";
 
-describe("Arena90 landing page", () => {
-  it("offers the committed Replay foundation arena as the truthful primary CTA", () => {
+describe("Arena90 homepage", () => {
+  it("routes five concise product previews into the working spectator experience", () => {
     render(<LandingPage />);
 
-    const enterArena = screen.getByRole("link", {
-      name: /enter arena.*replay foundation/i,
-    });
-
-    expect(enterArena).toHaveAttribute("href", "/arena/arena-replay-001");
-  });
-
-  it("introduces the spectator product without inventing an active arena", () => {
-    render(<LandingPage />);
-
-    expect(
+    const main = screen.getByRole("main", { name: "Arena90 home" });
+    expect(main).toContainElement(
       screen.getByRole("heading", {
         level: 1,
-        name: /football is the stage\. strategy is the contest\./i,
+        name: "Same verified match feed. Two autonomous strategies.",
       }),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/momentum & repricing/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/structure & valuation control/i),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/runtime data not connected/i)).toBeInTheDocument();
-    expect(screen.getByText(/awaiting verified arena data/i)).toBeInTheDocument();
-
-    expect(screen.queryByText(/isagi|aiku/i)).not.toBeInTheDocument();
-    expect(
-      screen.queryByText(/live txline|system_online|pool share|over 2\.5|under 2\.5/i),
-    ).not.toBeInTheDocument();
-    expect(
-      screen.queryByText(/blink|escrow|kamino|yield|settlement/i),
-    ).not.toBeInTheDocument();
-  });
-
-  it("provides keyboard-addressable editorial navigation", () => {
-    render(<LandingPage />);
-
-    expect(screen.getByRole("link", { name: /arena90 home/i })).toHaveAttribute(
-      "href",
-      "/",
     );
-    expect(screen.getByRole("link", { name: /meet the agents/i })).toHaveAttribute(
+    expect(main).toHaveTextContent(/same TxLINE snapshot and equal virtual bankrolls/i);
+    expect(main).toHaveTextContent(/independent portfolio decisions/i);
+    expect(screen.getByRole("link", { name: "Watch Autonomous Replay" })).toHaveAttribute(
       "href",
-      "#agents",
+      "/arena/arena-replay-001/replay",
     );
+    expect(screen.getByRole("link", { name: "See How It Works" })).toHaveAttribute(
+      "href",
+      "/how-it-works",
+    );
+    expect(screen.getByRole("heading", { name: "Speed meets discipline." })).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /how the arena works/i }),
-    ).toHaveAttribute("href", "#format");
+      screen.getByRole("heading", { name: "Evidence in. Autonomous decisions out." }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Home FC vs Away FC" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Watch first. Verify when ready." })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Compare both agents" })).toHaveAttribute(
+      "href",
+      "/agents",
+    );
+    expect(screen.getByRole("link", { name: "Inspect public proof" })).toHaveAttribute(
+      "href",
+      "/arena/arena-replay-001/proof",
+    );
+    expect(screen.getByText("Decision rounds")).toBeInTheDocument();
+    expect(screen.getByText("Six checkpoints")).toBeInTheDocument();
+    expect(main).not.toHaveTextContent(/state completed/i);
+    expect(main.querySelectorAll(":scope > section")).toHaveLength(5);
+    expect(main).not.toHaveTextContent(/place bet|guaranteed edge|live now/i);
   });
 });
