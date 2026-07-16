@@ -15,6 +15,7 @@ import { agentDecisionSchema } from "./decision.js";
 import { arenaEventSchema } from "./event.js";
 import { portfolioStateSchema } from "./portfolio.js";
 import { canonicalSnapshotSchema } from "./snapshot.js";
+import { terminalEvidenceV1Schema } from "./terminal-evidence.js";
 
 export type JsonValue =
   | null
@@ -122,14 +123,41 @@ export type PersistedArenaEventV1 = z.infer<
 
 const arenaWinnerSchema = z.union([arenaAgentIdSchema, z.literal("DRAW")]);
 
+function canonicalJson(value: JsonValue): string {
+  if (value === null || typeof value !== "object") {
+    return JSON.stringify(value);
+  }
+  if (Array.isArray(value)) {
+    return `[${value.map((entry) => canonicalJson(entry)).join(",")}]`;
+  }
+  const object = value as { readonly [key: string]: JsonValue };
+  return `{${Object.keys(object)
+    .sort()
+    .map((key) => `${JSON.stringify(key)}:${canonicalJson(object[key] as JsonValue)}`)
+    .join(",")}}`;
+}
+
+export function calculatePreSettlementEventLogHash(
+  events: readonly PersistedArenaEventV1[],
+): string {
+  const parsed = events.map((event) => persistedArenaEventV1Schema.parse(event));
+  return createHash("sha256")
+    .update(canonicalJson(parsed as JsonValue))
+    .digest("hex");
+}
+
 const arenaFinalResultHashInputSchema = z
   .object({
-    schemaVersion: z.literal(1),
+    schemaVersion: z.literal(2),
     arenaId: nonBlankStringSchema,
+    winnerRule: z.literal("FINAL_NAV_ONLY_V1"),
     winningAssetId: arenaAssetIdSchema,
     winner: arenaWinnerSchema,
     alphaFinalNavMicros: moneyMicrosSchema,
     betaFinalNavMicros: moneyMicrosSchema,
+    terminalEvidence: terminalEvidenceV1Schema,
+    completedEventSequence: z.number().int().positive().safe(),
+    preSettlementEventLogHash: z.string().regex(/^[0-9a-f]{64}$/),
   })
   .strict();
 
@@ -141,10 +169,14 @@ function hashFinalResult(input: ArenaFinalResultHashInput): string {
   const canonicalJson = JSON.stringify({
     schemaVersion: input.schemaVersion,
     arenaId: input.arenaId,
+    winnerRule: input.winnerRule,
     winningAssetId: input.winningAssetId,
     winner: input.winner,
     alphaFinalNavMicros: input.alphaFinalNavMicros,
     betaFinalNavMicros: input.betaFinalNavMicros,
+    terminalEvidence: input.terminalEvidence,
+    completedEventSequence: input.completedEventSequence,
+    preSettlementEventLogHash: input.preSettlementEventLogHash,
   });
 
   return createHash("sha256").update(canonicalJson).digest("hex");
@@ -156,7 +188,7 @@ export function calculateFinalResultHash(
   return hashFinalResult(arenaFinalResultHashInputSchema.parse(input));
 }
 
-export const arenaFinalResultV1Schema = arenaFinalResultHashInputSchema
+export const arenaFinalResultV2Schema = arenaFinalResultHashInputSchema
   .extend({
     finalResultHash: z.string().regex(/^[0-9a-f]{64}$/),
   })
@@ -171,7 +203,18 @@ export const arenaFinalResultV1Schema = arenaFinalResultHashInputSchema
       context.addIssue({
         code: "custom",
         path: ["winner"],
-        message: "Winner must follow the P0 final NAV rule",
+        message: "Winner must follow FINAL_NAV_ONLY_V1",
+      });
+    }
+
+    if (
+      result.terminalEvidence.arenaId !== result.arenaId ||
+      result.terminalEvidence.winningAssetId !== result.winningAssetId
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["terminalEvidence"],
+        message: "Terminal evidence must match the final result",
       });
     }
 
@@ -185,7 +228,7 @@ export const arenaFinalResultV1Schema = arenaFinalResultHashInputSchema
     }
   });
 
-export type ArenaFinalResultV1 = z.infer<typeof arenaFinalResultV1Schema>;
+export type ArenaFinalResultV2 = z.infer<typeof arenaFinalResultV2Schema>;
 
 const runtimeComponentSchema = z
   .object({
@@ -201,7 +244,7 @@ export const arenaRuntimeMetadataV1Schema = z
     runtimeId: nonBlankStringSchema,
     runtimeVersion: nonBlankStringSchema,
     executionRuleVersion: nonBlankStringSchema,
-    winnerRuleVersion: nonBlankStringSchema,
+    winnerRuleVersion: z.literal("FINAL_NAV_ONLY_V1"),
     agentTimeoutMs: z.number().int().positive().safe(),
     agents: z
       .object({
@@ -369,7 +412,7 @@ export const arenaRunStateV1Schema = z
     portfolios: checkpointPortfoliosSchema,
     checkpoints: z.array(decisionCheckpointCommitV1Schema).max(6),
     pendingCheckpoint: preparedCheckpointV1Schema.optional(),
-    finalResult: arenaFinalResultV1Schema.optional(),
+    finalResult: arenaFinalResultV2Schema.optional(),
     lastEventSequence: z.number().int().nonnegative().safe(),
   })
   .strict()
@@ -638,6 +681,33 @@ export const arenaRunStateV1Schema = z
           message: "Settled portfolios must match the final result NAV values",
         });
       }
+      const terminalEvidence = state.finalResult.terminalEvidence;
+      const expectedTerminalSource =
+        state.manifest.mode === "LIVE" ? "TXLINE_LIVE" : "TXLINE_RECORDED";
+      const lastSnapshot = state.checkpoints
+        .map(({ snapshot }) => snapshot)
+        .filter((snapshot) => snapshot !== undefined)
+        .at(-1);
+      if (
+        terminalEvidence.fixtureId !== state.manifest.fixtureId ||
+        terminalEvidence.source !== expectedTerminalSource ||
+        (lastSnapshot !== undefined &&
+          (terminalEvidence.providerSequence <= lastSnapshot.providerSequence ||
+            terminalEvidence.sourceEventId === lastSnapshot.sourceEventId))
+      ) {
+        context.addIssue({
+          code: "custom",
+          path: ["finalResult", "terminalEvidence"],
+          message: "Terminal evidence must follow the locked arena snapshots",
+        });
+      }
+      if (state.finalResult.completedEventSequence !== state.lastEventSequence) {
+        context.addIssue({
+          code: "custom",
+          path: ["finalResult", "completedEventSequence"],
+          message: "Final result must bind the terminal event sequence",
+        });
+      }
     }
   });
 
@@ -710,6 +780,39 @@ export const arenaLifecyclePersistenceV1Schema = z
       }
       previousRangeEnd = lastEventSequence;
     });
+
+    const completedEvents = events.filter((event) => event.type === "COMPLETED");
+    if (state.phase === "COMPLETED" && state.finalResult !== undefined) {
+      const completedEvent = completedEvents[0];
+      if (
+        completedEvents.length !== 1 ||
+        completedEvent?.sequence !== state.lastEventSequence ||
+        completedEvent.checkpointId !== "FINAL" ||
+        !isDeepStrictEqual(completedEvent.publicPayload, state.finalResult)
+      ) {
+        context.addIssue({
+          code: "custom",
+          path: ["events"],
+          message: "Completed state requires one matching terminal event",
+        });
+      }
+      if (
+        state.finalResult.preSettlementEventLogHash !==
+        calculatePreSettlementEventLogHash(events.slice(0, -1))
+      ) {
+        context.addIssue({
+          code: "custom",
+          path: ["state", "finalResult", "preSettlementEventLogHash"],
+          message: "Final result must bind the pre-settlement event log",
+        });
+      }
+    } else if (completedEvents.length !== 0) {
+      context.addIssue({
+        code: "custom",
+        path: ["events"],
+        message: "Non-completed state cannot contain a terminal event",
+      });
+    }
   });
 
 export type ArenaLifecyclePersistenceV1 = z.infer<

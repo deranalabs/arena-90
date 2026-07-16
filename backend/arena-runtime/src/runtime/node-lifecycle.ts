@@ -62,7 +62,7 @@ export function createNodeArenaLifecycleComposition(
         return {
           prepare: live.refreshCheckpoint,
           getSnapshot: live.getSnapshot,
-          getFinalResult: live.getFinalResult,
+          getTerminalEvidence: live.getTerminalEvidence,
         };
       }
       if (config.recordedFixture === undefined) {
@@ -72,7 +72,7 @@ export function createNodeArenaLifecycleComposition(
       return {
         async prepare() {},
         getSnapshot: recorded.getSnapshot,
-        getFinalResult: recorded.getFinalResult,
+        getTerminalEvidence: recorded.getTerminalEvidence,
       };
     },
   });

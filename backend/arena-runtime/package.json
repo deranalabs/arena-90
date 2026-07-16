@@ -38,6 +38,7 @@
   "scripts": {
     "build": "tsc --project tsconfig.json --noEmit && tsc --project tsconfig.build.json",
     "start:http": "npm run build && node scripts/http-server.mjs",
+    "preflight:acceptance": "node scripts/acceptance-preflight.mjs",
     "smoke:http:replay": "npm run build && node scripts/http-replay-smoke.mjs",
     "smoke:lifecycle:replay": "npm run build && node scripts/lifecycle-replay-smoke.mjs",
     "smoke:txline": "npm run build && node scripts/txline-smoke.mjs",

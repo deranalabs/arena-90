@@ -30,7 +30,7 @@ const runtimeMetadata = {
   runtimeId: "arena90-node-runtime",
   runtimeVersion: "6-acceptance",
   executionRuleVersion: "p0-v1",
-  winnerRuleVersion: "p0-final-nav-v1",
+  winnerRuleVersion: "FINAL_NAV_ONLY_V1",
   agentTimeoutMs: 1_000,
   agents: {
     alpha: {

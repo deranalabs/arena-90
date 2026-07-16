@@ -329,7 +329,7 @@ describe("TxLINE live data adapter", () => {
       await expect(
         adapter.refreshCheckpoint("FINAL", new AbortController().signal),
       ).rejects.toMatchObject({ code: "INVALID_SCORE_STATE" });
-      expect(() => adapter.getFinalResult()).toThrow(
+      expect(() => adapter.getTerminalEvidence()).toThrow(
         "Live fixture has no prepared FINAL result",
       );
     },
@@ -405,7 +405,7 @@ describe("TxLINE live data adapter", () => {
     await adapter.refreshCheckpoint("FINAL", new AbortController().signal);
     await adapter.refreshCheckpoint("FINAL", new AbortController().signal);
 
-    expect(adapter.getFinalResult()).toBe("HOME");
+    expect(adapter.getTerminalEvidence().winningAssetId).toBe("HOME");
     expect(scoreCalls).toBe(1);
   });
 
@@ -733,7 +733,7 @@ describe("TxLINE live data adapter", () => {
 
       await adapter.refreshCheckpoint("FINAL", new AbortController().signal);
 
-      expect(adapter.getFinalResult()).toBe(expectedResult);
+      expect(adapter.getTerminalEvidence().winningAssetId).toBe(expectedResult);
     },
   );
 
@@ -771,7 +771,7 @@ describe("TxLINE live data adapter", () => {
 
     await adapter.refreshCheckpoint("FINAL", new AbortController().signal);
 
-    expect(adapter.getFinalResult()).toBe("HOME");
+    expect(adapter.getTerminalEvidence().winningAssetId).toBe("HOME");
   });
 
   it("keeps FINAL unavailable when a suspended authoritative final has no recovery", async () => {
@@ -799,7 +799,7 @@ describe("TxLINE live data adapter", () => {
       code: "INVALID_PROVIDER_INPUT",
       message: "TxLINE checkpoint state unavailable",
     });
-    expect(() => adapter.getFinalResult()).toThrow(
+    expect(() => adapter.getTerminalEvidence()).toThrow(
       "Live fixture has no prepared FINAL result",
     );
   });

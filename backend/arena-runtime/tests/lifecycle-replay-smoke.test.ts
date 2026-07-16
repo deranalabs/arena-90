@@ -1,6 +1,8 @@
-import { readFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, onTestFinished } from "vitest";
 
 import {
   formatLifecycleReplaySmokeResult,
@@ -49,6 +51,31 @@ function decisionAgent(
 }
 
 describe("full lifecycle Replay smoke", () => {
+  it("reopens atomic JSON and proves completed recovery is idempotent", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "arena90-smoke-restart-"));
+    onTestFinished(() => rm(directory, { recursive: true, force: true }));
+    const invocations: string[] = [];
+    const result = await runLifecycleReplaySmoke({
+      env: {
+        ZEROCLAW_BIN: "zeroclaw",
+        ZEROCLAW_CONFIG_DIR: "configured-outside-git",
+        ARENA90_PERSISTENCE_DIR: directory,
+      },
+      readFixture: recordedFixtureText,
+      zeroClawAgentFactory({ agentId }) {
+        return decisionAgent(agentId, (checkpointId) =>
+          invocations.push(`${agentId}:${checkpointId}`),
+        );
+      },
+      overallTimeoutMs: 1_000,
+    });
+
+    expect({ result, invocationCount: invocations.length }).toEqual({
+      result: { status: "PASSED" },
+      invocationCount: 12,
+    });
+  });
+
   it("verifies six fresh Alpha/Beta decisions and FINAL without another agent call", async () => {
     const invocations: string[] = [];
     const result = await runLifecycleReplaySmoke({

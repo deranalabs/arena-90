@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   CHECKPOINT_IDS,
-  calculateFinalResultHash,
 } from "../src/contracts/index.js";
 import {
   formatReplayHttpAcceptanceSmokeResult,
@@ -760,7 +759,7 @@ describe("Replay HTTP acceptance smoke", () => {
       "final result",
       (record: MutableJsonRecord) => {
         if (
-          record["schemaVersion"] === 1 &&
+          record["schemaVersion"] === 2 &&
           typeof record["arenaId"] === "string" &&
           typeof record["finalResultHash"] === "string" &&
           typeof record["alphaFinalNavMicros"] === "string" &&
@@ -770,14 +769,6 @@ describe("Replay HTTP acceptance smoke", () => {
             record["winner"] === "DRAW")
         ) {
           record["winningAssetId"] = "AWAY";
-          record["finalResultHash"] = calculateFinalResultHash({
-            schemaVersion: 1,
-            arenaId: record["arenaId"],
-            winningAssetId: "AWAY",
-            winner: record["winner"],
-            alphaFinalNavMicros: record["alphaFinalNavMicros"],
-            betaFinalNavMicros: record["betaFinalNavMicros"],
-          });
         }
       },
     ],

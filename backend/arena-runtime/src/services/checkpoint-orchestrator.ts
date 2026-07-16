@@ -4,7 +4,6 @@ import {
   canonicalSnapshotSchema,
   persistedArenaEventV1Schema,
   type ArenaAgentId,
-  type ArenaAssetId,
   type ArenaEvent,
   type CanonicalSnapshot,
   type CheckpointId,
@@ -19,7 +18,6 @@ import {
 
 interface DataAdapter {
   getSnapshot(checkpointId: DecisionCheckpointId): CanonicalSnapshot;
-  getFinalResult(): ArenaAssetId;
 }
 
 interface CheckpointOrchestratorConfig {

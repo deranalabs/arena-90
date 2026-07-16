@@ -4,13 +4,14 @@ import {
   CHECKPOINT_IDS,
   arenaAssetIdSchema,
   calculateSnapshotHash,
+  calculateTerminalEvidenceHash,
   canonicalSnapshotSchema,
   checkpointIdSchema,
   nonBlankStringSchema,
   utcDateTimeSchema,
-  type ArenaAssetId,
   type CanonicalSnapshot,
   type DecisionCheckpointId,
+  type TerminalEvidenceV1,
 } from "../../contracts/index.js";
 
 const recordedCheckpointSchema = z
@@ -116,7 +117,7 @@ const recordedFixtureSchema = z
 
 interface RecordedDataAdapter {
   getSnapshot(checkpointId: DecisionCheckpointId): CanonicalSnapshot;
-  getFinalResult(): ArenaAssetId;
+  getTerminalEvidence(): TerminalEvidenceV1;
 }
 
 export function createRecordedDataAdapter(input: unknown): RecordedDataAdapter {
@@ -151,14 +152,34 @@ export function createRecordedDataAdapter(input: unknown): RecordedDataAdapter {
       });
     },
 
-    getFinalResult() {
+    getTerminalEvidence() {
       const finalRecord = fixture.records.at(-1);
 
       if (finalRecord?.checkpointId !== "FINAL" || finalRecord.finalResult === undefined) {
         throw new RangeError("Recorded fixture has no valid FINAL result");
       }
 
-      return finalRecord.finalResult;
+      const hashInput = {
+        schemaVersion: 1 as const,
+        providerSequence: finalRecord.providerSequence,
+        arenaId: fixture.arenaId,
+        fixtureId: fixture.fixtureId,
+        observedAtUtc: finalRecord.observedAtUtc,
+        sourceEventId: finalRecord.sourceEventId,
+        source: "TXLINE_RECORDED" as const,
+        match: {
+          status: "FINISHED" as const,
+          minute: finalRecord.match.minute,
+          addedTime: finalRecord.match.addedTime,
+          homeScore: finalRecord.match.homeScore,
+          awayScore: finalRecord.match.awayScore,
+        },
+        winningAssetId: finalRecord.finalResult,
+      };
+      return {
+        ...hashInput,
+        terminalEvidenceHash: calculateTerminalEvidenceHash(hashInput),
+      };
     },
   };
 }

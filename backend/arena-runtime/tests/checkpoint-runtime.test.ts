@@ -48,7 +48,7 @@ describe("recorded data adapter", () => {
         }),
       ),
       kickoff: snapshots[0],
-      finalResult: adapter.getFinalResult(),
+      terminalEvidence: adapter.getTerminalEvidence(),
     }).toEqual({
       snapshotOrder: [
         {
@@ -119,7 +119,24 @@ describe("recorded data adapter", () => {
           suspended: false,
         },
       },
-      finalResult: "HOME",
+      terminalEvidence: {
+        schemaVersion: 1,
+        providerSequence: 7,
+        arenaId: "arena-replay-001",
+        fixtureId: "fixture-recorded-001",
+        observedAtUtc: "2026-07-13T13:52:00.000Z",
+        sourceEventId: "txline-event-007",
+        source: "TXLINE_RECORDED",
+        match: {
+          status: "FINISHED",
+          minute: 90,
+          addedTime: 4,
+          homeScore: 2,
+          awayScore: 1,
+        },
+        winningAssetId: "HOME",
+        terminalEvidenceHash: expect.stringMatching(/^[0-9a-f]{64}$/),
+      },
     });
   });
 
@@ -136,7 +153,7 @@ describe("recorded data adapter", () => {
           returnBps: 0,
           updatedAtCheckpoint: "M75",
         },
-        adapter.getFinalResult(),
+        adapter.getTerminalEvidence().winningAssetId,
         "100000000",
       ),
     ).toEqual({

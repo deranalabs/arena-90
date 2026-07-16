@@ -1,7 +1,7 @@
 import {
   CHECKPOINT_IDS,
   type AgentDecision,
-  type ArenaFinalResultV1,
+  type ArenaFinalResultV2,
   type ArenaManifest,
   type ArenaRunStateV1,
   type CanonicalSnapshot,
@@ -19,7 +19,7 @@ import {
   type PublicCheckpointV1,
   type PublicDecisionV1,
   type PublicFailureV1,
-  type PublicFinalResultV1,
+  type PublicFinalResultV2,
   type PublicEventHistoryV1,
   type PublicManifestV1,
   type PublicPortfolioV1,
@@ -196,14 +196,18 @@ function projectCheckpoint(
   };
 }
 
-function projectFinalResult(result: ArenaFinalResultV1): PublicFinalResultV1 {
+function projectFinalResult(result: ArenaFinalResultV2): PublicFinalResultV2 {
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     arenaId: result.arenaId,
+    winnerRule: result.winnerRule,
     winningAssetId: result.winningAssetId,
     winner: result.winner,
     alphaFinalNavMicros: result.alphaFinalNavMicros,
     betaFinalNavMicros: result.betaFinalNavMicros,
+    terminalEvidence: structuredClone(result.terminalEvidence),
+    completedEventSequence: result.completedEventSequence,
+    preSettlementEventLogHash: result.preSettlementEventLogHash,
     finalResultHash: result.finalResultHash,
   };
 }

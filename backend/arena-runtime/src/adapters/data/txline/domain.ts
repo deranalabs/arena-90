@@ -1,8 +1,8 @@
 import type {
-  ArenaAssetId,
   CanonicalSnapshot,
   CheckpointId,
   DecisionCheckpointId,
+  TerminalEvidenceV1,
 } from "../../../contracts/index.js";
 
 export type TxlineDataErrorCode =
@@ -168,7 +168,7 @@ export interface TxlineLiveDataAdapter {
     signal: AbortSignal,
   ): Promise<void>;
   getSnapshot(checkpointId: DecisionCheckpointId): CanonicalSnapshot;
-  getFinalResult(): ArenaAssetId;
+  getTerminalEvidence(): TerminalEvidenceV1;
 }
 
 export class TxlineHttpStatusError extends Error {

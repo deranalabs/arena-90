@@ -48,7 +48,7 @@ const runtimeMetadata = {
   runtimeId: "private-runtime-id",
   runtimeVersion: "7.2",
   executionRuleVersion: "p0-v1",
-  winnerRuleVersion: "p0-final-nav-v1",
+  winnerRuleVersion: "FINAL_NAV_ONLY_V1",
   agentTimeoutMs: 30_000,
   agents: {
     alpha: {
@@ -139,7 +139,7 @@ function createBaseRunner(store: ArenaLifecycleStore): ArenaLifecycleRunner {
       getSnapshot() {
         throw new Error("not used by HTTP tests");
       },
-      getFinalResult() {
+      getTerminalEvidence() {
         throw new Error("not used by HTTP tests");
       },
     }),

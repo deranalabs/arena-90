@@ -45,13 +45,16 @@ interface TxlineLiveDataAdapter {
   ): Promise<void>;
 
   getSnapshot(checkpointId: DecisionCheckpointId): CanonicalSnapshot;
-  getFinalResult(): ArenaAssetId;
+  getTerminalEvidence(): TerminalEvidenceV1;
 }
 ```
 
 `refreshCheckpoint()` performs asynchronous provider access, validation, and
 state preparation. The existing synchronous `getSnapshot()` and
-`getFinalResult()` methods read only prepared state.
+`getTerminalEvidence()` methods read only prepared state. Terminal evidence
+must retain the verified final score, provider sequence and event identity,
+observation time, source mode, winning asset, and deterministic evidence hash;
+an asset enum alone is not sufficient for settlement.
 
 Slice 6 must call `refreshCheckpoint()` before invoking checkpoint
 orchestration. Slice 5 must not make the current checkpoint orchestrator

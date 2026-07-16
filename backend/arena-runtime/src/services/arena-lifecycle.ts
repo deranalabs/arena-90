@@ -1,10 +1,10 @@
 import type {
-  ArenaAssetId,
   ArenaManifest,
   ArenaRunStateV1,
   CanonicalSnapshot,
   CheckpointId,
   DecisionCheckpointId,
+  TerminalEvidenceV1,
 } from "../contracts/index.js";
 
 export interface ArenaLifecycleRunner {
@@ -15,7 +15,7 @@ export interface ArenaLifecycleRunner {
 export interface ArenaLifecycleDataSource {
   prepare(checkpointId: CheckpointId, signal: AbortSignal): Promise<void>;
   getSnapshot(checkpointId: DecisionCheckpointId): CanonicalSnapshot;
-  getFinalResult(): ArenaAssetId;
+  getTerminalEvidence(): TerminalEvidenceV1;
 }
 
 export type ArenaLifecycleDataSourceFactory = (

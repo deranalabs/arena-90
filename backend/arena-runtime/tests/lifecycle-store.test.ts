@@ -39,7 +39,7 @@ function initialState() {
       runtimeId: "arena90-runtime",
       runtimeVersion: "6a",
       executionRuleVersion: "p0-v1",
-      winnerRuleVersion: "p0-final-nav-v1",
+      winnerRuleVersion: "FINAL_NAV_ONLY_V1",
       agentTimeoutMs: 30_000,
       agents: {
         alpha: {

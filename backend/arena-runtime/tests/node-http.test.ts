@@ -7,6 +7,7 @@ import {
   createNodeHttpRuntimeComposition,
   formatNodeHttpRuntimeFailure,
 } from "../src/runtime/node-http.js";
+import { createInMemoryArenaLifecycleStore } from "../src/services/index.js";
 
 const manifest = {
   schemaVersion: 1,
@@ -72,6 +73,10 @@ function agent(agentId: "alpha" | "beta") {
   };
 }
 
+function testStore() {
+  return createInMemoryArenaLifecycleStore({ nowMs: Date.now });
+}
+
 const replayEnv = {
   ARENA90_RUNTIME_MODE: "REPLAY",
   ARENA90_MANIFEST_FILE: "manifest.json",
@@ -105,6 +110,7 @@ describe("Node HTTP runtime composition", () => {
         "recording.json": recording,
       }),
       agents: { alpha: agent("alpha"), beta: agent("beta") },
+      store: testStore(),
     });
 
     expect({
@@ -124,7 +130,7 @@ describe("Node HTTP runtime composition", () => {
       hasRunner: "function",
       hasStore: "function",
       hasCapacity: "function",
-      persistence: "IN_MEMORY_SINGLE_PROCESS_NON_DURABLE",
+      persistence: "INJECTED",
     });
 
     await composition.shutdown();
@@ -190,6 +196,7 @@ describe("Node HTTP runtime composition", () => {
         "binding.json": binding,
       }),
       agents: { alpha: agent("alpha"), beta: agent("beta") },
+      store: testStore(),
       txlineClientFactory(env) {
         factoryCalls += 1;
         expect(Boolean(env["TXLINE_JWT"] && env["TXLINE_API_TOKEN"])).toBe(
@@ -219,6 +226,7 @@ describe("Node HTTP runtime composition", () => {
       env: replayEnv,
       readFile: replayFiles(),
       agents: { alpha: agent("alpha"), beta: agent("beta") },
+      store: testStore(),
     });
     const address = await composition.listen({ port: 0 });
     const origin = `http://${address.host}:${address.port}`;
@@ -262,29 +270,28 @@ describe("Node HTTP runtime composition", () => {
   });
 
   it("fails closed for ambiguous mode and incompatible locked Replay inputs", async () => {
-    const missingMode = createNodeHttpRuntimeComposition({
-      env: {
-        ...replayEnv,
-        ARENA90_RUNTIME_MODE: undefined,
-      },
-      readFile: replayFiles(),
-      agents: { alpha: agent("alpha"), beta: agent("beta") },
-    });
-    const mismatchedRecording = createNodeHttpRuntimeComposition({
-      env: replayEnv,
-      readFile: replayFiles(manifest, {
-        ...recording,
-        fixtureId: "different-fixture",
+    await expect(
+      createNodeHttpRuntimeComposition({
+        env: {
+          ...replayEnv,
+          ARENA90_RUNTIME_MODE: undefined,
+        },
+        readFile: replayFiles(),
+        agents: { alpha: agent("alpha"), beta: agent("beta") },
+        store: testStore(),
       }),
-      agents: { alpha: agent("alpha"), beta: agent("beta") },
-    });
-
-    await expect(missingMode).rejects.toMatchObject({
-      category: "CONFIG_FAILURE",
-    });
-    await expect(mismatchedRecording).rejects.toMatchObject({
-      category: "RECORDING_FAILURE",
-    });
+    ).rejects.toMatchObject({ category: "CONFIG_FAILURE" });
+    await expect(
+      createNodeHttpRuntimeComposition({
+        env: replayEnv,
+        readFile: replayFiles(manifest, {
+          ...recording,
+          fixtureId: "different-fixture",
+        }),
+        agents: { alpha: agent("alpha"), beta: agent("beta") },
+        store: testStore(),
+      }),
+    ).rejects.toMatchObject({ category: "RECORDING_FAILURE" });
   });
 
   it("rejects hostile LIVE binding fields and missing TxLINE configuration without fallback", async () => {
@@ -321,6 +328,7 @@ describe("Node HTTP runtime composition", () => {
         "binding.json": { ...binding, providerPayload: "must-not-pass" },
       }),
       agents: { alpha: agent("alpha"), beta: agent("beta") },
+      store: testStore(),
       txlineClientFactory() {
         throw new Error("factory must not run");
       },
@@ -333,6 +341,7 @@ describe("Node HTTP runtime composition", () => {
         "recording.json": recording,
       }),
       agents: { alpha: agent("alpha"), beta: agent("beta") },
+      store: testStore(),
       txlineClientFactory() {
         throw new Error("factory must not run");
       },
@@ -360,6 +369,7 @@ describe("Node HTTP runtime composition", () => {
           throw new Error(`${secret} raw-provider-payload`);
         },
         agents: { alpha: agent("alpha"), beta: agent("beta") },
+        store: testStore(),
       });
     } catch (error) {
       caught = error;
@@ -406,6 +416,7 @@ describe("Node HTTP runtime composition", () => {
         alpha: hangingAgent("alpha"),
         beta: hangingAgent("beta"),
       },
+      store: testStore(),
     });
     const address = await composition.listen({ port: 0 });
     const origin = `http://${address.host}:${address.port}`;

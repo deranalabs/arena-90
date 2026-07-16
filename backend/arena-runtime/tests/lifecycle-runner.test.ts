@@ -1,15 +1,19 @@
-import { readFile } from "node:fs/promises";
+import { mkdtemp, readFile, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, onTestFinished } from "vitest";
 
 import { createRecordedDataAdapter } from "../src/adapters/data/index.js";
 import {
   CHECKPOINT_IDS,
   calculateSnapshotHash,
+  calculateTerminalEvidenceHash,
 } from "../src/contracts/index.js";
 import {
   createArenaLifecycleRunner,
   createInMemoryArenaLifecycleStore,
+  createJsonArenaLifecycleStore,
   ArenaLifecycleStoreError,
   type ArenaLifecycleDataSource,
   type ArenaLifecycleStore,
@@ -39,7 +43,7 @@ const runtimeMetadata = {
   runtimeId: "arena90-runtime",
   runtimeVersion: "6b",
   executionRuleVersion: "p0-v1",
-  winnerRuleVersion: "p0-final-nav-v1",
+  winnerRuleVersion: "FINAL_NAV_ONLY_V1",
   agentTimeoutMs: 30_000,
   agents: {
     alpha: {
@@ -65,7 +69,7 @@ function unavailableDataSource(): ArenaLifecycleDataSource {
     getSnapshot() {
       throw new Error("not used");
     },
-    getFinalResult() {
+    getTerminalEvidence() {
       throw new Error("not used");
     },
   };
@@ -229,7 +233,7 @@ describe("Arena lifecycle runner", () => {
           expect(checkpointId).toBe("KICKOFF");
         },
         getSnapshot: () => kickoffSnapshot(),
-        getFinalResult() {
+        getTerminalEvidence() {
           throw new Error("not used");
         },
       }),
@@ -306,7 +310,7 @@ describe("Arena lifecycle runner", () => {
           prepared.push(checkpointId);
         },
         getSnapshot: recorded.getSnapshot,
-        getFinalResult: recorded.getFinalResult,
+        getTerminalEvidence: recorded.getTerminalEvidence,
       }),
       agents: { alpha: agent("alpha"), beta: agent("beta") },
       runtimeMetadata,
@@ -345,16 +349,21 @@ describe("Arena lifecycle runner", () => {
       checkpointIds: ["KICKOFF", "M15", "M30", "HALFTIME", "M60", "M75"],
       prepared: ["KICKOFF", "M15", "M30", "HALFTIME", "M60", "M75", "FINAL"],
       agentCalls: 12,
-      finalResult: {
-        schemaVersion: 1,
+      finalResult: expect.objectContaining({
+        schemaVersion: 2,
         arenaId: "arena-replay-001",
+        winnerRule: "FINAL_NAV_ONLY_V1",
         winningAssetId: "HOME",
         winner: "DRAW",
         alphaFinalNavMicros: "100000000",
         betaFinalNavMicros: "100000000",
-        finalResultHash:
-          "f95a489df074ec44b9556c0ac0a8b307c46810be3429b663a9df65183e615ccf",
-      },
+        completedEventSequence: 39,
+        terminalEvidence: expect.objectContaining({
+          source: "TXLINE_RECORDED",
+          providerSequence: 7,
+          winningAssetId: "HOME",
+        }),
+      }),
       eventSequence: Array.from({ length: 39 }, (_, index) => index + 1),
       eventTypes: [
         "ARENA_READY",
@@ -414,7 +423,7 @@ describe("Arena lifecycle runner", () => {
             snapshotHash: calculateSnapshotHash(suspended),
           };
         },
-        getFinalResult: recorded.getFinalResult,
+        getTerminalEvidence: recorded.getTerminalEvidence,
       }),
       agents: { alpha: agent("alpha"), beta: agent("beta") },
       runtimeMetadata,
@@ -503,7 +512,7 @@ describe("Arena lifecycle runner", () => {
           }
         },
         getSnapshot: recorded.getSnapshot,
-        getFinalResult: recorded.getFinalResult,
+        getTerminalEvidence: recorded.getTerminalEvidence,
       }),
       agents: { alpha: agent("alpha"), beta: agent("beta") },
       runtimeMetadata,
@@ -604,7 +613,7 @@ describe("Arena lifecycle runner", () => {
           prepared.push(checkpointId);
         },
         getSnapshot: recorded.getSnapshot,
-        getFinalResult: recorded.getFinalResult,
+        getTerminalEvidence: recorded.getTerminalEvidence,
       }),
       agents: { alpha: agent("alpha"), beta: agent("beta") },
       runtimeMetadata,
@@ -636,21 +645,26 @@ describe("Arena lifecycle runner", () => {
     });
   });
 
-  it("resumes pending work from its stored snapshot without provider refresh", async () => {
-    const store = createInMemoryArenaLifecycleStore({ nowMs: () => 1_000 });
+  it("recovers atomic JSON pending work without duplicate checkpoint or terminal events", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "arena90-restart-"));
+    onTestFinished(() => rm(directory, { recursive: true, force: true }));
+    const firstStore = createJsonArenaLifecycleStore({
+      directory,
+      nowMs: () => 1_000,
+    });
     let blockingCalls = 0;
     let notifyBlockingStarted!: () => void;
     const blockingStarted = new Promise<void>((resolve) => {
       notifyBlockingStarted = resolve;
     });
     const firstRunner = createArenaLifecycleRunner({
-      store,
+      store: firstStore,
       dataSourceFactory: () => ({
         async prepare(checkpointId) {
           expect(checkpointId).toBe("KICKOFF");
         },
         getSnapshot: () => kickoffSnapshot(),
-        getFinalResult() {
+        getTerminalEvidence() {
           throw new Error("not used");
         },
       }),
@@ -687,6 +701,10 @@ describe("Arena lifecycle runner", () => {
     firstController.abort();
     await expect(interrupted).rejects.toMatchObject({ code: "ABORTED" });
 
+    const recoveredStore = createJsonArenaLifecycleStore({
+      directory,
+      nowMs: () => 1_000,
+    });
     const recorded = createRecordedDataAdapter(await loadRecordedFixture());
     const prepared: string[] = [];
     const readSnapshots: string[] = [];
@@ -713,7 +731,7 @@ describe("Arena lifecycle runner", () => {
       },
     });
     const resumedRunner = createArenaLifecycleRunner({
-      store,
+      store: recoveredStore,
       dataSourceFactory: () => ({
         async prepare(checkpointId) {
           prepared.push(checkpointId);
@@ -725,7 +743,7 @@ describe("Arena lifecycle runner", () => {
           }
           return recorded.getSnapshot(checkpointId);
         },
-        getFinalResult: recorded.getFinalResult,
+        getTerminalEvidence: recorded.getTerminalEvidence,
       }),
       agents: {
         alpha: resumedAgent("alpha"),
@@ -744,6 +762,7 @@ describe("Arena lifecycle runner", () => {
       manifest.arenaId,
       new AbortController().signal,
     );
+    const persisted = await recoveredStore.read(manifest.arenaId, 0);
 
     expect({
       phase: completed.phase,
@@ -751,13 +770,102 @@ describe("Arena lifecycle runner", () => {
       readSnapshots,
       firstCheckpointSnapshot: completed.checkpoints[0]?.snapshot?.snapshotId,
       firstAgentCalls: resumedAgentCalls.slice(0, 2),
+      eventIdsAreUnique:
+        persisted !== "NOT_FOUND" &&
+        new Set(persisted.events.map(({ eventId }) => eventId)).size ===
+          persisted.events.length,
+      completedEvents:
+        persisted === "NOT_FOUND"
+          ? 0
+          : persisted.events.filter(({ type }) => type === "COMPLETED").length,
+      checkpointEventRanges:
+        persisted === "NOT_FOUND"
+          ? []
+          : persisted.state.checkpoints.map(
+              ({ checkpointId, firstEventSequence, lastEventSequence }) => ({
+                checkpointId,
+                firstEventSequence,
+                lastEventSequence,
+              }),
+            ),
     }).toEqual({
       phase: "COMPLETED",
       prepared: ["M15", "M30", "HALFTIME", "M60", "M75", "FINAL"],
       readSnapshots: ["M15", "M30", "HALFTIME", "M60", "M75"],
       firstCheckpointSnapshot: "snapshot-kickoff",
       firstAgentCalls: ["alpha:KICKOFF", "beta:KICKOFF"],
+      eventIdsAreUnique: true,
+      completedEvents: 1,
+      checkpointEventRanges: expect.arrayContaining([
+        expect.objectContaining({ checkpointId: "KICKOFF" }),
+        expect.objectContaining({ checkpointId: "M75" }),
+      ]),
     });
+  });
+
+  it("serializes JSON leases across store instances and fences an expired writer", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "arena90-fencing-"));
+    onTestFinished(() => rm(directory, { recursive: true, force: true }));
+    let nowMs = 1_000;
+    const firstStore = createJsonArenaLifecycleStore({
+      directory,
+      nowMs: () => nowMs,
+    });
+    const secondStore = createJsonArenaLifecycleStore({
+      directory,
+      nowMs: () => nowMs,
+    });
+    const creator = createArenaLifecycleRunner({
+      store: firstStore,
+      dataSourceFactory: unavailableDataSource,
+      agents: {
+        alpha: {
+          agentId: "alpha",
+          async invoke() {
+            throw new Error("not used");
+          },
+        },
+        beta: {
+          agentId: "beta",
+          async invoke() {
+            throw new Error("not used");
+          },
+        },
+      },
+      runtimeMetadata,
+      timing: {
+        nowMs: () => nowMs,
+        wait: heartbeatWait,
+        waitForCheckpoint: async () => undefined,
+      },
+      lease: { ownerId: "creator", ttlMs: 1_000, renewEveryMs: 100 },
+    });
+    await creator.create(manifest);
+
+    const firstLease = await firstStore.acquire(
+      manifest.arenaId,
+      "runner-a",
+      2_000,
+    );
+    expect(typeof firstLease).not.toBe("string");
+    expect(
+      await secondStore.acquire(manifest.arenaId, "runner-b", 2_000),
+    ).toBe("BUSY");
+    if (typeof firstLease === "string") throw new Error("Missing first lease");
+
+    nowMs = 2_001;
+    const secondLease = await secondStore.acquire(
+      manifest.arenaId,
+      "runner-b",
+      3_000,
+    );
+    expect(typeof secondLease).not.toBe("string");
+    if (typeof secondLease === "string") throw new Error("Missing second lease");
+    expect(secondLease.fencingToken).not.toBe(firstLease.fencingToken);
+    await expect(firstLease.renew(4_000)).rejects.toMatchObject({
+      code: "LEASE_LOST",
+    });
+    await secondLease.release();
   });
 
   it("returns BUSY to another runner and propagates lease loss without a global miss", async () => {
@@ -802,7 +910,7 @@ describe("Arena lifecycle runner", () => {
         dataSourceFactory: () => ({
           async prepare() {},
           getSnapshot: () => kickoffSnapshot(),
-          getFinalResult() {
+          getTerminalEvidence() {
             throw new Error("not used");
           },
         }),
@@ -899,7 +1007,7 @@ describe("Arena lifecycle runner", () => {
           if (checkpointId === "FINAL") throw new Error("final unavailable");
         },
         getSnapshot: recorded.getSnapshot,
-        getFinalResult: recorded.getFinalResult,
+        getTerminalEvidence: recorded.getTerminalEvidence,
       }),
       agents: {
         alpha: decisionAgent("alpha", () => {
@@ -934,7 +1042,7 @@ describe("Arena lifecycle runner", () => {
         getSnapshot() {
           throw new Error("decision snapshots must not be read after FINALIZING");
         },
-        getFinalResult: recorded.getFinalResult,
+        getTerminalEvidence: recorded.getTerminalEvidence,
       }),
       agents: {
         alpha: decisionAgent("alpha", () => {
@@ -1002,7 +1110,7 @@ describe("Arena lifecycle runner", () => {
           });
         },
         getSnapshot: () => kickoffSnapshot(),
-        getFinalResult() {
+        getTerminalEvidence() {
           throw new Error("not used");
         },
       }),
@@ -1089,7 +1197,21 @@ describe("Arena lifecycle runner", () => {
             snapshotHash: calculateSnapshotHash(liveSnapshot),
           };
         },
-        getFinalResult: recorded.getFinalResult,
+        getTerminalEvidence() {
+          const recordedEvidence = recorded.getTerminalEvidence();
+          const { terminalEvidenceHash: _terminalEvidenceHash, ...base } =
+            recordedEvidence;
+          const liveEvidence = {
+            ...base,
+            arenaId: liveManifest.arenaId,
+            source: "TXLINE_LIVE" as const,
+          };
+          return {
+            ...liveEvidence,
+            terminalEvidenceHash:
+              calculateTerminalEvidenceHash(liveEvidence),
+          };
+        },
       }),
       agents: { alpha: agent("alpha"), beta: agent("beta") },
       runtimeMetadata,

@@ -2,16 +2,21 @@ import type {
   AgentAdapter,
   AgentInvocationRequest,
 } from "../adapters/agents/fake.js";
+import { isDeepStrictEqual } from "node:util";
 import {
   createZeroClawAgentAdapter,
   type ZeroClawAgentAdapterConfig,
 } from "../adapters/agents/zeroclaw.js";
 import {
   DECISION_CHECKPOINT_IDS,
-  arenaFinalResultV1Schema,
+  arenaFinalResultV2Schema,
   type ArenaAgentId,
 } from "../contracts/index.js";
-import type { ArenaLifecycleStore } from "../services/lifecycle-store.js";
+import {
+  createInMemoryArenaLifecycleStore,
+  type ArenaLifecycleStore,
+} from "../services/lifecycle-store.js";
+import { createJsonArenaLifecycleStore } from "../services/json-lifecycle-store.js";
 import { createNodeArenaLifecycleComposition } from "./node-lifecycle.js";
 
 export type LifecycleReplaySmokeStatus =
@@ -168,7 +173,11 @@ export async function runLifecycleReplaySmoke(
     typeof options.readFixture !== "function" ||
     agentTimeoutMs === undefined ||
     overallTimeoutMs === undefined ||
-    resolvedAgents === undefined
+    resolvedAgents === undefined ||
+    (options.store === undefined &&
+      options.agents === undefined &&
+      (env["ARENA90_PERSISTENCE_DIR"] === undefined ||
+        env["ARENA90_PERSISTENCE_DIR"]?.trim() === ""))
   ) {
     return result("CONFIG_FAILURE");
   }
@@ -203,43 +212,67 @@ export async function runLifecycleReplaySmoke(
 
   try {
     const nowMs = Date.now;
-    const composition = createNodeArenaLifecycleComposition({
-      recordedFixture: fixture,
-      agents: countedAgents,
-      ...(options.store === undefined ? {} : { store: options.store }),
-      runtimeMetadata: {
-        runtimeId: "arena90-node-runtime",
-        runtimeVersion: "6-acceptance",
-        executionRuleVersion: "p0-v1",
-        winnerRuleVersion: "p0-final-nav-v1",
-        agentTimeoutMs,
-        agents: {
-          alpha: {
-            adapterId: resolvedAgents.provenance.alpha,
-            adapterVersion: "1",
-            strategyId: "alpha-momentum-repricing",
-            strategyVersion: "1",
-          },
-          beta: {
-            adapterId: resolvedAgents.provenance.beta,
-            adapterVersion: "1",
-            strategyId: "beta-structure-valuation",
-            strategyVersion: "1",
+    const store =
+      options.store ??
+      (options.agents === undefined
+        ? createJsonArenaLifecycleStore({
+            directory: env["ARENA90_PERSISTENCE_DIR"] as string,
+            nowMs,
+          })
+        : createInMemoryArenaLifecycleStore({ nowMs }));
+    const createComposition = (
+      compositionStore: ArenaLifecycleStore,
+      ownerId: string,
+    ) =>
+      createNodeArenaLifecycleComposition({
+        recordedFixture: fixture,
+        agents: countedAgents,
+        store: compositionStore,
+        runtimeMetadata: {
+          runtimeId: "arena90-node-runtime",
+          runtimeVersion: "6-acceptance",
+          executionRuleVersion: "p0-v1",
+          winnerRuleVersion: "FINAL_NAV_ONLY_V1",
+          agentTimeoutMs,
+          agents: {
+            alpha: {
+              adapterId: resolvedAgents.provenance.alpha,
+              adapterVersion: "1",
+              strategyId: "alpha-momentum-repricing",
+              strategyVersion: "1",
+            },
+            beta: {
+              adapterId: resolvedAgents.provenance.beta,
+              adapterVersion: "1",
+              strategyId: "beta-structure-valuation",
+              strategyVersion: "1",
+            },
           },
         },
-      },
-      timing: {
-        nowMs,
-        wait: abortableWait,
-        waitForCheckpoint: async () => undefined,
-      },
-      lease: {
-        ownerId: "lifecycle-replay-smoke",
-        ttlMs: 30_000,
-        renewEveryMs: 10_000,
-      },
-    });
+        timing: {
+          nowMs,
+          wait: abortableWait,
+          waitForCheckpoint: async () => undefined,
+        },
+        lease: {
+          ownerId,
+          ttlMs: 30_000,
+          renewEveryMs: 10_000,
+        },
+      });
+    const composition = createComposition(store, "lifecycle-replay-smoke");
     await composition.runner.create(manifest);
+    const startingPersistence = await composition.store.read(
+      manifest.arenaId,
+      0,
+    );
+    const expectedInvocationCount =
+      startingPersistence === "NOT_FOUND" ||
+      startingPersistence.state.phase === "COMPLETED"
+        ? 0
+        : (DECISION_CHECKPOINT_IDS.length -
+            startingPersistence.state.checkpoints.length) *
+          2;
     const completed = await composition.runner.run(
       manifest.arenaId,
       controller.signal,
@@ -261,13 +294,42 @@ export async function runLifecycleReplaySmoke(
       persisted.events.every((event, index) => event.sequence === index + 1);
     const finalResultIsValid =
       completed.finalResult !== undefined &&
-      arenaFinalResultV1Schema.safeParse(completed.finalResult).success;
+      arenaFinalResultV2Schema.safeParse(completed.finalResult).success;
+    let restartIsIdempotent = true;
+    if (options.store === undefined && options.agents === undefined) {
+      const restartStore = createJsonArenaLifecycleStore({
+        directory: env["ARENA90_PERSISTENCE_DIR"] as string,
+        nowMs,
+      });
+      const restarted = createComposition(
+        restartStore,
+        "lifecycle-replay-smoke-restart",
+      );
+      await restarted.runner.create(manifest);
+      const recovered = await restarted.runner.run(
+        manifest.arenaId,
+        controller.signal,
+      );
+      const recoveredPersistence = await restartStore.read(manifest.arenaId, 0);
+      restartIsIdempotent =
+        invocationCount === expectedInvocationCount &&
+        persisted !== "NOT_FOUND" &&
+        recoveredPersistence !== "NOT_FOUND" &&
+        isDeepStrictEqual(recovered, completed) &&
+        isDeepStrictEqual(recoveredPersistence, persisted) &&
+        new Set(
+          recoveredPersistence.events.map(({ eventId }) => eventId),
+        ).size === recoveredPersistence.events.length &&
+        recoveredPersistence.events.filter(({ type }) => type === "COMPLETED")
+          .length === 1;
+    }
 
     return completed.phase === "COMPLETED" &&
       checkpointsAreComplete &&
       eventsAreContiguous &&
       finalResultIsValid &&
-      invocationCount === 12
+      invocationCount === expectedInvocationCount &&
+      restartIsIdempotent
       ? result("PASSED")
       : result("VERIFICATION_FAILURE");
   } catch {
