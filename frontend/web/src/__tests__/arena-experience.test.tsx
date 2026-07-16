@@ -10,6 +10,7 @@ import type {
 import type { RuntimeTransport } from "@/lib/arena-api/transport";
 import {
   publicEvent,
+  publicFinalResult,
   publicHistory,
   publicPortfolio,
   publicSnapshot,
@@ -155,15 +156,10 @@ function completedRun() {
     returnBps: 800,
     updatedAtCheckpoint: "FINAL" as const,
   };
-  const finalResult = {
-    schemaVersion: 1 as const,
-    arenaId,
-    winningAssetId: "HOME" as const,
-    winner: "alpha" as const,
+  const finalResult = publicFinalResult({
     alphaFinalNavMicros: alpha.navMicros,
     betaFinalNavMicros: beta.navMicros,
-    finalResultHash: "d".repeat(64),
-  };
+  });
   const state = publicState({
     phase: "COMPLETED",
     nextCheckpointId: undefined,
@@ -277,7 +273,9 @@ describe("Arena90 spectator experience", () => {
     expect(screen.getAllByText("112.50 vUSD").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("108.00 vUSD").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByText("HOME")).toBeInTheDocument();
-    expect(screen.getByText("d".repeat(64))).toBeInTheDocument();
+    expect(screen.getByText(run.state.finalResult!.finalResultHash)).toBeInTheDocument();
+    expect(screen.getByText(run.state.finalResult!.terminalEvidence.terminalEvidenceHash)).toBeInTheDocument();
+    expect(screen.getByText("FINAL_NAV_ONLY_V1")).toBeInTheDocument();
   });
 
   it("fails closed when a Replay route receives a LIVE arena binding", async () => {

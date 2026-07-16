@@ -3,9 +3,11 @@ import {
   publicArenaStateV1Schema,
   publicEventHistoryV1Schema,
 } from "@/lib/arena-api/contracts";
+import { sha256Hex } from "@/lib/arena-api/hash";
 
 import {
   publicEvent,
+  publicFinalResult,
   publicHistory,
   publicPortfolio,
   publicSnapshot,
@@ -18,6 +20,15 @@ const portfolios = {
 };
 
 describe("browser-safe Arena90 public contracts", () => {
+  it("matches standard SHA-256 vectors used by terminal proof verification", () => {
+    expect(sha256Hex("")).toBe(
+      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    );
+    expect(sha256Hex("abc")).toBe(
+      "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad",
+    );
+  });
+
   it("accepts the current public state and rejects hostile extra fields", () => {
     expect(publicArenaStateV1Schema.parse(publicState())).toEqual(publicState());
 
@@ -74,15 +85,11 @@ describe("browser-safe Arena90 public contracts", () => {
       publicEvent(11, "COMPLETED", {
         checkpointId: "FINAL",
         payload: {
-          result: {
-            schemaVersion: 1,
-            arenaId: "arena-replay-001",
-            winningAssetId: "HOME",
-            winner: "DRAW",
+          result: publicFinalResult({
             alphaFinalNavMicros: "100000000",
             betaFinalNavMicros: "100000000",
-            finalResultHash: "b".repeat(64),
-          },
+            completedEventSequence: 11,
+          }),
           portfolios,
         },
       }),
@@ -94,6 +101,45 @@ describe("browser-safe Arena90 public contracts", () => {
         ...events[3],
         payload: { status: "RECEIVED", rawModelOutput: "private" },
       }),
+    ).toThrow();
+  });
+
+  it("rejects tampered terminal evidence, final hashes, and legacy winner rules", () => {
+    const result = publicFinalResult({
+      alphaFinalNavMicros: "100000000",
+      betaFinalNavMicros: "100000000",
+    });
+    expect(() =>
+      publicArenaStateV1Schema.parse(
+        publicState({
+          runtimeVersions: {
+            ...publicState().runtimeVersions,
+            winnerRuleVersion: "final-nav-v1",
+          },
+        }),
+      ),
+    ).toThrow();
+    expect(() =>
+      publicArenaStateV1Schema.parse(
+        publicState({
+          phase: "COMPLETED",
+          finalResult: {
+            ...result,
+            terminalEvidence: {
+              ...result.terminalEvidence,
+              terminalEvidenceHash: "f".repeat(64),
+            },
+          },
+        }),
+      ),
+    ).toThrow();
+    expect(() =>
+      publicArenaStateV1Schema.parse(
+        publicState({
+          phase: "COMPLETED",
+          finalResult: { ...result, finalResultHash: "e".repeat(64) },
+        }),
+      ),
     ).toThrow();
   });
 

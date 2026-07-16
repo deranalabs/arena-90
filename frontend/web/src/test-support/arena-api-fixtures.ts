@@ -1,6 +1,10 @@
-import type {
-  PublicPortfolioV1,
-  PublicSnapshotV1,
+import {
+  calculatePublicFinalResultHash,
+  calculateTerminalEvidenceHash,
+  type PublicFinalResultV2,
+  type PublicPortfolioV1,
+  type PublicSnapshotV1,
+  type TerminalEvidenceV1,
 } from "@/lib/arena-api/contracts";
 
 const occurredAtUtc = "2026-07-13T12:00:00.000Z";
@@ -44,6 +48,60 @@ export function publicSnapshot(): PublicSnapshotV1 {
   };
 }
 
+export function publicTerminalEvidence(): TerminalEvidenceV1 {
+  const input = {
+    schemaVersion: 1 as const,
+    providerSequence: 7,
+    arenaId: "arena-replay-001",
+    fixtureId: "fixture-recorded-001",
+    observedAtUtc: "2026-07-13T13:52:00.000Z",
+    sourceEventId: "txline-event-final-007",
+    source: "TXLINE_RECORDED" as const,
+    match: {
+      status: "FINISHED" as const,
+      minute: 90,
+      addedTime: 4,
+      homeScore: 2,
+      awayScore: 1,
+    },
+    winningAssetId: "HOME" as const,
+  };
+  return {
+    ...input,
+    terminalEvidenceHash: calculateTerminalEvidenceHash(input),
+  };
+}
+
+export function publicFinalResult(options: {
+  alphaFinalNavMicros: string;
+  betaFinalNavMicros: string;
+  completedEventSequence?: number;
+}): PublicFinalResultV2 {
+  const terminalEvidence = publicTerminalEvidence();
+  const winner: PublicFinalResultV2["winner"] =
+    BigInt(options.alphaFinalNavMicros) > BigInt(options.betaFinalNavMicros)
+      ? "alpha"
+      : BigInt(options.betaFinalNavMicros) > BigInt(options.alphaFinalNavMicros)
+        ? "beta"
+        : "DRAW";
+  const input = {
+    schemaVersion: 2 as const,
+    arenaId: "arena-replay-001",
+    winnerRule: "FINAL_NAV_ONLY_V1" as const,
+    winningAssetId: "HOME" as const,
+    winner,
+    alphaFinalNavMicros: options.alphaFinalNavMicros,
+    betaFinalNavMicros: options.betaFinalNavMicros,
+    terminalEvidence,
+    completedEventSequence: options.completedEventSequence ?? 2,
+    preSettlementEventLogHash: "c".repeat(64),
+  };
+  return {
+    ...input,
+    finalResultHash: calculatePublicFinalResultHash(input),
+  };
+}
+
 export function publicState(overrides: Record<string, unknown> = {}) {
   return {
     schemaVersion: 1,
@@ -70,7 +128,7 @@ export function publicState(overrides: Record<string, unknown> = {}) {
     runtimeVersions: {
       runtimeVersion: "runtime-v1",
       executionRuleVersion: "execution-v1",
-      winnerRuleVersion: "winner-v1",
+      winnerRuleVersion: "FINAL_NAV_ONLY_V1",
       agents: {
         alpha: { strategyId: "alpha", strategyVersion: "1" },
         beta: { strategyId: "beta", strategyVersion: "1" },

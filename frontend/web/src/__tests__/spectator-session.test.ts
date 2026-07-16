@@ -4,7 +4,12 @@ import {
   type RuntimeTransport,
 } from "@/lib/arena-api/transport";
 
-import { publicEvent, publicHistory, publicState } from "../test-support/arena-api-fixtures";
+import {
+  publicEvent,
+  publicFinalResult,
+  publicHistory,
+  publicState,
+} from "../test-support/arena-api-fixtures";
 
 const portfolios = publicState().portfolios;
 
@@ -23,15 +28,11 @@ function completed(sequence: number) {
   return publicEvent(sequence, "COMPLETED", {
     checkpointId: "FINAL",
     payload: {
-      result: {
-        schemaVersion: 1,
-        arenaId: "arena-replay-001",
-        winningAssetId: "HOME",
-        winner: "DRAW",
+      result: publicFinalResult({
         alphaFinalNavMicros: "100000000",
         betaFinalNavMicros: "100000000",
-        finalResultHash: "b".repeat(64),
-      },
+        completedEventSequence: sequence,
+      }),
       portfolios,
     },
   });

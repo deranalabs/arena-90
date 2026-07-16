@@ -7,6 +7,7 @@ import type {
 import { validateSpectatorView } from "@/lib/arena-api/view-invariants";
 import {
   publicEvent,
+  publicFinalResult,
   publicPortfolio,
   publicSnapshot,
   publicState,
@@ -97,15 +98,10 @@ function completedState(overrides: Record<string, unknown> = {}) {
     nextCheckpointId: undefined,
     portfolios: { alpha, beta },
     leader: { result: "alpha", provisional: false },
-    finalResult: {
-      schemaVersion: 1,
-      arenaId,
-      winningAssetId: "HOME",
-      winner: "alpha",
+    finalResult: publicFinalResult({
       alphaFinalNavMicros: alpha.navMicros,
       betaFinalNavMicros: beta.navMicros,
-      finalResultHash: "d".repeat(64),
-    },
+    }),
     ...overrides,
   }) as PublicArenaStateV1;
 }
@@ -408,11 +404,10 @@ describe("spectator view consistency boundary", () => {
     const state = {
       ...valid,
       portfolios: { alpha, beta },
-      finalResult: {
-        ...valid.finalResult!,
+      finalResult: publicFinalResult({
         alphaFinalNavMicros: alpha.navMicros,
         betaFinalNavMicros: beta.navMicros,
-      },
+      }),
     };
 
     expect(

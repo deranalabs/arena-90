@@ -479,9 +479,20 @@ export function ArenaExperience({
           <p className="product-eyebrow">Verified terminal result</p>
           <h2 id="arena-result-title">{resultTitle}</h2>
           <dl>
+            <div>
+              <dt>Final score</dt>
+              <dd>
+                {state.finalResult.terminalEvidence.match.homeScore}–
+                {state.finalResult.terminalEvidence.match.awayScore}
+              </dd>
+            </div>
             <div><dt>Winning asset</dt><dd>{state.finalResult.winningAssetId}</dd></div>
             <div><dt>Alpha final NAV</dt><dd>{formatMicros(state.finalResult.alphaFinalNavMicros)}</dd></div>
             <div><dt>Beta final NAV</dt><dd>{formatMicros(state.finalResult.betaFinalNavMicros)}</dd></div>
+            <div><dt>Winner rule</dt><dd>{state.finalResult.winnerRule}</dd></div>
+            <div><dt>Terminal source</dt><dd>{state.finalResult.terminalEvidence.source}</dd></div>
+            <div><dt>Final snapshot hash</dt><dd>{state.finalResult.terminalEvidence.terminalEvidenceHash}</dd></div>
+            <div><dt>Pre-settlement event log hash</dt><dd>{state.finalResult.preSettlementEventLogHash}</dd></div>
             <div><dt>Final result hash</dt><dd>{state.finalResult.finalResultHash}</dd></div>
           </dl>
           <Link className="product-text-link" href={`/arena/${arenaId}/proof`}>Inspect public proof <span aria-hidden="true">→</span></Link>
@@ -506,6 +517,14 @@ export function ArenaExperience({
             <div><dt>Winner rules</dt><dd>{state.runtimeVersions.winnerRuleVersion}</dd></div>
             <div><dt>Current snapshot hash</dt><dd>{state.currentSnapshot?.snapshotHash ?? "No checkpoint snapshot yet"}</dd></div>
             <div><dt>Public events loaded</dt><dd>{session.events.length}</dd></div>
+            {state.finalResult ? (
+              <>
+                <div><dt>Terminal provider sequence</dt><dd>{state.finalResult.terminalEvidence.providerSequence}</dd></div>
+                <div><dt>Terminal provider event</dt><dd>{state.finalResult.terminalEvidence.sourceEventId}</dd></div>
+                <div><dt>Terminal observed at</dt><dd>{state.finalResult.terminalEvidence.observedAtUtc}</dd></div>
+                <div><dt>Completed event sequence</dt><dd>{state.finalResult.completedEventSequence}</dd></div>
+              </>
+            ) : null}
           </dl>
         </section>
       ) : null}

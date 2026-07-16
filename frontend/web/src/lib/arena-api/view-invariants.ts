@@ -5,6 +5,7 @@ import type {
   PublicFailureV1,
   PublicPortfolioV1,
 } from "./contracts";
+import { publicFinalResultV2Schema } from "./contracts";
 
 type AgentId = "alpha" | "beta";
 type Portfolios = { alpha: PublicPortfolioV1; beta: PublicPortfolioV1 };
@@ -107,6 +108,7 @@ function validCompleted(
   events: readonly PublicArenaEventV1[],
 ) {
   const result = state.finalResult;
+  const parsedResult = publicFinalResultV2Schema.safeParse(result);
   const completedEvents = events.filter(
     (event): event is Extract<PublicArenaEventV1, { type: "COMPLETED" }> =>
       event.type === "COMPLETED" && event.sequence <= state.lastEventSequence,
@@ -114,6 +116,7 @@ function validCompleted(
   const completed = completedEvents[0];
   if (
     !result ||
+    !parsedResult.success ||
     completedEvents.length !== 1 ||
     completed.sequence !== state.lastEventSequence ||
     !equal(completed.payload.result, result) ||
@@ -121,6 +124,14 @@ function validCompleted(
     state.leader.provisional ||
     state.leader.result !== result.winner ||
     result.arenaId !== state.manifest.arenaId ||
+    result.winnerRule !== "FINAL_NAV_ONLY_V1" ||
+    state.runtimeVersions.winnerRuleVersion !== result.winnerRule ||
+    result.completedEventSequence !== state.lastEventSequence ||
+    result.terminalEvidence.arenaId !== state.manifest.arenaId ||
+    result.terminalEvidence.fixtureId !== state.manifest.fixtureId ||
+    result.terminalEvidence.winningAssetId !== result.winningAssetId ||
+    result.terminalEvidence.source !==
+      (state.manifest.mode === "LIVE" ? "TXLINE_LIVE" : "TXLINE_RECORDED") ||
     result.alphaFinalNavMicros !== state.portfolios.alpha.navMicros ||
     result.betaFinalNavMicros !== state.portfolios.beta.navMicros ||
     !validTerminalAccounting(
@@ -137,6 +148,17 @@ function validCompleted(
     state.portfolios.beta.updatedAtCheckpoint !== "FINAL" ||
     state.nextCheckpointId !== undefined ||
     !state.manifest.assets.some((asset) => asset.id === result.winningAssetId)
+  ) {
+    return false;
+  }
+
+  const lastSnapshot = state.checkpoints
+    .flatMap((checkpoint) => checkpoint.snapshot ? [checkpoint.snapshot] : [])
+    .at(-1);
+  if (
+    lastSnapshot !== undefined &&
+    Date.parse(result.terminalEvidence.observedAtUtc) <=
+      Date.parse(lastSnapshot.observedAtUtc)
   ) {
     return false;
   }

@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { sha256Hex } from "./hash";
+
 const arenaModeSchema = z.enum(["LIVE", "REPLAY"]);
 const arenaAgentIdSchema = z.enum(["alpha", "beta"]);
 const arenaAssetIdSchema = z.enum(["HOME", "DRAW", "AWAY"]);
@@ -205,23 +207,163 @@ export const publicCheckpointV1Schema = z
     (checkpoint) => checkpoint.lastEventSequence >= checkpoint.firstEventSequence,
   );
 
-export const publicFinalResultV1Schema = z
+const terminalEvidenceHashInputV1Schema = z
   .object({
     schemaVersion: z.literal(1),
+    providerSequence: z.number().int().positive().safe(),
     arenaId: nonBlankStringSchema,
+    fixtureId: nonBlankStringSchema,
+    observedAtUtc: utcDateTimeSchema,
+    sourceEventId: nonBlankStringSchema,
+    source: z.enum(["TXLINE_RECORDED", "TXLINE_LIVE"]),
+    match: z
+      .object({
+        status: z.literal("FINISHED"),
+        minute: z.number().int().nonnegative(),
+        addedTime: z.number().int().nonnegative(),
+        homeScore: z.number().int().nonnegative(),
+        awayScore: z.number().int().nonnegative(),
+      })
+      .strict(),
+    winningAssetId: arenaAssetIdSchema,
+  })
+  .strict();
+
+type TerminalEvidenceHashInputV1 = z.infer<
+  typeof terminalEvidenceHashInputV1Schema
+>;
+
+export function calculateTerminalEvidenceHash(
+  input: TerminalEvidenceHashInputV1,
+) {
+  const parsed = terminalEvidenceHashInputV1Schema.parse(input);
+  return sha256Hex(
+    JSON.stringify({
+      schemaVersion: parsed.schemaVersion,
+      providerSequence: parsed.providerSequence,
+      arenaId: parsed.arenaId,
+      fixtureId: parsed.fixtureId,
+      observedAtUtc: parsed.observedAtUtc,
+      sourceEventId: parsed.sourceEventId,
+      source: parsed.source,
+      match: {
+        status: parsed.match.status,
+        minute: parsed.match.minute,
+        addedTime: parsed.match.addedTime,
+        homeScore: parsed.match.homeScore,
+        awayScore: parsed.match.awayScore,
+      },
+      winningAssetId: parsed.winningAssetId,
+    }),
+  );
+}
+
+export const terminalEvidenceV1Schema = terminalEvidenceHashInputV1Schema
+  .extend({ terminalEvidenceHash: z.string().regex(/^[0-9a-f]{64}$/) })
+  .strict()
+  .superRefine((evidence, context) => {
+    const expectedWinningAsset =
+      evidence.match.homeScore > evidence.match.awayScore
+        ? "HOME"
+        : evidence.match.awayScore > evidence.match.homeScore
+          ? "AWAY"
+          : "DRAW";
+    if (evidence.winningAssetId !== expectedWinningAsset) {
+      context.addIssue({
+        code: "custom",
+        path: ["winningAssetId"],
+        message: "Terminal winning asset must match the finished score",
+      });
+    }
+    const { terminalEvidenceHash, ...hashInput } = evidence;
+    if (terminalEvidenceHash !== calculateTerminalEvidenceHash(hashInput)) {
+      context.addIssue({
+        code: "custom",
+        path: ["terminalEvidenceHash"],
+        message: "Terminal evidence hash must match the terminal snapshot",
+      });
+    }
+  });
+
+const publicFinalResultHashInputV2Schema = z
+  .object({
+    schemaVersion: z.literal(2),
+    arenaId: nonBlankStringSchema,
+    winnerRule: z.literal("FINAL_NAV_ONLY_V1"),
     winningAssetId: arenaAssetIdSchema,
     winner: z.union([arenaAgentIdSchema, z.literal("DRAW")]),
     alphaFinalNavMicros: nonNegativeIntegerStringSchema,
     betaFinalNavMicros: nonNegativeIntegerStringSchema,
-    finalResultHash: z.string().regex(/^[0-9a-f]{64}$/),
+    terminalEvidence: terminalEvidenceV1Schema,
+    completedEventSequence: z.number().int().positive().safe(),
+    preSettlementEventLogHash: z.string().regex(/^[0-9a-f]{64}$/),
   })
   .strict();
+
+type PublicFinalResultHashInputV2 = z.infer<
+  typeof publicFinalResultHashInputV2Schema
+>;
+
+export function calculatePublicFinalResultHash(
+  input: PublicFinalResultHashInputV2,
+) {
+  const parsed = publicFinalResultHashInputV2Schema.parse(input);
+  return sha256Hex(
+    JSON.stringify({
+      schemaVersion: parsed.schemaVersion,
+      arenaId: parsed.arenaId,
+      winnerRule: parsed.winnerRule,
+      winningAssetId: parsed.winningAssetId,
+      winner: parsed.winner,
+      alphaFinalNavMicros: parsed.alphaFinalNavMicros,
+      betaFinalNavMicros: parsed.betaFinalNavMicros,
+      terminalEvidence: parsed.terminalEvidence,
+      completedEventSequence: parsed.completedEventSequence,
+      preSettlementEventLogHash: parsed.preSettlementEventLogHash,
+    }),
+  );
+}
+
+export const publicFinalResultV2Schema = publicFinalResultHashInputV2Schema
+  .extend({ finalResultHash: z.string().regex(/^[0-9a-f]{64}$/) })
+  .strict()
+  .superRefine((result, context) => {
+    const alphaNav = BigInt(result.alphaFinalNavMicros);
+    const betaNav = BigInt(result.betaFinalNavMicros);
+    const expectedWinner =
+      alphaNav > betaNav ? "alpha" : betaNav > alphaNav ? "beta" : "DRAW";
+    if (result.winner !== expectedWinner) {
+      context.addIssue({
+        code: "custom",
+        path: ["winner"],
+        message: "Winner must follow FINAL_NAV_ONLY_V1",
+      });
+    }
+    if (
+      result.terminalEvidence.arenaId !== result.arenaId ||
+      result.terminalEvidence.winningAssetId !== result.winningAssetId
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["terminalEvidence"],
+        message: "Terminal evidence must match the final result",
+      });
+    }
+    const { finalResultHash, ...hashInput } = result;
+    if (finalResultHash !== calculatePublicFinalResultHash(hashInput)) {
+      context.addIssue({
+        code: "custom",
+        path: ["finalResultHash"],
+        message: "Final result hash must match the canonical result",
+      });
+    }
+  });
 
 export const publicRuntimeVersionsV1Schema = z
   .object({
     runtimeVersion: nonBlankStringSchema,
     executionRuleVersion: nonBlankStringSchema,
-    winnerRuleVersion: nonBlankStringSchema,
+    winnerRuleVersion: z.literal("FINAL_NAV_ONLY_V1"),
     agents: z
       .object({
         alpha: z
@@ -257,7 +399,7 @@ export const publicArenaStateV1Schema = z
         provisional: z.boolean(),
       })
       .strict(),
-    finalResult: publicFinalResultV1Schema.optional(),
+    finalResult: publicFinalResultV2Schema.optional(),
     lastEventSequence: z.number().int().nonnegative().safe(),
   })
   .strict();
@@ -373,7 +515,7 @@ export const publicArenaEventV1Schema = z.discriminatedUnion("type", [
       checkpointId: z.literal("FINAL"),
       payload: z
         .object({
-          result: publicFinalResultV1Schema,
+          result: publicFinalResultV2Schema,
           portfolios: publicAgentPortfoliosV1Schema,
         })
         .strict(),
@@ -440,7 +582,8 @@ export type PublicGlobalFailureReasonV1 = z.infer<
 >;
 export type PublicFailureV1 = z.infer<typeof publicFailureV1Schema>;
 export type PublicCheckpointV1 = z.infer<typeof publicCheckpointV1Schema>;
-export type PublicFinalResultV1 = z.infer<typeof publicFinalResultV1Schema>;
+export type TerminalEvidenceV1 = z.infer<typeof terminalEvidenceV1Schema>;
+export type PublicFinalResultV2 = z.infer<typeof publicFinalResultV2Schema>;
 export type PublicRuntimeVersionsV1 = z.infer<
   typeof publicRuntimeVersionsV1Schema
 >;
