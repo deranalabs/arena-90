@@ -14,6 +14,7 @@ import {
   MINIMUM_ARENA_EVENT_TYPES,
   calculateFinalResultHash,
   calculateSnapshotHash,
+  calculateTerminalEvidenceHash,
   type PersistedArenaEventV1,
   type ArenaRunStateV1,
 } from "../src/contracts/index.js";
@@ -43,7 +44,7 @@ const runtimeMetadata = {
   runtimeId: "arena90-runtime-private",
   runtimeVersion: "7.1",
   executionRuleVersion: "p0-v1",
-  winnerRuleVersion: "p0-final-nav-v1",
+  winnerRuleVersion: "FINAL_NAV_ONLY_V1",
   agentTimeoutMs: 30_000,
   agents: {
     alpha: {
@@ -108,6 +109,43 @@ function initialPortfolios() {
   return {
     alpha: initializePortfolio("alpha", manifest.startingBankrollMicros),
     beta: initializePortfolio("beta", manifest.startingBankrollMicros),
+  };
+}
+
+function terminalResultInput(completedEventSequence: number) {
+  const terminalEvidenceInput = {
+    schemaVersion: 1 as const,
+    providerSequence: 99,
+    arenaId: manifest.arenaId,
+    fixtureId: manifest.fixtureId,
+    observedAtUtc: "2026-07-13T13:52:00.000Z",
+    sourceEventId: "private-provider-event-99",
+    source: "TXLINE_RECORDED" as const,
+    match: {
+      status: "FINISHED" as const,
+      minute: 90,
+      addedTime: 4,
+      homeScore: 2,
+      awayScore: 1,
+    },
+    winningAssetId: "HOME" as const,
+  };
+  return {
+    schemaVersion: 2 as const,
+    arenaId: manifest.arenaId,
+    winnerRule: "FINAL_NAV_ONLY_V1" as const,
+    winningAssetId: "HOME" as const,
+    winner: "DRAW" as const,
+    alphaFinalNavMicros: "100000000",
+    betaFinalNavMicros: "100000000",
+    terminalEvidence: {
+      ...terminalEvidenceInput,
+      terminalEvidenceHash: calculateTerminalEvidenceHash(
+        terminalEvidenceInput,
+      ),
+    },
+    completedEventSequence,
+    preSettlementEventLogHash: "a".repeat(64),
   };
 }
 
@@ -196,7 +234,7 @@ describe("Arena public projection", () => {
       runtimeVersions: {
         runtimeVersion: "7.1",
         executionRuleVersion: "p0-v1",
-        winnerRuleVersion: "p0-final-nav-v1",
+        winnerRuleVersion: "FINAL_NAV_ONLY_V1",
         agents: {
           alpha: { strategyId: "alpha-momentum", strategyVersion: "1" },
           beta: { strategyId: "beta-valuation", strategyVersion: "1" },
@@ -454,14 +492,7 @@ describe("Arena public projection", () => {
       ],
       lastEventSequence: 3,
     } as unknown as ArenaRunStateV1;
-    const finalResultInput = {
-      schemaVersion: 1 as const,
-      arenaId: manifest.arenaId,
-      winningAssetId: "HOME" as const,
-      winner: "DRAW" as const,
-      alphaFinalNavMicros: "100000000",
-      betaFinalNavMicros: "100000000",
-    };
+    const finalResultInput = terminalResultInput(10);
     const terminalPortfolios = {
       alpha: {
         ...initialPortfolios().alpha,
@@ -632,14 +663,7 @@ describe("Arena public projection", () => {
 
   it("exposes only final result and terminal portfolios when completed", () => {
     const state = revealedState();
-    const finalResultInput = {
-      schemaVersion: 1 as const,
-      arenaId: manifest.arenaId,
-      winningAssetId: "HOME" as const,
-      winner: "DRAW" as const,
-      alphaFinalNavMicros: "100000000",
-      betaFinalNavMicros: "100000000",
-    };
+    const finalResultInput = terminalResultInput(9);
     const completed = {
       ...state,
       phase: "COMPLETED",

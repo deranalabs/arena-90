@@ -255,12 +255,11 @@ During Final Settlement, the deterministic system:
 4. applies the published winner rules;
 5. records the terminal result and provenance.
 
-The winner is determined in this order:
+The winner is determined only by final portfolio equity under
+`FINAL_NAV_ONLY_V1`:
 
-1. Higher final equity
-2. Lower maximum drawdown
-3. Lower peak exposure
-4. `DRAW`
+1. Higher final equity wins.
+2. Exactly equal final equity is `DRAW`.
 
 Possible competition results are:
 
@@ -268,11 +267,13 @@ Possible competition results are:
 * `AGENT_BETA_WIN`
 * `DRAW`
 
-A draw occurs only when final equity and all approved tie-breakers remain equal.
+A draw occurs when final equity is exactly equal. Drawdown, exposure, number of
+trades, and earlier leadership are evidence and spectator metrics only; they
+must never break a terminal tie.
 
 A draw is a valid competitive result. It is not an operational failure or a voided arena.
 
-If the final match result cannot be verified, the arena must remain finalizing or paused. The system must not guess the result or manually select a winning agent.
+If the final match result cannot be verified, the arena must remain finalizing or paused. The system must not guess the result or manually select a winning agent. A completed result must bind the final score, source mode, provider sequence, provider event identity, observation time, and a deterministic evidence hash. That terminal evidence must be newer than the latest committed canonical snapshot when one exists.
 
 Exact settlement formulas, supporter payout behavior, and result-attestation mechanisms belong to their relevant specifications.
 

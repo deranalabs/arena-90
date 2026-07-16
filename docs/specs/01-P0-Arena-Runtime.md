@@ -296,7 +296,24 @@ Final settlement:
   / startingBankrollMicros`, using integer truncation;
 - higher final NAV wins;
 - equal final NAV is a draw;
+- `FINAL_NAV_ONLY_V1` is the complete winner rule; no drawdown, exposure,
+  trade-count, or earlier-leader tie-breaker is permitted;
 - agents cannot choose settlement behavior.
+
+The terminal result is schema V2 and must bind:
+
+- the literal winner rule `FINAL_NAV_ONLY_V1`;
+- both final NAV values and the winning `1X2` asset;
+- verified terminal evidence containing the final score, source mode, provider
+  sequence, provider event identity, observation time, and evidence hash;
+- the single `COMPLETED` event sequence;
+- a hash of the complete pre-settlement event log;
+- a deterministic final-result hash over all fields above.
+
+Lifecycle persistence must use atomic replacement of a strict JSON record and
+must fsync the file before rename. Restart recovery resumes durable pending
+work and must not duplicate checkpoint ranges, event IDs/sequences, agent
+settlement, or the terminal `COMPLETED` event.
 
 These formulas must be implemented once in the deterministic engine and covered
 by automated tests.

@@ -3,12 +3,13 @@ import { isDeepStrictEqual } from "node:util";
 import type { AgentAdapter } from "../adapters/agents/fake.js";
 import {
   DECISION_CHECKPOINT_IDS,
-  arenaAssetIdSchema,
   arenaManifestSchema,
   canonicalSnapshotSchema,
   calculateFinalResultHash,
+  calculatePreSettlementEventLogHash,
   persistedArenaEventV1Schema,
   arenaRuntimeMetadataV1Schema,
+  terminalEvidenceV1Schema,
   type ArenaAgentId,
   type ArenaRunStateV1,
   type ArenaRuntimeMetadataV1,
@@ -441,9 +442,26 @@ export function createArenaLifecycleRunner(
         requireActiveRun();
         await dataSource.prepare("FINAL", runSignal);
         requireActiveRun();
-        const winningAssetId = arenaAssetIdSchema.parse(
-          dataSource.getFinalResult(),
+        const terminalEvidence = terminalEvidenceV1Schema.parse(
+          dataSource.getTerminalEvidence(),
         );
+        const expectedSource =
+          state.manifest.mode === "LIVE" ? "TXLINE_LIVE" : "TXLINE_RECORDED";
+        const lastSnapshot = state.checkpoints
+          .map(({ snapshot }) => snapshot)
+          .filter((snapshot) => snapshot !== undefined)
+          .at(-1);
+        if (
+          terminalEvidence.arenaId !== arenaId ||
+          terminalEvidence.fixtureId !== state.manifest.fixtureId ||
+          terminalEvidence.source !== expectedSource ||
+          (lastSnapshot !== undefined &&
+            (terminalEvidence.providerSequence <= lastSnapshot.providerSequence ||
+              terminalEvidence.sourceEventId === lastSnapshot.sourceEventId))
+        ) {
+          throw new Error("Invalid terminal evidence");
+        }
+        const winningAssetId = terminalEvidence.winningAssetId;
         const portfolios = {
           alpha: settlePortfolio(
             state.portfolios.alpha,
@@ -456,22 +474,39 @@ export function createArenaLifecycleRunner(
             state.manifest.startingBankrollMicros,
           ),
         };
+        const persistedBeforeSettlement = await config.store.read(arenaId, 0);
+        if (
+          persistedBeforeSettlement === "NOT_FOUND" ||
+          !isDeepStrictEqual(persistedBeforeSettlement.state, state)
+        ) {
+          throw new ArenaLifecycleStoreError(
+            "REVISION_CONFLICT",
+            "Terminal settlement state conflicts with persisted history",
+          );
+        }
+        const completedEventSequence = state.lastEventSequence + 1;
         const finalResultInput = {
-          schemaVersion: 1 as const,
+          schemaVersion: 2 as const,
           arenaId,
+          winnerRule: "FINAL_NAV_ONLY_V1" as const,
           winningAssetId,
           winner: determineWinner(portfolios.alpha, portfolios.beta),
           alphaFinalNavMicros: portfolios.alpha.navMicros,
           betaFinalNavMicros: portfolios.beta.navMicros,
+          terminalEvidence,
+          completedEventSequence,
+          preSettlementEventLogHash: calculatePreSettlementEventLogHash(
+            persistedBeforeSettlement.events,
+          ),
         };
         const finalResult = {
           ...finalResultInput,
           finalResultHash: calculateFinalResultHash(finalResultInput),
         };
         const completedEvent = persistedArenaEventV1Schema.parse({
-          eventId: `${arenaId}:${state.lastEventSequence + 1}`,
+          eventId: `${arenaId}:${completedEventSequence}`,
           arenaId,
-          sequence: state.lastEventSequence + 1,
+          sequence: completedEventSequence,
           type: "COMPLETED",
           occurredAtUtc: new Date(config.timing.nowMs()).toISOString(),
           checkpointId: "FINAL",

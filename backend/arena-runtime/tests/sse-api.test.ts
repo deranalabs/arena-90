@@ -47,7 +47,7 @@ const runtimeMetadata = {
   runtimeId: "private-sse-runtime",
   runtimeVersion: "7.3",
   executionRuleVersion: "p0-v1",
-  winnerRuleVersion: "p0-final-nav-v1",
+  winnerRuleVersion: "FINAL_NAV_ONLY_V1",
   agentTimeoutMs: 1_000,
   agents: {
     alpha: {
@@ -364,7 +364,7 @@ describe("Arena SSE API", () => {
       "COMPLETED",
     );
     expect(response.body).not.toMatch(
-      /prompt|rawModelOutput|provider|secret|lease|fencing/i,
+      /prompt|rawModelOutput|providerPayload|secret|lease|fencing/i,
     );
   });
 

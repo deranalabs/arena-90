@@ -104,6 +104,12 @@ when valid data is available; duplicate work is harmless; persisted state and
 events reproduce the terminal result; the final-result contract is frozen for
 Slice 9.
 
+**Frozen handoff contract:** The nested terminal result is schema V2 with
+`FINAL_NAV_ONLY_V1`, provider-bound terminal evidence, completed-event binding,
+pre-settlement event-log hash, and final-result hash. Persistence is atomic
+JSON with restart recovery. These are breaking consumer changes from the old
+schema V1 result.
+
 ## 6. Slice 7 — HTTP and SSE API
 
 **Goal:** Expose the lifecycle through stable public state and ordered event
@@ -147,6 +153,10 @@ API without mocked competition progress.
 - explicit Live and Replay labeling with Replay fallback access;
 - responsive and accessible integration tests for the critical spectator
   flow.
+
+**Slice 8 handoff:** Update frontend state, history, and SSE consumers to parse
+the nested final-result schema V2 and render terminal evidence safely. Do not
+infer legacy tie-breakers or accept the removed schema V1 final result.
 
 **Non-goals:**
 

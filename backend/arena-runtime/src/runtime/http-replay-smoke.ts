@@ -11,8 +11,9 @@ import {
 } from "../api/public-projection.js";
 import {
   DECISION_CHECKPOINT_IDS,
-  arenaFinalResultV1Schema,
+  arenaFinalResultV2Schema,
 } from "../contracts/index.js";
+import { createInMemoryArenaLifecycleStore } from "../services/lifecycle-store.js";
 import {
   classifyNodeHttpRuntimeFailure,
   createNodeHttpRuntimeComposition,
@@ -115,6 +116,20 @@ async function executeAcceptanceFlow(
   if (composition.mode !== "REPLAY") {
     throw new SmokeFailure("CONFIG_FAILURE");
   }
+  const startingPersistence = await composition.store.read(
+    composition.manifest.arenaId,
+    0,
+  );
+  const committedCheckpointIds = new Set(
+    startingPersistence === "NOT_FOUND"
+      ? []
+      : startingPersistence.state.checkpoints.map(
+          ({ checkpointId }) => checkpointId,
+        ),
+  );
+  const expectedInvocationCheckpoints = DECISION_CHECKPOINT_IDS.filter(
+    (checkpointId) => !committedCheckpointIds.has(checkpointId),
+  );
   const address = await composition.listen({ host: "127.0.0.1", port: 0 });
   const origin = `http://${address.host}:${address.port}`;
   const createResponse = await fetchImpl(`${origin}/api/arenas`, {
@@ -270,8 +285,8 @@ async function executeAcceptanceFlow(
   const primaryInvocations = invocations.filter(({ attempt }) => attempt === 0);
   const repairInvocations = invocations.filter(({ attempt }) => attempt === 1);
   const invocationsAreValid =
-    primaryInvocations.length === 12 &&
-    DECISION_CHECKPOINT_IDS.every((checkpointId) =>
+    primaryInvocations.length === expectedInvocationCheckpoints.length * 2 &&
+    expectedInvocationCheckpoints.every((checkpointId) =>
       (["alpha", "beta"] as const).every(
         (agentId) =>
           primaryInvocations.filter(
@@ -384,7 +399,7 @@ async function executeAcceptanceFlow(
   const settlementIsValid =
     finalState.success &&
     finalState.data.finalResult !== undefined &&
-    arenaFinalResultV1Schema.safeParse(finalState.data.finalResult).success &&
+    arenaFinalResultV2Schema.safeParse(finalState.data.finalResult).success &&
     completedEvent?.type === "COMPLETED" &&
     JSON.stringify(completedEvent.payload.result) ===
       JSON.stringify(finalState.data.finalResult) &&
@@ -459,8 +474,16 @@ export async function runReplayHttpAcceptanceSmoke(
   }> = [];
   try {
     const configuredObserver = options.composition?.observeAgentInvocation;
+    const configuredStore = options.composition?.store;
+    const injectedTestStore =
+      configuredStore === undefined && options.composition?.agents !== undefined
+        ? createInMemoryArenaLifecycleStore({
+            nowMs: options.composition.nowMs ?? Date.now,
+          })
+        : undefined;
     composition = await createNodeHttpRuntimeComposition({
       ...options.composition,
+      ...(injectedTestStore === undefined ? {} : { store: injectedTestStore }),
       observeAgentInvocation(observation) {
         invocations.push(observation);
         configuredObserver?.(observation);

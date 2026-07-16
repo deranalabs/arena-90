@@ -9,6 +9,7 @@ import {
   moneyMicrosSchema,
   nonBlankStringSchema,
   positiveIntegerStringSchema,
+  terminalEvidenceV1Schema,
   unitMicrosSchema,
   utcDateTimeSchema,
 } from "../contracts/index.js";
@@ -215,14 +216,18 @@ export const publicCheckpointV1Schema = z
     { message: "Public checkpoint event range is invalid" },
   );
 
-export const publicFinalResultV1Schema = z
+export const publicFinalResultV2Schema = z
   .object({
-    schemaVersion: z.literal(1),
+    schemaVersion: z.literal(2),
     arenaId: nonBlankStringSchema,
+    winnerRule: z.literal("FINAL_NAV_ONLY_V1"),
     winningAssetId: arenaAssetIdSchema,
     winner: z.union([arenaAgentIdSchema, z.literal("DRAW")]),
     alphaFinalNavMicros: moneyMicrosSchema,
     betaFinalNavMicros: moneyMicrosSchema,
+    terminalEvidence: terminalEvidenceV1Schema,
+    completedEventSequence: z.number().int().positive().safe(),
+    preSettlementEventLogHash: z.string().regex(/^[0-9a-f]{64}$/),
     finalResultHash: z.string().regex(/^[0-9a-f]{64}$/),
   })
   .strict();
@@ -238,7 +243,7 @@ export const publicRuntimeVersionsV1Schema = z
   .object({
     runtimeVersion: nonBlankStringSchema,
     executionRuleVersion: nonBlankStringSchema,
-    winnerRuleVersion: nonBlankStringSchema,
+    winnerRuleVersion: z.literal("FINAL_NAV_ONLY_V1"),
     agents: z
       .object({
         alpha: publicStrategyVersionV1Schema,
@@ -264,7 +269,7 @@ export const publicArenaStateV1Schema = z
         provisional: z.boolean(),
       })
       .strict(),
-    finalResult: publicFinalResultV1Schema.optional(),
+    finalResult: publicFinalResultV2Schema.optional(),
     lastEventSequence: z.number().int().nonnegative().safe(),
   })
   .strict();
@@ -381,7 +386,7 @@ export const publicArenaEventV1Schema = z.discriminatedUnion("type", [
       checkpointId: z.literal("FINAL"),
       payload: z
         .object({
-          result: publicFinalResultV1Schema,
+          result: publicFinalResultV2Schema,
           portfolios: publicAgentPortfoliosV1Schema,
         })
         .strict(),
@@ -451,7 +456,7 @@ export type PublicGlobalFailureReasonV1 = z.infer<
 >;
 export type PublicFailureV1 = z.infer<typeof publicFailureV1Schema>;
 export type PublicCheckpointV1 = z.infer<typeof publicCheckpointV1Schema>;
-export type PublicFinalResultV1 = z.infer<typeof publicFinalResultV1Schema>;
+export type PublicFinalResultV2 = z.infer<typeof publicFinalResultV2Schema>;
 export type PublicArenaStateV1 = z.infer<typeof publicArenaStateV1Schema>;
 export type PublicArenaEventV1 = z.infer<typeof publicArenaEventV1Schema>;
 export type PublicEventHistoryV1 = z.infer<typeof publicEventHistoryV1Schema>;

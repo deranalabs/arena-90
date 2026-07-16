@@ -2,11 +2,13 @@ import { createHash } from "node:crypto";
 
 import {
   calculateSnapshotHash,
+  calculateTerminalEvidenceHash,
   canonicalSnapshotSchema,
   type ArenaAssetId,
   type CanonicalSnapshot,
   type CheckpointId,
   type DecisionCheckpointId,
+  type TerminalEvidenceV1,
 } from "../../../contracts/index.js";
 import type {
   NormalizedTxlineFixture,
@@ -146,7 +148,7 @@ export function createTxlineLiveDataAdapter(
   let fixture: NormalizedTxlineFixture | undefined;
   let scoreReducer: TxlineScoreStateReducer | undefined;
   let scoreEvents: unknown[] | undefined;
-  let finalResult: ArenaAssetId | undefined;
+  let terminalEvidence: TerminalEvidenceV1 | undefined;
   let refreshInFlight = false;
   const snapshots = new Map<DecisionCheckpointId, CanonicalSnapshot>();
 
@@ -272,7 +274,7 @@ export function createTxlineLiveDataAdapter(
         if (cached !== undefined) return;
       }
       if (checkpointId === "FINAL") {
-        if (finalResult !== undefined) return;
+        if (terminalEvidence !== undefined) return;
       }
       if (refreshInFlight) {
         throw invalidInput("TxLINE refresh already in progress");
@@ -294,12 +296,34 @@ export function createTxlineLiveDataAdapter(
               "Invalid TxLINE score state",
             );
           }
-          finalResult =
+          if (fixture === undefined) throw invalidInput("TxLINE fixture unavailable");
+          const winningAssetId: ArenaAssetId =
             state.homeScore > state.awayScore
               ? "HOME"
               : state.awayScore > state.homeScore
                 ? "AWAY"
                 : "DRAW";
+          const hashInput = {
+            schemaVersion: 1 as const,
+            providerSequence: state.providerSequence,
+            arenaId,
+            fixtureId: String(fixture.fixtureId),
+            observedAtUtc: toUtc(state.timestampMs),
+            sourceEventId: state.sourceEventId,
+            source: "TXLINE_LIVE" as const,
+            match: {
+              status: "FINISHED" as const,
+              minute: state.minute,
+              addedTime: state.addedTime,
+              homeScore: state.homeScore,
+              awayScore: state.awayScore,
+            },
+            winningAssetId,
+          };
+          terminalEvidence = {
+            ...hashInput,
+            terminalEvidenceHash: calculateTerminalEvidenceHash(hashInput),
+          };
           return;
         }
 
@@ -368,11 +392,11 @@ export function createTxlineLiveDataAdapter(
       return structuredClone(snapshot);
     },
 
-    getFinalResult() {
-      if (finalResult === undefined) {
+    getTerminalEvidence() {
+      if (terminalEvidence === undefined) {
         throw new RangeError("Live fixture has no prepared FINAL result");
       }
-      return finalResult;
+      return structuredClone(terminalEvidence);
     },
   });
 }

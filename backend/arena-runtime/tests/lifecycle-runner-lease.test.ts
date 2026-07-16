@@ -6,6 +6,7 @@ import { createRecordedDataAdapter } from "../src/adapters/data/index.js";
 import {
   CHECKPOINT_IDS,
   calculateSnapshotHash,
+  calculateTerminalEvidenceHash,
   type ArenaRunStateV1,
 } from "../src/contracts/index.js";
 import {
@@ -40,7 +41,7 @@ const runtimeMetadata = {
   runtimeId: "arena90-runtime",
   runtimeVersion: "6b",
   executionRuleVersion: "p0-v1",
-  winnerRuleVersion: "p0-final-nav-v1",
+  winnerRuleVersion: "FINAL_NAV_ONLY_V1",
   agentTimeoutMs: 1_000,
   agents: {
     alpha: {
@@ -135,7 +136,7 @@ function createKickoffRunner(input: {
         throw new Error("stop after KICKOFF");
       },
       getSnapshot: () => kickoffSnapshot(),
-      getFinalResult() {
+      getTerminalEvidence() {
         throw new Error("FINAL unavailable");
       },
     }),
@@ -434,7 +435,16 @@ describe("Arena lifecycle runner lease and commit recovery", () => {
           const rebound = { ...base, arenaId: manifest.arenaId };
           return { ...rebound, snapshotHash: calculateSnapshotHash(rebound) };
         },
-        getFinalResult: recorded.getFinalResult,
+        getTerminalEvidence() {
+          const recordedEvidence = recorded.getTerminalEvidence();
+          const { terminalEvidenceHash: _terminalEvidenceHash, ...base } =
+            recordedEvidence;
+          const rebound = { ...base, arenaId: manifest.arenaId };
+          return {
+            ...rebound,
+            terminalEvidenceHash: calculateTerminalEvidenceHash(rebound),
+          };
+        },
       }),
       agents: { alpha: decision("alpha"), beta: decision("beta") },
       runtimeMetadata,

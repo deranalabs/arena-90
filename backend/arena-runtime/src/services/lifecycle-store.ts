@@ -15,7 +15,8 @@ export type ArenaLifecycleStoreErrorCode =
   | "REVISION_CONFLICT"
   | "IMMUTABLE_STATE_CONFLICT"
   | "EVENT_SEQUENCE_CONFLICT"
-  | "EVENT_RANGE_CONFLICT";
+  | "EVENT_RANGE_CONFLICT"
+  | "PERSISTENCE_FAILURE";
 
 export class ArenaLifecycleStoreError extends Error {
   readonly code: ArenaLifecycleStoreErrorCode;

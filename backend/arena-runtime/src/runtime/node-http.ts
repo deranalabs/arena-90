@@ -24,6 +24,7 @@ import {
   type ArenaManifest,
 } from "../contracts/index.js";
 import type { ArenaLifecycleRunner } from "../services/arena-lifecycle.js";
+import { createJsonArenaLifecycleStore } from "../services/json-lifecycle-store.js";
 import type { ArenaLifecycleStore } from "../services/lifecycle-store.js";
 import { createNodeArenaLifecycleComposition } from "./node-lifecycle.js";
 
@@ -74,8 +75,7 @@ export interface NodeHttpRuntimeComposition {
   readonly store: ArenaLifecycleStore;
   readonly capacityCoordinator: ArenaHttpCapacityCoordinator;
   readonly server: ReturnType<typeof createArenaHttpServer>;
-  /** This Slice 7 store is intentionally single-process and non-durable. */
-  readonly persistence: "IN_MEMORY_SINGLE_PROCESS_NON_DURABLE";
+  readonly persistence: "ATOMIC_JSON_V1" | "INJECTED";
   isReady(): boolean;
   listen(options?: Readonly<{ host?: string; port?: number }>): Promise<{
     host: string;
@@ -263,6 +263,12 @@ export async function createNodeHttpRuntimeComposition(
     }),
   ) as Record<ArenaAgentId, AgentAdapter>;
   const nowMs = options.nowMs ?? Date.now;
+  const lifecycleStore =
+    options.store ??
+    createJsonArenaLifecycleStore({
+      directory: requiredEnvironmentValue(env, "ARENA90_PERSISTENCE_DIR"),
+      nowMs,
+    });
 
   let recordedFixture: unknown;
   let live:
@@ -349,13 +355,13 @@ export async function createNodeHttpRuntimeComposition(
   const lifecycle = createNodeArenaLifecycleComposition({
     ...(recordedFixture === undefined ? {} : { recordedFixture }),
     ...(live === undefined ? {} : { live }),
-    ...(options.store === undefined ? {} : { store: options.store }),
+    store: lifecycleStore,
     agents,
     runtimeMetadata: {
       runtimeId: "arena90-node-http-runtime",
       runtimeVersion: "7.4",
       executionRuleVersion: "p0-v1",
-      winnerRuleVersion: "p0-final-nav-v1",
+      winnerRuleVersion: "FINAL_NAV_ONLY_V1",
       agentTimeoutMs,
       agents: {
         alpha: {
@@ -423,7 +429,7 @@ export async function createNodeHttpRuntimeComposition(
     store: lifecycle.store,
     capacityCoordinator,
     server,
-    persistence: "IN_MEMORY_SINGLE_PROCESS_NON_DURABLE",
+    persistence: options.store === undefined ? "ATOMIC_JSON_V1" : "INJECTED",
     isReady: () => ready,
     async listen(listenOptions = {}) {
       const host = listenOptions.host ?? defaultHost;

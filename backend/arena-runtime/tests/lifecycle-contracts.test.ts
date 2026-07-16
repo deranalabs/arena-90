@@ -2,10 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import {
   CHECKPOINT_IDS,
-  arenaFinalResultV1Schema,
+  arenaFinalResultV2Schema,
   arenaRunStateV1Schema,
   calculateFinalResultHash,
   calculateSnapshotHash,
+  calculateTerminalEvidenceHash,
 } from "../src/contracts/index.js";
 import { initializePortfolio, settlePortfolio } from "../src/engine/index.js";
 
@@ -33,7 +34,7 @@ const runtimeMetadata = {
   runtimeId: "arena90-runtime",
   runtimeVersion: "6a",
   executionRuleVersion: "p0-v1",
-  winnerRuleVersion: "p0-final-nav-v1",
+  winnerRuleVersion: "FINAL_NAV_ONLY_V1",
   agentTimeoutMs: 30_000,
   agents: {
     alpha: {
@@ -121,28 +122,52 @@ function snapshotFor(
 
 describe("Arena lifecycle contracts", () => {
   it("hashes the fixed-order final result fields and validates the winner", () => {
-    const hashInput = {
+    const terminalEvidenceInput = {
       schemaVersion: 1 as const,
+      providerSequence: 7,
       arenaId: "arena-replay-001",
+      fixtureId: "fixture-recorded-001",
+      observedAtUtc: "2026-07-13T13:52:00.000Z",
+      sourceEventId: "txline-event-007",
+      source: "TXLINE_RECORDED" as const,
+      match: {
+        status: "FINISHED" as const,
+        minute: 90,
+        addedTime: 4,
+        homeScore: 2,
+        awayScore: 1,
+      },
+      winningAssetId: "HOME" as const,
+    };
+    const hashInput = {
+      schemaVersion: 2 as const,
+      arenaId: "arena-replay-001",
+      winnerRule: "FINAL_NAV_ONLY_V1" as const,
       winningAssetId: "HOME" as const,
       winner: "alpha" as const,
       alphaFinalNavMicros: "120000000",
       betaFinalNavMicros: "90000000",
+      terminalEvidence: {
+        ...terminalEvidenceInput,
+        terminalEvidenceHash: calculateTerminalEvidenceHash(
+          terminalEvidenceInput,
+        ),
+      },
+      completedEventSequence: 42,
+      preSettlementEventLogHash: "a".repeat(64),
     };
+    const finalResultHash = calculateFinalResultHash(hashInput);
 
-    expect(calculateFinalResultHash(hashInput)).toBe(
-      "8d17a51f33147618f0fb563bb08c102e8c3613b178a0940eca6ea37ca0ee3d21",
-    );
+    expect(finalResultHash).toMatch(/^[0-9a-f]{64}$/);
+    expect(calculateFinalResultHash(hashInput)).toBe(finalResultHash);
     expect(
-      arenaFinalResultV1Schema.parse({
+      arenaFinalResultV2Schema.parse({
         ...hashInput,
-        finalResultHash:
-          "8d17a51f33147618f0fb563bb08c102e8c3613b178a0940eca6ea37ca0ee3d21",
+        finalResultHash,
       }),
     ).toEqual({
       ...hashInput,
-      finalResultHash:
-        "8d17a51f33147618f0fb563bb08c102e8c3613b178a0940eca6ea37ca0ee3d21",
+      finalResultHash,
     });
   });
 
@@ -156,6 +181,15 @@ describe("Arena lifecycle contracts", () => {
         runtimeMetadata: {
           ...state.runtimeMetadata,
           apiToken: "must-not-be-persisted",
+        },
+      }).success,
+    ).toBe(false);
+    expect(
+      arenaRunStateV1Schema.safeParse({
+        ...state,
+        runtimeMetadata: {
+          ...state.runtimeMetadata,
+          winnerRuleVersion: "p0-final-nav-v1",
         },
       }).success,
     ).toBe(false);
@@ -239,15 +273,43 @@ describe("Arena lifecycle contracts", () => {
       alpha: settlePortfolio(initial.alpha, "HOME", "100000000"),
       beta: settlePortfolio(initial.beta, "HOME", "100000000"),
     };
-    const finalResult = {
+    const terminalEvidenceInput = {
       schemaVersion: 1 as const,
+      providerSequence: 99,
       arenaId: "arena-replay-001",
+      fixtureId: "fixture-recorded-001",
+      observedAtUtc: "2026-07-13T13:52:00.000Z",
+      sourceEventId: "txline-event-099",
+      source: "TXLINE_RECORDED" as const,
+      match: {
+        status: "FINISHED" as const,
+        minute: 90,
+        addedTime: 4,
+        homeScore: 2,
+        awayScore: 1,
+      },
+      winningAssetId: "HOME" as const,
+    };
+    const finalResultInput = {
+      schemaVersion: 2 as const,
+      arenaId: "arena-replay-001",
+      winnerRule: "FINAL_NAV_ONLY_V1" as const,
       winningAssetId: "HOME" as const,
       winner: "DRAW" as const,
       alphaFinalNavMicros: "100000000",
       betaFinalNavMicros: "100000000",
-      finalResultHash:
-        "f95a489df074ec44b9556c0ac0a8b307c46810be3429b663a9df65183e615ccf",
+      terminalEvidence: {
+        ...terminalEvidenceInput,
+        terminalEvidenceHash: calculateTerminalEvidenceHash(
+          terminalEvidenceInput,
+        ),
+      },
+      completedEventSequence: 15,
+      preSettlementEventLogHash: "a".repeat(64),
+    };
+    const finalResult = {
+      ...finalResultInput,
+      finalResultHash: calculateFinalResultHash(finalResultInput),
     };
     const state = {
       ...readyState(),

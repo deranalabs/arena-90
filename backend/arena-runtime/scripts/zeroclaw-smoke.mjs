@@ -16,8 +16,8 @@ const binaryPath = process.env.ZEROCLAW_BIN ?? "zeroclaw";
 const availability = spawnSync(binaryPath, ["--version"], { stdio: "ignore" });
 
 if (availability.status !== 0) {
-  console.log("ZeroClaw smoke skipped: binary unavailable.");
-  process.exit(0);
+  console.error("ZeroClaw smoke failed: CONFIG_FAILURE.");
+  process.exit(2);
 }
 
 const configDir = process.env.ZEROCLAW_CONFIG_DIR;

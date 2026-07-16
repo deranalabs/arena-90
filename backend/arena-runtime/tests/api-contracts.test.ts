@@ -6,10 +6,11 @@ import {
   publicApiErrorEnvelopeV1Schema,
   publicCheckpointV1Schema,
   publicEventHistoryV1Schema,
-  publicFinalResultV1Schema,
+  publicFinalResultV2Schema,
   publicManifestV1Schema,
   publicPortfolioV1Schema,
   publicSnapshotV1Schema,
+  calculateTerminalEvidenceHash,
 } from "../src/index.js";
 
 const publicSnapshot = {
@@ -108,13 +109,39 @@ describe("Arena public API contracts", () => {
       firstEventSequence: 2,
       lastEventSequence: 8,
     } as const;
-    const finalResult = {
-      schemaVersion: 1,
+    const terminalEvidenceInput = {
+      schemaVersion: 1 as const,
+      providerSequence: 7,
       arenaId: publicManifest.arenaId,
+      fixtureId: publicManifest.fixtureId,
+      observedAtUtc: "2026-07-13T13:52:00.000Z",
+      sourceEventId: "txline-event-007",
+      source: "TXLINE_RECORDED" as const,
+      match: {
+        status: "FINISHED" as const,
+        minute: 90,
+        addedTime: 4,
+        homeScore: 2,
+        awayScore: 1,
+      },
+      winningAssetId: "HOME" as const,
+    };
+    const finalResult = {
+      schemaVersion: 2,
+      arenaId: publicManifest.arenaId,
+      winnerRule: "FINAL_NAV_ONLY_V1",
       winningAssetId: "HOME",
       winner: "DRAW",
       alphaFinalNavMicros: "100000000",
       betaFinalNavMicros: "100000000",
+      terminalEvidence: {
+        ...terminalEvidenceInput,
+        terminalEvidenceHash: calculateTerminalEvidenceHash(
+          terminalEvidenceInput,
+        ),
+      },
+      completedEventSequence: 39,
+      preSettlementEventLogHash: "c".repeat(64),
       finalResultHash: "b".repeat(64),
     } as const;
     const state = {
@@ -124,7 +151,7 @@ describe("Arena public API contracts", () => {
       runtimeVersions: {
         runtimeVersion: "7.1",
         executionRuleVersion: "p0-v1",
-        winnerRuleVersion: "p0-final-nav-v1",
+        winnerRuleVersion: "FINAL_NAV_ONLY_V1",
         agents: {
           alpha: { strategyId: "alpha-momentum", strategyVersion: "1" },
           beta: { strategyId: "beta-valuation", strategyVersion: "1" },
@@ -155,7 +182,7 @@ describe("Arena public API contracts", () => {
     expect(publicSnapshotV1Schema.parse(publicSnapshot)).toEqual(publicSnapshot);
     expect(publicPortfolioV1Schema.parse(publicPortfolio)).toEqual(publicPortfolio);
     expect(publicCheckpointV1Schema.parse(checkpoint)).toEqual(checkpoint);
-    expect(publicFinalResultV1Schema.parse(finalResult)).toEqual(finalResult);
+    expect(publicFinalResultV2Schema.parse(finalResult)).toEqual(finalResult);
     expect(publicArenaStateV1Schema.parse(state)).toEqual(state);
     expect(publicArenaEventV1Schema.parse(event)).toEqual(event);
     expect(
