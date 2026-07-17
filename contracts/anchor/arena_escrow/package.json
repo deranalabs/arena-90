@@ -3,7 +3,8 @@
   "private": true,
   "scripts": {
     "test": "cargo test",
-    "smoke:devnet": "node scripts/devnet-lifecycle-smoke.mjs"
+    "smoke:devnet": "node scripts/devnet-lifecycle-smoke.mjs",
+    "smoke:devnet:settlement": "node scripts/devnet-settlement-smoke.mjs"
   },
   "devDependencies": {
     "@coral-xyz/anchor": "0.32.1",

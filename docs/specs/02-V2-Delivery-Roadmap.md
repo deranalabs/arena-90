@@ -80,7 +80,7 @@ fallback evidence, not a substitute for the required live integration.
 | 1. Strategy Integrity | Complete locally | Deploy strategy v2 and preserve smoke evidence |
 | 2. Always-On World Cup Live | In progress | Supervisor clean-boot and restart proof |
 | 3. Spectator & Technical Proof | In progress | World Cup API/SSE through browser |
-| 4. Solana Supporter Slice | In progress | TxLINE receipt, settlement, and frontend wallet proof |
+| 4. Solana Supporter Slice | In progress | Runtime resolver seam, public Blink, and frontend proof |
 | 5. Release & Demo | Not started | Rehearsal, security audit, deploy, and recording |
 
 Update this table only from captured acceptance evidence. Local implementation
@@ -144,6 +144,13 @@ or an isolated unit test does not close a gate.
   and Claim transactions after program-owner, origin, wallet, amount, and rate
   validation. Build and all five HTTP/encoding tests pass; production
   dependency audit reports zero known vulnerabilities.
+- A second real devnet smoke used TxLINE fixture `17926686`, provider sequence
+  `880`, and HOME/AWAY terminal leaves `1-1`. Two wallets backed opposite
+  agents, the deadline locked, TxLINE returned true through CPI, the receipt
+  was consumed exactly once, Alpha settled, the losing claim failed, and the
+  winning position claimed the complete zero-fee pool. The terminal-proof
+  transaction is
+  `4AresX6YhituNL9AKuhanWSX15sfddi27f9fU4wzFdTasGhniEknftTjFXs3Mj9R7vKxWR9nVBMnPu8rfFTRTDA5`.
 
 ### 3.2 Not Proven
 
@@ -166,9 +173,9 @@ or an isolated unit test does not close a gate.
   Vercel build and homepage response.
 - The Event Ledger changes have not yet been deployed or matched against a
   persisted production World Cup SSE sequence in a browser.
-- TxLINE terminal proof receipt, winner settlement, Alpha/Beta payout, and
-  rejection paths have not passed devnet end to end. The completed void/refund
-  smoke is necessary but does not close Gate 4.
+- The successful winner-settlement smoke used an isolated deterministic test
+  result hash. The deployed runtime has not yet submitted its persisted
+  canonical `finalResultHash` through the restricted resolver seam.
 - The Action service has not been deployed publicly or exercised through a
   Blink client. Frontend wallet signing and transaction proof remain absent.
 - Demo-critical frontend routes still contain competing CSS foundations and
