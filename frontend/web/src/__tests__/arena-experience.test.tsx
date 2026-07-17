@@ -270,7 +270,7 @@ describe("Arena90 spectator experience", () => {
       />,
     );
 
-    expect(await screen.findByText("COMPLETED")).toBeInTheDocument();
+    expect((await screen.findAllByText("COMPLETED")).length).toBeGreaterThanOrEqual(1);
     expect(screen.getByRole("heading", { name: "Agent Alpha wins" })).toBeInTheDocument();
     expect(screen.getAllByText("112.50 vUSD").length).toBeGreaterThanOrEqual(1);
     expect(screen.getAllByText("108.00 vUSD").length).toBeGreaterThanOrEqual(1);

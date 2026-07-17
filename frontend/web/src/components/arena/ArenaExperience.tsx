@@ -4,6 +4,7 @@ import type { CSSProperties } from "react";
 import Link from "next/link";
 
 import { AgentPortrait } from "@/components/agents/AgentPortrait";
+import { ArenaEventLedger } from "@/components/arena/ArenaEventLedger";
 import {
   ArenaNextEvent,
   ArenaScoreboard,
@@ -174,7 +175,7 @@ function AgentCard({
       <p className="product-eyebrow">Agent {alpha ? "01" : "02"}</p>
       <h2>Agent {alpha ? "Alpha" : "Beta"}</h2>
       <p className="arena-agent__strategy">
-        {alpha ? "Momentum & Repricing" : "Structure & Valuation Control"}
+        {alpha ? "Overreaction Hunter" : "Underreaction Hunter"}
       </p>
       <dl className="arena-metrics">
         <div><dt>NAV</dt><dd>{formatMicros(portfolio.navMicros)}</dd></div>
@@ -370,6 +371,11 @@ export function ArenaExperience({
       />
 
       <CompetitionStatusBand detail={roundStatus.detail} label={roundStatus.label} />
+
+      <ArenaEventLedger
+        connection={connectionMessage(session.status)}
+        events={session.events}
+      />
 
       <section className="arena-leader-strip" aria-label="Competition leader">
         <div><span>Standing</span><strong>{standing}</strong></div>

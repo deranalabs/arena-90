@@ -1,11 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { FEATURED_REPLAY_ARENA_ID } from "@/lib/featured-arena";
-
-const replayHref = `/arena/${FEATURED_REPLAY_ARENA_ID}/replay`;
+import { FEATURED_ARENA } from "@/lib/featured-arena";
 const navigation = [
-  { label: "Replay Arena", href: `/arena/${FEATURED_REPLAY_ARENA_ID}` },
+  { label: FEATURED_ARENA.navigationLabel, href: FEATURED_ARENA.arenaHref },
   { label: "Agents", href: "/agents" },
   { label: "Replays", href: "/replays" },
   { label: "How it works", href: "/how-it-works" },
@@ -43,8 +41,8 @@ export function SiteFooter() {
 
           <div className="site-footer__actions">
             <span>Powered by TxLINE</span>
-            <Link className="site-footer__cta" href={replayHref}>
-              Watch Replay <span aria-hidden="true">→</span>
+            <Link className="site-footer__cta" href={FEATURED_ARENA.watchHref}>
+              {FEATURED_ARENA.watchLabel} <span aria-hidden="true">→</span>
             </Link>
           </div>
         </div>

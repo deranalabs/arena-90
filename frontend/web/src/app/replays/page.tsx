@@ -1,7 +1,9 @@
 import Link from "next/link";
 
 import { ProductPageIntro } from "@/components/product/ProductPageIntro";
-import { FEATURED_REPLAY_ARENA_ID } from "@/lib/featured-arena";
+import { resolveFeaturedArena } from "@/lib/featured-arena";
+
+const foundationReplay = resolveFeaturedArena("FOUNDATION_REPLAY");
 
 export default function ReplaysPage() {
   return (
@@ -24,7 +26,7 @@ export default function ReplaysPage() {
           <div><dt>Engine</dt><dd>Canonical runtime</dd></div>
           <div><dt>Decisions</dt><dd>Generated per run</dd></div>
         </dl>
-        <Link className="product-text-link" href={`/arena/${FEATURED_REPLAY_ARENA_ID}/replay`}>
+        <Link className="product-text-link" href={foundationReplay.watchHref}>
           Open Foundation Replay <span aria-hidden="true">→</span>
         </Link>
       </section>

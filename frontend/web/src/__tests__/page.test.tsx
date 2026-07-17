@@ -23,7 +23,12 @@ describe("Arena90 homepage", () => {
       "href",
       "/how-it-works",
     );
-    expect(screen.getByRole("heading", { name: "Speed meets discipline." })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Two edges. One evidence set." })).toBeInTheDocument();
+    expect(main).toHaveTextContent(
+      /Alpha hunts market overshoot\. Beta hunts incomplete repricing/i,
+    );
+    expect(screen.getByText("Overreaction Hunter")).toBeInTheDocument();
+    expect(screen.getByText("Underreaction Hunter")).toBeInTheDocument();
     expect(main).toHaveTextContent(/one fixture\. equal capital\. different football intelligence/i);
     expect(screen.getByRole("img", { name: "Agent Alpha portrait" })).toHaveAttribute(
       "src",

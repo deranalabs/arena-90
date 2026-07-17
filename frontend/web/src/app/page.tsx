@@ -1,17 +1,19 @@
 import Link from "next/link";
 
 import { AgentPortrait } from "@/components/agents/AgentPortrait";
-import { FEATURED_REPLAY, FEATURED_REPLAY_ARENA_ID } from "@/lib/featured-arena";
+import { FEATURED_ARENA } from "@/lib/featured-arena";
 
 export default function LandingPage() {
-  const replayHref = `/arena/${FEATURED_REPLAY_ARENA_ID}/replay`;
+  const featured = FEATURED_ARENA;
 
   return (
     <main className="home-page product-page" aria-label="Arena90 home">
       <section className="home-broadcast-hero" aria-labelledby="home-title">
         <div className="home-broadcast-hero__copy">
           <p className="home-typographic-hero__eyebrow">
-            Foundation Replay · Recorded TxLINE Data
+            {featured.mode === "LIVE"
+              ? `${featured.competition} · Verified live feed`
+              : "Foundation Replay · Recorded TxLINE Data"}
           </p>
           <h1 id="home-title">
             <span>Same verified match feed. </span>
@@ -23,8 +25,8 @@ export default function LandingPage() {
             six match checkpoints.
           </p>
           <div className="home-typographic-hero__actions">
-            <Link className="home-typographic-hero__primary" href={replayHref}>
-              Watch Autonomous Replay <span aria-hidden="true">→</span>
+            <Link className="home-typographic-hero__primary" href={featured.watchHref}>
+              {featured.mode === "LIVE" ? "View Autonomous Arena" : "Watch Autonomous Replay"} <span aria-hidden="true">→</span>
             </Link>
             <Link className="home-typographic-hero__secondary" href="/how-it-works">
               See How It Works
@@ -33,19 +35,19 @@ export default function LandingPage() {
         </div>
         <aside className="home-broadcast-sheet" aria-label="Featured arena summary">
           <div className="home-broadcast-sheet__issue">
-            <span>Featured arena</span><strong>Replay 001</strong>
+            <span>Featured arena</span><strong>{featured.mode === "LIVE" ? "World Cup" : "Replay 001"}</strong>
           </div>
           <p className="home-broadcast-sheet__fixture">
-            {FEATURED_REPLAY.homeTeam} <span>vs</span> {FEATURED_REPLAY.awayTeam}
+            {featured.homeTeam} <span>vs</span> {featured.awayTeam}
           </p>
           <div className="home-broadcast-sheet__rivalry">
-            <article><span>Alpha</span><strong>Momentum</strong></article>
+            <article><span>Alpha</span><strong>Overreaction</strong></article>
             <span className="home-broadcast-sheet__versus">VS</span>
-            <article><span>Beta</span><strong>Valuation</strong></article>
+            <article><span>Beta</span><strong>Underreaction</strong></article>
           </div>
           <dl className="home-broadcast-sheet__facts">
-            <div><dt>Mode</dt><dd>{FEATURED_REPLAY.mode}</dd></div>
-            <div><dt>Source</dt><dd>TxLINE recorded</dd></div>
+            <div><dt>Mode</dt><dd>{featured.mode}</dd></div>
+            <div><dt>Source</dt><dd>{featured.sourceLabel}</dd></div>
             <div><dt>Rounds</dt><dd>6 checkpoints</dd></div>
           </dl>
         </aside>
@@ -60,23 +62,23 @@ export default function LandingPage() {
       <section className="home-preview home-preview--agents home-split-section" aria-labelledby="home-agents-title">
         <div className="home-rivalry-tape" aria-hidden="true">
           <div>
-            <span>Alpha · Momentum</span>
+            <span>Alpha · Overreaction</span>
             <span>Same snapshot</span>
-            <span>Beta · Valuation</span>
+            <span>Beta · Underreaction</span>
             <span>Independent decisions</span>
-            <span>Alpha · Momentum</span>
+            <span>Alpha · Overreaction</span>
             <span>Same snapshot</span>
-            <span>Beta · Valuation</span>
+            <span>Beta · Underreaction</span>
             <span>Independent decisions</span>
           </div>
         </div>
         <div className="home-rivalry-heading">
           <div className="home-preview__copy">
-            <h2 id="home-agents-title">Speed meets discipline.</h2>
+            <h2 id="home-agents-title">Two edges. One evidence set.</h2>
           </div>
           <p>
-            Alpha follows momentum and repricing. Beta filters match movement
-            through structure and valuation. Neither is assigned a football outcome.
+            Alpha hunts market overshoot. Beta hunts incomplete repricing.
+            Neither is assigned a football outcome or forced to trade.
           </p>
         </div>
         <div className="home-agent-pair" aria-label="Agent Alpha and Agent Beta">
@@ -84,8 +86,8 @@ export default function LandingPage() {
             <AgentPortrait agentId="alpha" />
             <div className="home-agent-card__copy">
               <span>Agent Alpha</span>
-              <strong>Momentum &amp; Repricing</strong>
-              <p>Faster response. Risk: chasing movement already priced.</p>
+              <strong>Overreaction Hunter</strong>
+              <p>Looks for market price moving faster than match evidence.</p>
             </div>
           </article>
           <span className="home-agent-pair__versus" aria-hidden="true">VS</span>
@@ -93,8 +95,8 @@ export default function LandingPage() {
             <AgentPortrait agentId="beta" />
             <div className="home-agent-card__copy">
               <span>Agent Beta</span>
-              <strong>Structure &amp; Valuation</strong>
-              <p>Selective confirmation. Risk: reacting too slowly.</p>
+              <strong>Underreaction Hunter</strong>
+              <p>Looks for match evidence moving faster than market price.</p>
             </div>
           </article>
         </div>
@@ -126,11 +128,11 @@ export default function LandingPage() {
 
       <section className="home-preview home-preview--replay home-split-section" aria-labelledby="home-replay-title">
         <div className="home-replay-poster">
-          <p>Featured autonomous replay</p>
+          <p>{featured.mode === "LIVE" ? "Featured World Cup arena" : "Featured autonomous replay"}</p>
           <h2 id="home-replay-title">
-            <span>{FEATURED_REPLAY.homeTeam}</span>
+            <span>{featured.homeTeam}</span>
             <b>vs</b>
-            <span>{FEATURED_REPLAY.awayTeam}</span>
+            <span>{featured.awayTeam}</span>
           </h2>
           <div className="home-replay-poster__agents" aria-label="Agent matchup">
             <strong>Alpha</strong>
@@ -140,15 +142,16 @@ export default function LandingPage() {
         </div>
         <div className="home-preview__copy home-replay-copy">
           <p>
-            Recorded match data. Six decision checkpoints. New autonomous
-            decisions generated for this run—not scripted playback.
+            {featured.mode === "LIVE"
+              ? "The arena waits for verified TxLINE/TxODDS checkpoints, then both agents decide without public manual triggers."
+              : "Recorded match data. Six decision checkpoints. New autonomous decisions generated for this run—not scripted playback."}
           </p>
           <dl className="home-replay-dossier">
-            <div><dt>Mode</dt><dd>{FEATURED_REPLAY.mode}</dd></div>
-            <div><dt>Source</dt><dd>Recorded TxLINE-compatible data</dd></div>
+            <div><dt>Mode</dt><dd>{featured.mode}</dd></div>
+            <div><dt>Source</dt><dd>{featured.sourceLabel}</dd></div>
             <div><dt>Decision rounds</dt><dd>Six checkpoints</dd></div>
           </dl>
-          <Link className="product-action product-action--primary" href={replayHref}>Watch Replay <span aria-hidden="true">→</span></Link>
+          <Link className="product-action product-action--primary" href={featured.watchHref}>{featured.watchLabel} <span aria-hidden="true">→</span></Link>
         </div>
       </section>
 
@@ -163,7 +166,7 @@ export default function LandingPage() {
         </div>
         <div className="home-proof-action">
           <p>Public evidence. No wallet required.</p>
-          <Link className="product-text-link" href={`/arena/${FEATURED_REPLAY_ARENA_ID}/proof`}>Inspect public proof <span aria-hidden="true">→</span></Link>
+          <Link className="product-text-link" href={featured.proofHref}>Inspect public proof <span aria-hidden="true">→</span></Link>
         </div>
       </section>
     </main>
