@@ -1,7 +1,7 @@
 [package]
 name = "arena_escrow"
 version = "0.1.0"
-description = "Created with Anchor"
+description = "Arena90 V2 native-SOL supporter escrow and settlement program"
 edition.workspace = true
 rust-version.workspace = true
 
@@ -14,28 +14,15 @@ default = []
 cpi = ["no-entrypoint"]
 no-entrypoint = []
 no-log-ix-name = []
-idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
+idl-build = ["anchor-lang/idl-build"]
 anchor-debug = []
 custom-heap = []
 custom-panic = []
 
 
 [dependencies]
-anchor-lang = "1.1.2"
-anchor-spl = "1.1.2"
-kamino_mock = { path = "../kamino_mock", features = ["cpi"] }
-
-[dev-dependencies]
-litesvm = "0.10.0"
-solana-account = "3.4.0"
-solana-message = "3.0.1"
-solana-program-option = "3.1.0"
-solana-program-pack = "3.1.0"
-solana-transaction = "3.0.2"
-solana-signer = "3.0.0"
-solana-keypair = "3.0.1"
-spl-token-interface = "2.0.0"
-
+anchor-lang = { version = "1.1.2", features = ["init-if-needed"] }
+solana-sha256-hasher = "3.1.0"
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(target_os, values("solana"))'] }
