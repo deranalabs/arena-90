@@ -6,6 +6,7 @@ import {
   calculateArenaManifestHash,
   calculateFinalResultHash,
   calculateTerminalEvidenceHash,
+  createSolanaArenaPreparationIntent,
   createSolanaSettlementIntent,
   solanaSettlementIntentV1Schema,
   type ArenaManifest,
@@ -68,6 +69,22 @@ function finalResult() {
 }
 
 describe("Solana settlement intent", () => {
+  it("closes supporter backing exactly at Live kickoff", () => {
+    expect(createSolanaArenaPreparationIntent(manifest)).toEqual({
+      schemaVersion: 1,
+      arenaId: manifest.arenaId,
+      identityHash: calculateArenaIdentityHash(manifest.arenaId),
+      manifestHash: calculateArenaManifestHash(manifest),
+      fixtureId: manifest.fixtureId,
+      backingDeadlineUtc: manifest.kickoffUtc,
+      feeBps: 0,
+      idempotencyKey: calculateArenaIdentityHash(manifest.arenaId),
+    });
+    expect(() =>
+      createSolanaArenaPreparationIntent({ ...manifest, mode: "REPLAY" }),
+    ).toThrow("Replay arenas cannot create Solana preparation intents");
+  });
+
   it("binds one Live final result to canonical arena hashes", () => {
     const result = finalResult();
     const intent = createSolanaSettlementIntent(manifest, result);

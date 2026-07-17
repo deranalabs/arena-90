@@ -27,6 +27,23 @@ const i64PositiveStringSchema = z.string().regex(/^[1-9]\d*$/).superRefine(
   },
 );
 
+export const solanaArenaPreparationIntentV1Schema = z
+  .object({
+    schemaVersion: z.literal(1),
+    arenaId: z.string().trim().min(1),
+    identityHash: hashHexSchema,
+    manifestHash: hashHexSchema,
+    fixtureId: i64PositiveStringSchema,
+    backingDeadlineUtc: z.iso.datetime({ offset: true }),
+    feeBps: z.literal(0),
+    idempotencyKey: hashHexSchema,
+  })
+  .strict();
+
+export type SolanaArenaPreparationIntentV1 = z.infer<
+  typeof solanaArenaPreparationIntentV1Schema
+>;
+
 export const solanaSettlementIntentV1Schema = z
   .object({
     schemaVersion: z.literal(1),
@@ -52,6 +69,26 @@ export const solanaSettlementIntentV1Schema = z
 export type SolanaSettlementIntentV1 = z.infer<
   typeof solanaSettlementIntentV1Schema
 >;
+
+export function createSolanaArenaPreparationIntent(
+  manifestInput: ArenaManifest,
+): SolanaArenaPreparationIntentV1 {
+  const manifest = arenaManifestSchema.parse(manifestInput);
+  if (manifest.mode !== "LIVE") {
+    throw new Error("Replay arenas cannot create Solana preparation intents");
+  }
+  const identityHash = calculateArenaIdentityHash(manifest.arenaId);
+  return solanaArenaPreparationIntentV1Schema.parse({
+    schemaVersion: 1,
+    arenaId: manifest.arenaId,
+    identityHash,
+    manifestHash: calculateArenaManifestHash(manifest),
+    fixtureId: manifest.fixtureId,
+    backingDeadlineUtc: manifest.kickoffUtc,
+    feeBps: 0,
+    idempotencyKey: identityHash,
+  });
+}
 
 export function createSolanaSettlementIntent(
   manifestInput: ArenaManifest,

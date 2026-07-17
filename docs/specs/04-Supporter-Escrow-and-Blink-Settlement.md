@@ -83,6 +83,10 @@ Creates the Arena and vault from canonical Live identity, fixture ID, manifest
 hash, backing deadline, resolver, treasury, and fee. Rejects Replay identity,
 past deadlines, invalid fee, and duplicate identity.
 
+For V2, the immutable backing deadline equals the approved Live manifest's
+`kickoffUtc`. No backing is accepted after agents can receive live match
+evidence.
+
 ### `back_agent`
 
 Transfers user-signed SOL into the arena vault before the deadline. Creates or
