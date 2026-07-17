@@ -4,3 +4,4 @@ export { classifyAgentDecisionOutput } from "./checkpoint-execution.js";
 export * from "./lifecycle-runner.js";
 export * from "./lifecycle-store.js";
 export * from "./json-lifecycle-store.js";
+export * from "./strategy-evidence.js";

@@ -16,6 +16,7 @@ import {
   type PersistedArenaEventV1,
   type PortfolioState,
 } from "../contracts/index.js";
+import { deriveStrategyEvidence } from "./strategy-evidence.js";
 import { applyDecision, markToMarket } from "../engine/index.js";
 
 export interface CheckpointExecutionPortfolios {
@@ -216,6 +217,7 @@ export function createCheckpointOpeningEvents(
 
 export async function executePreparedCheckpoint(input: {
   readonly snapshot: CanonicalSnapshot;
+  readonly acceptedSnapshots: readonly CanonicalSnapshot[];
   readonly portfolios: CheckpointExecutionPortfolios;
   readonly agents: Readonly<Record<ArenaAgentId, AgentAdapter>>;
   readonly timeoutMs: number;
@@ -224,6 +226,10 @@ export async function executePreparedCheckpoint(input: {
   readonly signal: AbortSignal;
 }): Promise<PreparedCheckpointExecutionResult> {
   const { snapshot } = input;
+  const strategyEvidence = deriveStrategyEvidence(
+    snapshot,
+    input.acceptedSnapshots,
+  );
   const validateDecisionOutput = (
     agentId: ArenaAgentId,
     output: unknown,
@@ -238,6 +244,7 @@ export async function executePreparedCheckpoint(input: {
     agentId: ArenaAgentId,
   ): Omit<AgentInvocationRequest, "signal"> => ({
     snapshot: structuredClone(snapshot),
+    strategyEvidence: structuredClone(strategyEvidence),
     portfolio: structuredClone(input.portfolios[agentId]),
     attempt: 0,
     validationErrors: [],
@@ -288,6 +295,7 @@ export async function executePreparedCheckpoint(input: {
       input.agents[agentId],
       {
         snapshot: structuredClone(snapshot),
+        strategyEvidence: structuredClone(strategyEvidence),
         portfolio: structuredClone(input.portfolios[agentId]),
         attempt: 1,
         validationErrors,

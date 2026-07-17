@@ -5,6 +5,7 @@ import {
   createAgentDecisionSchema,
   createRecordedDataAdapter,
   createZeroClawAgentAdapter,
+  deriveStrategyEvidence,
   initializePortfolio,
 } from "../dist/index.js";
 import {
@@ -57,6 +58,7 @@ async function invokeAgent(agentId) {
       configDir,
     }).invoke({
       snapshot,
+      strategyEvidence: deriveStrategyEvidence(snapshot, []),
       portfolio: initializePortfolio(agentId, "100000000"),
       attempt: 0,
       validationErrors: [],

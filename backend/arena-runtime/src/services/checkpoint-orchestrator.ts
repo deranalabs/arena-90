@@ -52,6 +52,7 @@ export function createCheckpointOrchestrator(
   let nextCheckpointIndex = 0;
   const events: ArenaEvent[] = [];
   const completedCheckpoints = new Map<DecisionCheckpointId, CheckpointRunResult>();
+  const acceptedSnapshots: CanonicalSnapshot[] = [];
 
   const snapshotEvents = () => structuredClone(events);
   const snapshotResult = (result: CheckpointRunResult) => structuredClone(result);
@@ -148,6 +149,7 @@ export function createCheckpointOrchestrator(
       sequence = openingEvents.at(-1)?.sequence ?? sequence;
       const execution = await executePreparedCheckpoint({
         snapshot,
+        acceptedSnapshots,
         portfolios,
         agents: config.agents,
         timeoutMs: config.timeoutMs,
@@ -156,6 +158,7 @@ export function createCheckpointOrchestrator(
         signal: new AbortController().signal,
       });
       events.push(...execution.events);
+      acceptedSnapshots.push(snapshot);
       sequence = execution.events.at(-1)?.sequence ?? sequence;
       nextCheckpointIndex += 1;
       const result = {

@@ -154,9 +154,9 @@ export class AgentOutputError extends Error {
 
 const STRATEGY_PROMPTS: Record<ArenaAgentId, string> = {
   alpha:
-    "You are Arena90 Agent Alpha. Follow a momentum and repricing strategy: evaluate recent match-state changes and whether prices have fully repriced them.",
+    "You are Arena90 Agent Alpha, the Overreaction Hunter. Your primary signal is no new goal in matchDeltaFromPrevious while any outcome price moves by at least 150000 micros within 15 elapsed match minutes. That is an overshoot: allocate away from the overpriced outcome toward supported alternatives or cash. Otherwise you may diversify, reduce exposure, hold cash, or choose NO_TRADE.",
   beta:
-    "You are Arena90 Agent Beta. Follow a structure and valuation control strategy: evaluate baseline value, margin of safety, concentration, and whether recent movement is noise.",
+    "You are Arena90 Agent Beta, the Underreaction Hunter. Your primary signal is a new goal in matchDeltaFromPrevious while the scoring side's priceDeltaFromPreviousMicros rises by less than 80000 micros. That is incomplete repricing: allocate toward the scoring side while managing concentration. Otherwise you may diversify, reduce exposure, hold cash, or choose NO_TRADE.",
 };
 
 function sanitizeValidationError(error: string): string {
@@ -266,6 +266,7 @@ function createMessage(
   } as const;
   const input = {
     snapshot: request.snapshot,
+    strategyEvidence: request.strategyEvidence,
     portfolio: request.portfolio,
     attempt: request.attempt,
     repairErrors: request.validationErrors
@@ -284,6 +285,9 @@ function createMessage(
   return [
     STRATEGY_PROMPTS[agentId],
     "Use only the supplied input.",
+    "Treat normalized prices summing to 1000000 as market state, not proof that no edge exists.",
+    "Never invent historical probability, movement, baseline, or match evidence. If evidence is null, say it is unavailable or choose NO_TRADE.",
+    "If there is no primary strategy signal and no other edge strictly supported by the supplied fields, choose NO_TRADE.",
     "Choose exactly one action: NO_TRADE or TARGET_ALLOCATION.",
     "Copy schemaVersion, arenaId, snapshotId, checkpointId, and agentId exactly from the selected shape below. Do not infer or change them.",
     "NO_TRADE must not include targetAllocationBps.",

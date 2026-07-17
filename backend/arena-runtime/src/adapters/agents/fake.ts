@@ -2,10 +2,12 @@ import type {
   ArenaAgentId,
   CanonicalSnapshot,
   PortfolioState,
+  StrategyEvidenceV1,
 } from "../../contracts/index.js";
 
 export interface AgentInvocationRequest {
   snapshot: CanonicalSnapshot;
+  strategyEvidence: StrategyEvidenceV1;
   portfolio: PortfolioState;
   attempt: 0 | 1;
   validationErrors: readonly string[];

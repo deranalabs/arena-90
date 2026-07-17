@@ -44,7 +44,9 @@
     "smoke:http:replay": "npm run build && node --env-file-if-exists=.env scripts/http-replay-smoke.mjs",
     "smoke:lifecycle:replay": "npm run build && node --env-file-if-exists=.env scripts/lifecycle-replay-smoke.mjs",
     "smoke:txline": "npm run build && node --env-file-if-exists=.env scripts/txline-smoke.mjs",
+    "inspect:txline:fixtures": "npm run build && node --env-file-if-exists=.env scripts/txline-fixture-inspect.mjs",
     "smoke:zeroclaw": "npm run build && node --env-file-if-exists=.env scripts/zeroclaw-smoke.mjs",
+    "smoke:zeroclaw:strategy": "npm run build && node --env-file-if-exists=.env scripts/zeroclaw-strategy-smoke.mjs",
     "test": "vitest run"
   },
   "dependencies": {

@@ -11,6 +11,7 @@ import {
 } from "../src/adapters/agents/index.js";
 import { createRecordedDataAdapter } from "../src/adapters/data/index.js";
 import { initializePortfolio } from "../src/engine/index.js";
+import { deriveStrategyEvidence } from "../src/services/index.js";
 
 async function loadRecordedFixture(): Promise<unknown> {
   const contents = await readFile(
@@ -44,6 +45,7 @@ describe("ZeroClaw agent adapter", () => {
       processRunner,
     }).invoke({
       snapshot,
+      strategyEvidence: deriveStrategyEvidence(snapshot, []),
       portfolio: initializePortfolio("beta", "100000000"),
       attempt: 0,
       validationErrors: [],
@@ -95,6 +97,7 @@ describe("ZeroClaw agent adapter", () => {
       processRunner,
     }).invoke({
       snapshot,
+      strategyEvidence: deriveStrategyEvidence(snapshot, []),
       portfolio: initializePortfolio("alpha", "100000000"),
       attempt: 1,
       validationErrors: [
@@ -156,6 +159,7 @@ describe("ZeroClaw agent adapter", () => {
     await expect(
       adapter.invoke({
         snapshot,
+        strategyEvidence: deriveStrategyEvidence(snapshot, []),
         portfolio,
         attempt: 1,
         validationErrors: ["Target allocations must sum to 10000 basis points"],
@@ -184,6 +188,7 @@ describe("ZeroClaw agent adapter", () => {
       ),
     ).toEqual({
       snapshot,
+      strategyEvidence: deriveStrategyEvidence(snapshot, []),
       portfolio,
       attempt: 1,
       repairErrors: ["Target allocations must sum to 10000 basis points"],
@@ -211,6 +216,7 @@ describe("ZeroClaw agent adapter", () => {
     await expect(
       adapter.invoke({
         snapshot,
+        strategyEvidence: deriveStrategyEvidence(snapshot, []),
         portfolio: initializePortfolio("beta", "100000000"),
         attempt: 0,
         validationErrors: [],
@@ -239,6 +245,7 @@ describe("ZeroClaw agent adapter", () => {
     await expect(
       adapter.invoke({
         snapshot,
+        strategyEvidence: deriveStrategyEvidence(snapshot, []),
         portfolio: initializePortfolio("alpha", "100000000"),
         attempt: 0,
         validationErrors: [],
@@ -281,6 +288,7 @@ describe("ZeroClaw agent adapter", () => {
     await expect(
       adapter.invoke({
         snapshot,
+        strategyEvidence: deriveStrategyEvidence(snapshot, []),
         portfolio: initializePortfolio("alpha", "100000000"),
         attempt: 0,
         validationErrors: [],
@@ -318,6 +326,7 @@ describe("ZeroClaw agent adapter", () => {
     await expect(
       adapter.invoke({
         snapshot,
+        strategyEvidence: deriveStrategyEvidence(snapshot, []),
         portfolio: initializePortfolio("alpha", "100000000"),
         attempt: 0,
         validationErrors: [],
@@ -355,6 +364,7 @@ describe("ZeroClaw agent adapter", () => {
     await expect(
       adapter.invoke({
         snapshot,
+        strategyEvidence: deriveStrategyEvidence(snapshot, []),
         portfolio: initializePortfolio("alpha", "100000000"),
         attempt: 0,
         validationErrors: [],
@@ -384,6 +394,7 @@ describe("ZeroClaw agent adapter", () => {
     await expect(
       adapter.invoke({
         snapshot,
+        strategyEvidence: deriveStrategyEvidence(snapshot, []),
         portfolio: initializePortfolio("alpha", "100000000"),
         attempt: 0,
         validationErrors: [],
@@ -421,6 +432,7 @@ describe("ZeroClaw agent adapter", () => {
     await expect(
       adapter.invoke({
         snapshot,
+        strategyEvidence: deriveStrategyEvidence(snapshot, []),
         portfolio: initializePortfolio("alpha", "100000000"),
         attempt: 0,
         validationErrors: [],
@@ -455,6 +467,7 @@ describe("ZeroClaw agent adapter", () => {
     await expect(
       adapter.invoke({
         snapshot,
+        strategyEvidence: deriveStrategyEvidence(snapshot, []),
         portfolio: initializePortfolio("beta", "100000000"),
         attempt: 0,
         validationErrors: [],
@@ -478,6 +491,7 @@ describe("ZeroClaw agent adapter", () => {
     await expect(
       adapter.invoke({
         snapshot,
+        strategyEvidence: deriveStrategyEvidence(snapshot, []),
         portfolio: initializePortfolio("alpha", "100000000"),
         attempt: 0,
         validationErrors: [],
@@ -511,6 +525,7 @@ describe("ZeroClaw agent adapter", () => {
       processRunner,
     }).invoke({
       snapshot,
+      strategyEvidence: deriveStrategyEvidence(snapshot, []),
       portfolio: initializePortfolio("alpha", "100000000"),
       attempt: 0,
       validationErrors: [],
@@ -523,6 +538,7 @@ describe("ZeroClaw agent adapter", () => {
       processRunner,
     }).invoke({
       snapshot,
+      strategyEvidence: deriveStrategyEvidence(snapshot, []),
       portfolio: initializePortfolio("beta", "100000000"),
       attempt: 0,
       validationErrors: [],
@@ -530,19 +546,15 @@ describe("ZeroClaw agent adapter", () => {
     });
 
     expect({
-      alphaUsesMomentum: messages["alpha"]?.includes("momentum and repricing"),
-      alphaUsesBetaStrategy: messages["alpha"]?.includes(
-        "structure and valuation control",
-      ),
-      betaUsesMomentum: messages["beta"]?.includes("momentum and repricing"),
-      betaUsesBetaStrategy: messages["beta"]?.includes(
-        "structure and valuation control",
-      ),
+      alphaUsesOverreaction: messages["alpha"]?.includes("Overreaction Hunter"),
+      alphaUsesBetaStrategy: messages["alpha"]?.includes("Underreaction Hunter"),
+      betaUsesAlphaStrategy: messages["beta"]?.includes("Overreaction Hunter"),
+      betaUsesUnderreaction: messages["beta"]?.includes("Underreaction Hunter"),
     }).toEqual({
-      alphaUsesMomentum: true,
+      alphaUsesOverreaction: true,
       alphaUsesBetaStrategy: false,
-      betaUsesMomentum: false,
-      betaUsesBetaStrategy: true,
+      betaUsesAlphaStrategy: false,
+      betaUsesUnderreaction: true,
     });
   });
 

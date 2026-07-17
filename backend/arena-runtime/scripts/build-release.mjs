@@ -54,6 +54,7 @@ try {
     "lifecycle-replay-smoke.mjs",
     "txline-smoke.mjs",
     "zeroclaw-smoke.mjs",
+    "zeroclaw-strategy-smoke.mjs",
   ]) {
     await cp(join(packageRoot, "scripts", script), join(stage, "scripts", script));
   }
@@ -69,6 +70,7 @@ try {
     "smoke:lifecycle:replay": "node scripts/lifecycle-replay-smoke.mjs",
     "smoke:txline": "node scripts/txline-smoke.mjs",
     "smoke:zeroclaw": "node scripts/zeroclaw-smoke.mjs",
+    "smoke:zeroclaw:strategy": "node scripts/zeroclaw-strategy-smoke.mjs",
   };
   await writeFile(
     join(stage, "package.json"),

@@ -210,6 +210,7 @@ describe("checkpoint orchestrator", () => {
   it("calls independent agents with one identical snapshot and reveals both decisions together", async () => {
     const dataAdapter = createRecordedDataAdapter(await loadRecordedFixture());
     const receivedSnapshots: string[] = [];
+    const receivedStrategyEvidence: string[] = [];
     const receivedPortfolioAgents: string[] = [];
     const alphaDecision = {
       schemaVersion: 1 as const,
@@ -237,11 +238,13 @@ describe("checkpoint orchestrator", () => {
       agents: {
         alpha: createFakeAgentAdapter("alpha", async (request) => {
           receivedSnapshots.push(JSON.stringify(request.snapshot));
+          receivedStrategyEvidence.push(JSON.stringify(request.strategyEvidence));
           receivedPortfolioAgents.push(request.portfolio.agentId);
           return alphaDecision;
         }),
         beta: createFakeAgentAdapter("beta", async (request) => {
           receivedSnapshots.push(JSON.stringify(request.snapshot));
+          receivedStrategyEvidence.push(JSON.stringify(request.strategyEvidence));
           receivedPortfolioAgents.push(request.portfolio.agentId);
           return betaDecision;
         }),
@@ -257,6 +260,9 @@ describe("checkpoint orchestrator", () => {
     expect({
       snapshotPayloadsMatch:
         receivedSnapshots.length === 2 && receivedSnapshots[0] === receivedSnapshots[1],
+      strategyEvidenceMatches:
+        receivedStrategyEvidence.length === 2 &&
+        receivedStrategyEvidence[0] === receivedStrategyEvidence[1],
       snapshotIds: receivedSnapshots.map(
         (snapshot) => (JSON.parse(snapshot) as { snapshotId: string }).snapshotId,
       ),
@@ -270,6 +276,7 @@ describe("checkpoint orchestrator", () => {
       })),
     }).toEqual({
       snapshotPayloadsMatch: true,
+      strategyEvidenceMatches: true,
       snapshotIds: ["snapshot-kickoff", "snapshot-kickoff"],
       portfolioAgents: ["alpha", "beta"],
       portfolios: {

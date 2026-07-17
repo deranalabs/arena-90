@@ -379,6 +379,9 @@ export function createArenaLifecycleRunner(
         const portfoliosBefore = structuredClone(state.portfolios);
         const execution = await executePreparedCheckpoint({
           snapshot: pending.snapshot,
+          acceptedSnapshots: state.checkpoints.flatMap((checkpoint) =>
+            checkpoint.snapshot === undefined ? [] : [checkpoint.snapshot],
+          ),
           portfolios: portfoliosBefore,
           agents: config.agents,
           timeoutMs: state.runtimeMetadata.agentTimeoutMs,
