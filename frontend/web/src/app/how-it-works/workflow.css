@@ -1,29 +1,35 @@
-/* Hallmark · genre: modern-minimal · macrostructure: Narrative Workflow · theme: Arena90 Native */
+/* Hallmark · genre: modern-minimal · macrostructure: Bento Grid · theme: Arena90 Native */
 
 .workflow-page {
   padding-block: var(--space-2xl) var(--space-3xl);
-  max-width: 64rem;
+  max-width: 72rem;
+  margin-inline: auto;
 }
 
 .workflow-timeline {
-  margin: var(--space-3xl) 0;
+  margin: var(--space-2xl) 0;
   padding: 0;
   list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2xl);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+  gap: var(--space-xl) var(--space-lg);
 }
 
 .workflow-stage {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: var(--space-sm);
+  padding: var(--space-lg);
+  background: var(--arena-raised);
+  border: 1px solid var(--arena-line);
+  border-radius: 8px;
 }
 
 .workflow-stage__head {
   display: flex;
   align-items: center;
-  gap: var(--space-md);
+  gap: var(--space-sm);
+  margin-block-end: var(--space-xs);
 }
 
 .workflow-stage__num {
@@ -32,38 +38,34 @@
   font-weight: 700;
   color: var(--arena-data);
   letter-spacing: 0.04em;
-  background: var(--arena-raised);
-  padding: var(--space-2xs) var(--space-sm);
-  border: 1px solid var(--arena-line);
-  border-radius: 4px;
 }
 
 .workflow-stage__rule {
   flex: 1;
-  height: 2px;
+  height: 1px;
   background: var(--arena-line);
 }
 
 .workflow-stage__body {
-  padding-inline-start: var(--space-xs);
-  max-width: 42rem;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2xs);
 }
 
 .workflow-stage__title {
-  margin: 0 0 var(--space-xs);
+  margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-size: var(--text-lg);
   font-weight: 700;
-  letter-spacing: -0.04em;
-  line-height: 1.1;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
   color: var(--arena-text);
   overflow-wrap: anywhere;
-  min-width: 0;
 }
 
 .workflow-stage__desc {
   margin: 0;
-  font-size: var(--text-md);
+  font-size: var(--text-sm);
   color: var(--arena-muted);
   line-height: 1.6;
 }
