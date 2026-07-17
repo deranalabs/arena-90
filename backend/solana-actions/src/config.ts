@@ -6,7 +6,6 @@ export interface ActionsConfig {
   programId: PublicKey;
   publicBaseUrl: string;
   frontendOrigin: string;
-  allowedOrigins: ReadonlySet<string>;
   minBackLamports: bigint;
   maxBackLamports: bigint;
   rateLimitPerMinute: number;
@@ -46,17 +45,12 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ActionsConfig 
     throw new Error("RATE_LIMIT_PER_MINUTE must be a positive integer");
   }
 
-  const configuredOrigins = (env.ALLOWED_ORIGINS ?? frontendOrigin)
-    .split(",")
-    .map((origin) => requiredUrl("ALLOWED_ORIGINS entry", origin.trim()));
-
   return {
     port: Number(env.PORT ?? "8787"),
     rpcUrl,
     programId,
     publicBaseUrl,
     frontendOrigin,
-    allowedOrigins: new Set(configuredOrigins),
     minBackLamports,
     maxBackLamports,
     rateLimitPerMinute,

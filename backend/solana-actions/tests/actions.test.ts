@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import test from "node:test";
 import type { AccountInfo, BlockhashWithExpiryBlockHeight } from "@solana/web3.js";
 import { PublicKey, Transaction } from "@solana/web3.js";
@@ -17,23 +18,35 @@ const config: ActionsConfig = {
   programId,
   publicBaseUrl: "https://api.example.com",
   frontendOrigin: "https://arena-90.vercel.app",
-  allowedOrigins: new Set(["https://arena-90.vercel.app"]),
   minBackLamports: 1_000_000n,
   maxBackLamports: 1_000_000_000n,
   rateLimitPerMinute: 60,
   trustProxy: false,
 };
 
-const arenaAccount: AccountInfo<Buffer> = {
-  data: Buffer.alloc(8),
-  executable: false,
-  lamports: 1,
-  owner: programId,
-  rentEpoch: 0,
-};
+function arenaAccount(
+  state: 0 | 1 | 2 | 3 = 0,
+  backingDeadlineUnix = 2_000n,
+): AccountInfo<Buffer> {
+  const data = Buffer.alloc(218);
+  createHash("sha256")
+    .update("account:Arena")
+    .digest()
+    .subarray(0, 8)
+    .copy(data);
+  data.writeBigInt64LE(backingDeadlineUnix, 209);
+  data[217] = state;
+  return {
+    data,
+    executable: false,
+    lamports: 1,
+    owner: programId,
+    rentEpoch: 0,
+  };
+}
 
 class FakeChain implements ChainReader {
-  constructor(private readonly account: AccountInfo<Buffer> | null = arenaAccount) {}
+  constructor(private readonly account: AccountInfo<Buffer> | null = arenaAccount()) {}
 
   async getAccountInfo(): Promise<AccountInfo<Buffer> | null> {
     return this.account;
@@ -74,13 +87,31 @@ test("encodes only supporter-signed Back and Claim instructions", () => {
   assert.equal(claim.data.length, 8);
 });
 
-test("GET exposes Back Alpha, Back Beta, and Claim only for owned arenas", async () => {
-  const app = createApp(config, new FakeChain());
+test("GET exposes only actions valid for the on-chain lifecycle", async () => {
+  const app = createApp(config, new FakeChain(), () => 1_000_000);
   const response = await request(app).get(`/actions/arena/${arena.toBase58()}`).expect(200);
   assert.equal(response.body.type, "action");
   assert.deepEqual(
     response.body.links.actions.map((action: { label: string }) => action.label),
-    ["Back Alpha", "Back Beta", "Claim or refund"],
+    ["Back Alpha", "Back Beta"],
+  );
+
+  const pending = await request(
+    createApp(config, new FakeChain(arenaAccount(1)), () => 1_000_000),
+  )
+    .get(`/actions/arena/${arena.toBase58()}`)
+    .expect(200);
+  assert.equal(pending.body.disabled, true);
+  assert.equal(pending.body.links, undefined);
+
+  const settled = await request(
+    createApp(config, new FakeChain(arenaAccount(2)), () => 1_000_000),
+  )
+    .get(`/actions/arena/${arena.toBase58()}`)
+    .expect(200);
+  assert.deepEqual(
+    settled.body.links.actions.map((action: { label: string }) => action.label),
+    ["Claim or refund"],
   );
 
   await request(createApp(config, new FakeChain(null)))
@@ -88,12 +119,28 @@ test("GET exposes Back Alpha, Back Beta, and Claim only for owned arenas", async
     .expect(404);
 });
 
-test("rejects hostile origins and amount/account abuse", async () => {
-  const app = createApp(config, new FakeChain());
+test("serves spec CORS and actions.json to every Blink client", async () => {
+  const app = createApp(config, new FakeChain(), () => 1_000_000);
+  const options = await request(app)
+    .options(`/actions/arena/${arena.toBase58()}`)
+    .set("origin", "https://wallet.example")
+    .expect(204);
+  assert.equal(options.headers["access-control-allow-origin"], "*");
+  assert.equal(options.headers["access-control-allow-methods"], "GET,POST,PUT,OPTIONS");
+
+  const manifest = await request(app).get("/actions.json").expect(200);
+  assert.equal(manifest.headers["access-control-allow-origin"], "*");
+  assert.deepEqual(manifest.body.rules, [
+    { pathPattern: "/actions/arena/**", apiPath: "/actions/arena/**" },
+  ]);
+});
+
+test("rejects amount and account abuse", async () => {
+  const app = createApp(config, new FakeChain(), () => 1_000_000);
   await request(app)
     .get(`/actions/arena/${arena.toBase58()}`)
     .set("origin", "https://evil.example")
-    .expect(403);
+    .expect(200);
   await request(app)
     .post(`/actions/arena/${arena.toBase58()}/back/alpha?amount=100`)
     .send({ account: supporter.toBase58() })
@@ -105,7 +152,7 @@ test("rejects hostile origins and amount/account abuse", async () => {
 });
 
 test("POST returns unsigned wallet transactions", async () => {
-  const app = createApp(config, new FakeChain());
+  const app = createApp(config, new FakeChain(), () => 1_000_000);
   const back = await request(app)
     .post(`/actions/arena/${arena.toBase58()}/back/beta?amount=0.01`)
     .send({ account: supporter.toBase58() })
@@ -115,11 +162,25 @@ test("POST returns unsigned wallet transactions", async () => {
   assert.equal(backTransaction.signatures[0]?.signature, null);
   assert.equal(backTransaction.instructions[0]?.data[8], 1);
 
-  const claim = await request(app)
+  const claim = await request(
+    createApp(config, new FakeChain(arenaAccount(2)), () => 1_000_000),
+  )
     .post(`/actions/arena/${arena.toBase58()}/claim`)
     .send({ account: supporter.toBase58() })
     .expect(200);
   const claimTransaction = Transaction.from(Buffer.from(claim.body.transaction, "base64"));
   assert.equal(claimTransaction.signatures[0]?.signature, null);
   assert.equal(claimTransaction.instructions.length, 1);
+});
+
+test("POST fails closed when backing or claim is not active", async () => {
+  await request(createApp(config, new FakeChain(arenaAccount(0, 1_000n)), () => 1_000_000))
+    .post(`/actions/arena/${arena.toBase58()}/back/alpha?amount=0.01`)
+    .send({ account: supporter.toBase58() })
+    .expect(409);
+
+  await request(createApp(config, new FakeChain(arenaAccount(1)), () => 1_000_000))
+    .post(`/actions/arena/${arena.toBase58()}/claim`)
+    .send({ account: supporter.toBase58() })
+    .expect(409);
 });

@@ -10,9 +10,41 @@ const VAULT_SEED = Buffer.from("vault");
 const POSITION_SEED = Buffer.from("position");
 
 export type AgentSide = "alpha" | "beta";
+export type ArenaState = "OPEN" | "LOCKED" | "SETTLED" | "VOID";
+
+export interface ArenaLifecycle {
+  readonly backingDeadlineUnix: bigint;
+  readonly state: ArenaState;
+}
 
 function discriminator(name: string): Buffer {
   return createHash("sha256").update(`global:${name}`).digest().subarray(0, 8);
+}
+
+const ARENA_ACCOUNT_DISCRIMINATOR = createHash("sha256")
+  .update("account:Arena")
+  .digest()
+  .subarray(0, 8);
+const ARENA_BACKING_DEADLINE_OFFSET = 209;
+const ARENA_STATE_OFFSET = 217;
+
+export function decodeArenaLifecycle(data: Buffer): ArenaLifecycle {
+  if (
+    data.length <= ARENA_STATE_OFFSET ||
+    !data.subarray(0, 8).equals(ARENA_ACCOUNT_DISCRIMINATOR)
+  ) {
+    throw new Error("invalid Arena90 V2 arena account data");
+  }
+
+  const state = (["OPEN", "LOCKED", "SETTLED", "VOID"] as const)[
+    data[ARENA_STATE_OFFSET] ?? -1
+  ];
+  if (state === undefined) throw new Error("invalid Arena90 V2 arena state");
+
+  return {
+    backingDeadlineUnix: data.readBigInt64LE(ARENA_BACKING_DEADLINE_OFFSET),
+    state,
+  };
 }
 
 export function deriveVault(programId: PublicKey, arena: PublicKey): PublicKey {

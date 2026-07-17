@@ -1,11 +1,16 @@
 import { ACTIONS_CORS_HEADERS, createPostResponse } from "@solana/actions";
 import type { AccountInfo, BlockhashWithExpiryBlockHeight } from "@solana/web3.js";
 import { PublicKey, Transaction } from "@solana/web3.js";
-import cors from "cors";
 import express, { type NextFunction, type Request, type Response } from "express";
 import type { ActionsConfig } from "./config.js";
 import { solToLamports } from "./config.js";
-import { backAgentInstruction, claimInstruction, type AgentSide } from "./program.js";
+import {
+  backAgentInstruction,
+  claimInstruction,
+  decodeArenaLifecycle,
+  type AgentSide,
+  type ArenaLifecycle,
+} from "./program.js";
 
 export interface ChainReader {
   getAccountInfo(address: PublicKey): Promise<AccountInfo<Buffer> | null>;
@@ -51,14 +56,23 @@ async function requireArena(
   chain: ChainReader,
   arena: PublicKey,
   programId: PublicKey,
-): Promise<void> {
+): Promise<ArenaLifecycle> {
   const account = await chain.getAccountInfo(arena);
   if (!account || !account.owner.equals(programId)) {
     throw new PublicError("Arena is not an Arena90 V2 on-chain account", 404);
   }
+  try {
+    return decodeArenaLifecycle(account.data);
+  } catch {
+    throw new PublicError("Arena account data is invalid", 502);
+  }
 }
 
-export function createApp(config: ActionsConfig, chain: ChainReader) {
+export function createApp(
+  config: ActionsConfig,
+  chain: ChainReader,
+  now: () => number = Date.now,
+) {
   const app = express();
   app.disable("x-powered-by");
   if (config.trustProxy) app.set("trust proxy", 1);
@@ -67,34 +81,41 @@ export function createApp(config: ActionsConfig, chain: ChainReader) {
     for (const [name, value] of Object.entries(ACTIONS_CORS_HEADERS)) {
       response.setHeader(name, value);
     }
-    const origin = request.get("origin");
-    if (origin && !config.allowedOrigins.has(origin)) {
-      response.status(403).json({ message: "Origin not allowed" });
+    if (request.method === "OPTIONS") {
+      response.status(204).end();
       return;
     }
     next();
   });
-  app.use(cors({ origin: [...config.allowedOrigins], methods: ["GET", "POST", "OPTIONS"] }));
   app.use(rateLimiter(config.rateLimitPerMinute));
 
   app.get("/health", (_request, response) => {
     response.json({ status: "ok", network: "solana-devnet" });
   });
 
+  app.get("/actions.json", (_request, response) => {
+    response.json({
+      rules: [
+        {
+          pathPattern: "/actions/arena/**",
+          apiPath: "/actions/arena/**",
+        },
+      ],
+    });
+  });
+
   app.get("/actions/arena/:arena", async (request, response, next) => {
     try {
       const arena = publicKey(request.params.arena, "arena");
-      await requireArena(chain, arena, config.programId);
+      const lifecycle = await requireArena(chain, arena, config.programId);
       const base = `${config.publicBaseUrl}/actions/arena/${arena.toBase58()}`;
-      response.json({
-        type: "action",
-        icon: `${config.frontendOrigin}/media/brand/arena90-mark.png`,
-        title: "Back an Arena90 agent",
-        description:
-          "Support Alpha or Beta with devnet SOL. Supporter funds never affect agent strategy or virtual performance.",
-        label: "Choose an agent",
-        links: {
-          actions: [
+      const backingOpen =
+        lifecycle.state === "OPEN" &&
+        BigInt(Math.floor(now() / 1_000)) < lifecycle.backingDeadlineUnix;
+      const claimOpen =
+        lifecycle.state === "SETTLED" || lifecycle.state === "VOID";
+      const actions = backingOpen
+        ? [
             {
               type: "transaction",
               href: `${base}/back/alpha?amount={amount}`,
@@ -125,13 +146,32 @@ export function createApp(config: ActionsConfig, chain: ChainReader) {
                 },
               ],
             },
-            {
-              type: "transaction",
-              href: `${base}/claim`,
-              label: "Claim or refund",
-            },
-          ],
-        },
+          ]
+        : claimOpen
+          ? [
+              {
+                type: "transaction",
+                href: `${base}/claim`,
+                label: "Claim or refund",
+              },
+            ]
+          : [];
+      response.json({
+        type: "action",
+        icon: `${config.frontendOrigin}/media/brand/arena90-mark.png`,
+        title: "Back an Arena90 agent",
+        description:
+          "Support Alpha or Beta with devnet SOL. Supporter funds never affect agent strategy or virtual performance.",
+        label: backingOpen
+          ? "Choose an agent"
+          : claimOpen
+            ? "Claim supporter funds"
+            : "Backing closed",
+        disabled: actions.length === 0,
+        ...(actions.length > 0 ? { links: { actions } } : {}),
+        ...(actions.length === 0
+          ? { error: { message: "Backing is closed; settlement is pending." } }
+          : {}),
       });
     } catch (error) {
       next(error);
@@ -158,7 +198,13 @@ export function createApp(config: ActionsConfig, chain: ChainReader) {
       if (lamports < config.minBackLamports || lamports > config.maxBackLamports) {
         throw new PublicError("amount is outside allowed bounds", 400);
       }
-      await requireArena(chain, arena, config.programId);
+      const lifecycle = await requireArena(chain, arena, config.programId);
+      if (
+        lifecycle.state !== "OPEN" ||
+        BigInt(Math.floor(now() / 1_000)) >= lifecycle.backingDeadlineUnix
+      ) {
+        throw new PublicError("Backing is closed", 409);
+      }
       const { blockhash } = await chain.getLatestBlockhash();
       const transaction = new Transaction({ feePayer: supporter, recentBlockhash: blockhash }).add(
         backAgentInstruction({
@@ -187,7 +233,10 @@ export function createApp(config: ActionsConfig, chain: ChainReader) {
     try {
       const arena = publicKey(request.params.arena, "arena");
       const supporter = publicKey(request.body?.account, "account");
-      await requireArena(chain, arena, config.programId);
+      const lifecycle = await requireArena(chain, arena, config.programId);
+      if (lifecycle.state !== "SETTLED" && lifecycle.state !== "VOID") {
+        throw new PublicError("Claim is not available yet", 409);
+      }
       const { blockhash } = await chain.getLatestBlockhash();
       const transaction = new Transaction({ feePayer: supporter, recentBlockhash: blockhash }).add(
         claimInstruction({ programId: config.programId, arena, supporter }),
