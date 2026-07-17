@@ -59,6 +59,11 @@ try {
   await run(
     "npm",
     ["ci", "--omit=dev", "--ignore-scripts", "--no-audit"],
+    join(stage, "arena-runtime"),
+  );
+  await run(
+    "npm",
+    ["ci", "--omit=dev", "--ignore-scripts", "--no-audit"],
     stagedResolver,
   );
 
