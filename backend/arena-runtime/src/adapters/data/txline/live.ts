@@ -272,7 +272,26 @@ export function createTxlineLiveDataAdapter(
     checkpointId: CheckpointId,
     signal: AbortSignal,
   ): Promise<TxlineScoreState> {
-    await bootstrap(signal);
+    try {
+      await bootstrap(signal);
+    } catch (error) {
+      if (
+        error instanceof TxlineDataError &&
+        error.code === "INCOMPLETE_SCORE_STATE"
+      ) {
+        if (
+          checkpointId === "KICKOFF" &&
+          nowMs() < fixtureBinding.startTime
+        ) {
+          throw checkpointPending();
+        }
+        throw new TxlineDataError(
+          "INVALID_SCORE_STATE",
+          "Invalid TxLINE score state",
+        );
+      }
+      throw error;
+    }
     if (
       fixture === undefined ||
       scoreReducer === undefined ||

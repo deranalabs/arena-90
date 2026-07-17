@@ -32,6 +32,13 @@ function scoreError(): TxlineDataError {
   return new TxlineDataError("INVALID_SCORE_STATE", "Invalid TxLINE score state");
 }
 
+function incompleteScoreError(): TxlineDataError {
+  return new TxlineDataError(
+    "INCOMPLETE_SCORE_STATE",
+    "Incomplete TxLINE score state",
+  );
+}
+
 function validateFixture(
   event: NormalizedTxlineScoreEvent,
   fixture: CreateTxlineScoreStateReducerInput["fixture"],
@@ -243,7 +250,7 @@ export function createTxlineScoreStateReducer(
       state.participant1Score === undefined ||
       state.participant2Score === undefined
     ) {
-      throw scoreError();
+      throw incompleteScoreError();
     }
     const homeScore = input.fixture.participant1IsHome
       ? state.participant1Score

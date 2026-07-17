@@ -175,6 +175,82 @@ describe("TxLINE live data adapter", () => {
     );
   });
 
+  it("treats valid but incomplete pre-kickoff score bootstrap as pending", async () => {
+    const sparseScoreSnapshot = [
+      scoreEvent({
+        Seq: 1,
+        Id: 2,
+        Action: "comment",
+        StatusId: undefined,
+        Clock: undefined,
+        Stats: {},
+      }),
+      scoreEvent({
+        Seq: 0,
+        Id: 1,
+        Action: "coverage_update",
+        StatusId: undefined,
+        Clock: undefined,
+        Stats: {},
+      }),
+    ];
+    const adapter = createTxlineLiveDataAdapter({
+      arenaId: "arena-live-001",
+      fixtureBinding,
+      delayed: false,
+      client: createClient({
+        getScoreSnapshot: async () => sparseScoreSnapshot,
+      }),
+      nowMs: () => fixtureBinding.startTime - 1,
+    });
+
+    await expect(
+      adapter.refreshCheckpoint("KICKOFF", new AbortController().signal),
+    ).rejects.toMatchObject({ code: "CHECKPOINT_PENDING" });
+    expect(() => adapter.getSnapshot("KICKOFF")).toThrow(
+      "Missing live decision checkpoint: KICKOFF",
+    );
+  });
+
+  it("rejects incomplete score bootstrap once kickoff has passed", async () => {
+    const adapter = createTxlineLiveDataAdapter({
+      arenaId: "arena-live-001",
+      fixtureBinding,
+      delayed: false,
+      client: createClient({
+        getScoreSnapshot: async () => [
+          scoreEvent({
+            Action: "coverage_update",
+            StatusId: undefined,
+            Clock: undefined,
+            Stats: {},
+          }),
+        ],
+      }),
+      nowMs: () => fixtureBinding.startTime + 1,
+    });
+
+    await expect(
+      adapter.refreshCheckpoint("KICKOFF", new AbortController().signal),
+    ).rejects.toMatchObject({ code: "INVALID_SCORE_STATE" });
+  });
+
+  it("rejects malformed score bootstrap before kickoff", async () => {
+    const adapter = createTxlineLiveDataAdapter({
+      arenaId: "arena-live-001",
+      fixtureBinding,
+      delayed: false,
+      client: createClient({
+        getScoreSnapshot: async () => [scoreEvent({ Clock: undefined })],
+      }),
+      nowMs: () => fixtureBinding.startTime - 1,
+    });
+
+    await expect(
+      adapter.refreshCheckpoint("KICKOFF", new AbortController().signal),
+    ).rejects.toMatchObject({ code: "INVALID_SCORE_STATE" });
+  });
+
   it("keeps pre-kickoff state pending when idle score stream times out", async () => {
     const adapter = createTxlineLiveDataAdapter({
       arenaId: "arena-live-001",

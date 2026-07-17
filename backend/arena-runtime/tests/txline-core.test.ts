@@ -415,8 +415,8 @@ describe("createTxlineScoreStateReducer", () => {
 
     expect(() => reducer.getState()).toThrow(
       expect.objectContaining({
-        code: "INVALID_SCORE_STATE",
-        message: "Invalid TxLINE score state",
+        code: "INCOMPLETE_SCORE_STATE",
+        message: "Incomplete TxLINE score state",
       }),
     );
   });
