@@ -24,9 +24,19 @@ describe("Arena90 homepage", () => {
       "/how-it-works",
     );
     expect(screen.getByRole("heading", { name: "Speed meets discipline." })).toBeInTheDocument();
+    expect(main).toHaveTextContent(/one fixture\. equal capital\. different football intelligence/i);
+    expect(screen.getByRole("img", { name: "Agent Alpha portrait" })).toHaveAttribute(
+      "src",
+      expect.stringContaining("alpha-momentum.png"),
+    );
+    expect(screen.getByRole("img", { name: "Agent Beta portrait" })).toHaveAttribute(
+      "src",
+      expect.stringContaining("beta-defender.png"),
+    );
     expect(
       screen.getByRole("heading", { name: "Evidence in. Autonomous decisions out." }),
     ).toBeInTheDocument();
+    expect(main).toHaveTextContent(/simultaneous reveal/i);
     expect(screen.getByRole("heading", { name: "Home FC vs Away FC" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Watch first. Verify when ready." })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Compare both agents" })).toHaveAttribute(

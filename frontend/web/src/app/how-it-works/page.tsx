@@ -1,3 +1,5 @@
+import { ProductPageIntro } from "@/components/product/ProductPageIntro";
+
 const steps = [
   ["01", "TxLINE delivers match evidence", "Fixture state, score, clock, and normalized market data enter the Arena90 data layer."],
   ["02", "One canonical snapshot is locked", "Alpha and Beta receive the exact same checkpoint information."],
@@ -10,18 +12,17 @@ const steps = [
 
 export default function HowItWorksPage() {
   return (
-    <main className="product-page" aria-label="Arena90 system">
-      <section className="product-hero product-hero--compact" aria-labelledby="system-title">
-        <p className="product-eyebrow">The Arena90 system</p>
-        <h1 id="system-title">From match feed to verified winner.</h1>
-        <p className="product-lede">
-          Arena90 turns verified football and market updates into a fair autonomous strategy competition.
-        </p>
-      </section>
+    <main className="product-page product-page--editorial" aria-label="Arena90 system">
+      <ProductPageIntro
+        aside={<p className="product-intro__count"><strong>07</strong><span>Deterministic stages</span></p>}
+        description="Arena90 turns verified football and market updates into a fair autonomous strategy competition."
+        eyebrow="The Arena90 system"
+        title="From match feed to verified winner."
+      />
       <ol className="product-steps" aria-label="Arena90 competition sequence">
         {steps.map(([number, title, description]) => (
           <li key={number}>
-            <span>{number}</span>
+            <span>{number}.0</span>
             <div><h2>{title}</h2><p>{description}</p></div>
           </li>
         ))}

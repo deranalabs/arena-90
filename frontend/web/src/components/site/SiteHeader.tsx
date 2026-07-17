@@ -17,7 +17,7 @@ const navigation = [
 export function SiteHeader() {
   return (
     <header className="site-header">
-      <div className="site-header__frame">
+      <div className="site-header__frame site-header__frame--compact">
         <div className="site-brand-lockup">
           <Link className="site-brand" href="/" aria-label="Arena90 home">
             <span className="site-brand__mark">
@@ -43,7 +43,7 @@ export function SiteHeader() {
           />
         </div>
 
-        <nav className="site-navigation" aria-label="Primary">
+        <nav className="site-navigation site-nav" aria-label="Primary">
           {navigation.map((item) => (
             <Link key={item.href} href={item.href}>
               {item.label}

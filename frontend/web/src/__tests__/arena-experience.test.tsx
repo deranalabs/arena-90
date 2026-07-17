@@ -194,6 +194,8 @@ describe("Arena90 spectator experience", () => {
     expect(screen.getByRole("heading", { name: "Home FC vs Away FC" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Agent Alpha" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Agent Beta" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Agent Alpha portrait" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Agent Beta portrait" })).toBeInTheDocument();
     expect(screen.getByLabelText("Agent Alpha current allocation")).toHaveTextContent(
       /home fc.*0\.0%.*cash.*100\.0%/i,
     );

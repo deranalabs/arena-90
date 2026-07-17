@@ -3,6 +3,13 @@
 import type { CSSProperties } from "react";
 import Link from "next/link";
 
+import { AgentPortrait } from "@/components/agents/AgentPortrait";
+import {
+  ArenaNextEvent,
+  ArenaScoreboard,
+  ArenaSectionHeading,
+  CompetitionStatusBand,
+} from "@/components/arena/ArenaPresentation";
 import { useArenaSession } from "@/components/arena/useArenaSession";
 import type {
   PublicArenaEventV1,
@@ -163,6 +170,7 @@ function AgentCard({
   );
   return (
     <article className={`arena-agent arena-agent--${agentId}`}>
+      <AgentPortrait agentId={agentId} />
       <p className="product-eyebrow">Agent {alpha ? "01" : "02"}</p>
       <h2>Agent {alpha ? "Alpha" : "Beta"}</h2>
       <p className="arena-agent__strategy">
@@ -312,57 +320,53 @@ export function ArenaExperience({
   };
   const roundStatus = currentRoundStatus(state, session.events);
   const freshness = state.currentSnapshot?.freshness;
+  const freshnessLabel = freshness?.suspended
+    ? "MARKET SUSPENDED"
+    : freshness?.delayed
+      ? "DATA DELAYED"
+      : state.currentSnapshot?.source === "TXLINE_LIVE"
+        ? "DATA LIVE"
+        : state.currentSnapshot
+          ? "RECORDED DATA"
+          : undefined;
+  const alphaNav = BigInt(state.portfolios.alpha.navMicros);
+  const betaNav = BigInt(state.portfolios.beta.navMicros);
+  const leadMarginMicros = alphaNav >= betaNav
+    ? alphaNav - betaNav
+    : betaNav - alphaNav;
+  const standing = state.leader.result === "DRAW"
+    ? "Level"
+    : `Agent ${state.leader.result === "alpha" ? "Alpha" : "Beta"} ${state.leader.provisional ? "leads" : "wins"}`;
 
   return (
     <main
       className="arena-experience"
       aria-label={`Arena90 ${experience} ${arenaId}`}
     >
-      <section className="arena-overview" aria-labelledby="arena-fixture-title">
-        <div className="arena-overview__copy">
-          <p className="product-eyebrow">{experienceEyebrow(experience, state)}</p>
-          {experience === "replay" ? <p className="arena-overview__statement">The match is recorded. The decisions are new.</p> : null}
-          <h1 id="arena-fixture-title">
-            {state.manifest.homeTeam.name} <span>vs</span> {state.manifest.awayTeam.name}
-          </h1>
-          <p>
-            Both agents receive the same locked snapshot and equal virtual bankroll.
-          </p>
-        </div>
-        <div className="arena-state-panel">
-          <strong>{state.phase}</strong>
-          <span>{state.manifest.mode}</span>
-          <p className={session.status === "RECONNECTING" ? "is-warning" : undefined} role="status">
-            {connectionMessage(session.status)}
-          </p>
-        </div>
-      </section>
+      <ArenaScoreboard
+        awayScore={state.currentSnapshot?.match.awayScore}
+        awayTeam={state.manifest.awayTeam.name}
+        checkpoint={state.currentSnapshot?.checkpointId}
+        connection={connectionMessage(session.status)}
+        connectionWarning={session.status === "RECONNECTING"}
+        eyebrow={experienceEyebrow(experience, state)}
+        freshness={freshnessLabel}
+        homeScore={state.currentSnapshot?.match.homeScore}
+        homeTeam={state.manifest.homeTeam.name}
+        minute={state.currentSnapshot?.match.minute}
+        mode={state.manifest.mode}
+        phase={state.phase}
+        source={state.currentSnapshot?.source}
+        statement={experience === "replay" ? "The match is recorded. The decisions are new." : undefined}
+      />
 
-      {state.currentSnapshot ? (
-        <section className="arena-match-state" aria-label="Latest verified match state">
-          <div><span>Source</span><strong>{state.currentSnapshot.source}</strong></div>
-          <div><span>Minute</span><strong>{state.currentSnapshot.match.minute}′</strong></div>
-          <div><span>Score</span><strong>{state.currentSnapshot.match.homeScore}–{state.currentSnapshot.match.awayScore}</strong></div>
-          <div><span>Snapshot</span><strong>{state.currentSnapshot.checkpointId}</strong></div>
-          <div>
-            <span>Freshness</span>
-            <strong>
-              {freshness?.suspended
-                ? "MARKET SUSPENDED"
-                : freshness?.delayed
-                  ? "DATA DELAYED"
-                  : state.currentSnapshot.source === "TXLINE_LIVE"
-                    ? "DATA LIVE"
-                    : "RECORDED DATA"}
-            </strong>
-          </div>
-        </section>
-      ) : null}
+      <CompetitionStatusBand detail={roundStatus.detail} label={roundStatus.label} />
 
-      <section className="arena-round-status" aria-live="polite">
-        <span>Current competition state</span>
-        <strong>{roundStatus.label}</strong>
-        <p>{roundStatus.detail}</p>
+      <section className="arena-leader-strip" aria-label="Competition leader">
+        <div><span>Standing</span><strong>{standing}</strong></div>
+        <div><span>Alpha NAV</span><strong>{formatMicros(state.portfolios.alpha.navMicros)}</strong></div>
+        <div><span>Lead margin</span><strong>{formatMicros(leadMarginMicros.toString())}</strong></div>
+        <div><span>Beta NAV</span><strong>{formatMicros(state.portfolios.beta.navMicros)}</strong></div>
       </section>
 
       <section className="arena-agent-grid" aria-label="Agent comparison">
@@ -389,16 +393,24 @@ export function ArenaExperience({
 
       {state.checkpoints.length > 0 ? (
         <section className="arena-rounds" aria-labelledby="arena-rounds-title">
-          <p className="product-eyebrow">Decision record</p>
-          <h2 id="arena-rounds-title">Simultaneous checkpoint reveals</h2>
+          <ArenaSectionHeading
+            detail="The newest committed round stays open. Earlier rounds remain available as a compact audit trail."
+            eyebrow="Latest simultaneous reveal"
+            title="Simultaneous checkpoint reveals"
+            titleId="arena-rounds-title"
+          />
           <div className="arena-round-list">
-            {[...state.checkpoints].reverse().map((checkpoint) => (
-              <article
-                className="arena-round"
-                key={checkpoint.checkpointId}
-                role="group"
-                aria-label={`${checkpoint.checkpointId} simultaneous reveal`}
-              >
+            {[...state.checkpoints].reverse().map((checkpoint, index) => (
+              <details className="arena-round-disclosure" key={checkpoint.checkpointId} open={index === 0}>
+                <summary>
+                  <span>{checkpointLabel(checkpoint.checkpointId)}</span>
+                  <strong>{checkpoint.outcome === "GLOBAL_MISSED" ? "GLOBAL MISSED" : index === 0 ? "LATEST REVEAL" : "ROUND REVEALED"}</strong>
+                </summary>
+                <article
+                  className={`arena-round${index === 0 ? " arena-round--latest" : ""}`}
+                  role="group"
+                  aria-label={`${checkpoint.checkpointId} simultaneous reveal`}
+                >
                 <header>
                   <div>
                     <h3>{checkpointLabel(checkpoint.checkpointId)}</h3>
@@ -459,25 +471,34 @@ export function ArenaExperience({
                     })}
                   </div>
                 )}
-              </article>
+                </article>
+              </details>
             ))}
           </div>
         </section>
       ) : null}
 
-      <section className="arena-next-round" aria-label="Next decision round">
-        <span>{state.phase === "COMPLETED" ? "Competition record" : "Next decision"}</span>
-        <strong>
-          {state.phase === "COMPLETED"
-            ? "Final settlement complete"
-            : checkpointLabel(state.nextCheckpointId ?? "FINAL")}
-        </strong>
-      </section>
+      <ArenaNextEvent
+        label={state.phase === "COMPLETED" ? "Competition record" : "Next decision"}
+        value={state.phase === "COMPLETED" ? "Final settlement complete" : checkpointLabel(state.nextCheckpointId ?? "FINAL")}
+      />
 
       {resultTitle && state.finalResult ? (
-        <section className="arena-result" aria-labelledby="arena-result-title">
-          <p className="product-eyebrow">Verified terminal result</p>
-          <h2 id="arena-result-title">{resultTitle}</h2>
+        <section className="arena-result arena-result--terminal" aria-labelledby="arena-result-title">
+          <div className="arena-result__hero">
+            <div>
+              <p className="product-eyebrow">Verified terminal result</p>
+              <h2 id="arena-result-title">{resultTitle}</h2>
+              <p>Final accounting is committed under {state.finalResult.winnerRule}.</p>
+            </div>
+            <div className="arena-result__score" aria-label="Final score">
+              <span>Final score</span>
+              <strong>
+                {state.finalResult.terminalEvidence.match.homeScore}–
+                {state.finalResult.terminalEvidence.match.awayScore}
+              </strong>
+            </div>
+          </div>
           <dl>
             <div>
               <dt>Final score</dt>
@@ -498,7 +519,7 @@ export function ArenaExperience({
           <Link className="product-text-link" href={`/arena/${arenaId}/proof`}>Inspect public proof <span aria-hidden="true">→</span></Link>
         </section>
       ) : state.phase === "FINALIZING" ? (
-        <section className="arena-result" aria-label="Provisional result">
+        <section className="arena-result arena-result--finalizing" aria-label="Provisional result">
           <p className="product-eyebrow">Finalizing</p>
           <h2>Verifying final result</h2>
           <p>The current leader remains provisional until terminal accounting completes.</p>
@@ -507,9 +528,12 @@ export function ArenaExperience({
 
       {experience === "proof" ? (
         <section className="arena-proof" aria-labelledby="arena-proof-title">
-          <p className="product-eyebrow">Architecture evidence</p>
-          <h2 id="arena-proof-title">Deterministic system boundary</h2>
-          <p>Agents choose strategy. Arena90 controls validation, execution, accounting, and winner resolution.</p>
+          <ArenaSectionHeading
+            detail="Agents choose strategy. Arena90 controls validation, execution, accounting, and winner resolution."
+            eyebrow="Architecture evidence"
+            title="Deterministic system boundary"
+            titleId="arena-proof-title"
+          />
           <dl>
             <div><dt>Confirmed event sequence</dt><dd>{state.lastEventSequence}</dd></div>
             <div><dt>Runtime version</dt><dd>{state.runtimeVersions.runtimeVersion}</dd></div>

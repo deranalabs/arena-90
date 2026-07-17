@@ -31,6 +31,13 @@ describe("Arena90 public product routes", () => {
     unmount();
   });
 
+  it("shows both named agent portraits on the strategy comparison", () => {
+    render(<AgentsPage />);
+
+    expect(screen.getByRole("img", { name: "Agent Alpha portrait" })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: "Agent Beta portrait" })).toBeInTheDocument();
+  });
+
   it.each([
     ["arena", ArenaPage],
     ["replay", ReplayPage],

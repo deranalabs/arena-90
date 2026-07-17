@@ -44,15 +44,20 @@ describe("Arena90 design foundation", () => {
   });
 
   it("uses the bundled Poppins family through semantic font tokens", () => {
+    expect(stylesheet.match(/^:root\s*{/gm)).toHaveLength(1);
     expect(stylesheet).toContain(
-      "--font-display: var(--font-poppins), Arial, Helvetica, sans-serif;",
+      "--font-display: var(--font-poppins), system-ui, sans-serif;",
     );
     expect(stylesheet).toContain(
-      "--font-ui: var(--font-poppins), Arial, Helvetica, sans-serif;",
+      "--font-body: var(--font-poppins), system-ui, sans-serif;",
     );
     expect(stylesheet).toContain(
-      '--font-mono: ui-monospace, "SFMono-Regular", Consolas, monospace;',
+      "--font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;",
     );
+    expect(stylesheet).toContain("--font-ui: var(--font-body);");
+    expect(stylesheet).toContain("--font-outlier: var(--font-mono);");
+    expect(stylesheet).toContain("--weight-heading: 600;");
+    expect(stylesheet).toContain("--weight-display: 700;");
     expect(stylesheet).toMatch(
       /body\s*{[^}]*font-family:\s*var\(--font-ui\)/,
     );
@@ -74,6 +79,57 @@ describe("Arena90 design foundation", () => {
     expect(replayCta).toMatch(/border:\s*1px solid var\(--arena-line\)/);
     expect(replayCta).toMatch(/color:\s*var\(--arena-text\)/);
     expect(replayCta).not.toMatch(/background:\s*var\(--arena-text\)/);
+  });
+
+  it("keeps the home hero compact and separates rivalry labels", () => {
+    const hero = stylesheet.match(/\.home-broadcast-hero\s*{([^}]*)}/)?.[1];
+    const heroHeading = stylesheet.match(
+      /\.home-broadcast-hero__copy h1,[^{]*{([^}]*)}/,
+    )?.[1];
+    const rivalryCard = stylesheet.match(
+      /\.home-broadcast-sheet__rivalry article\s*{([^}]*)}/,
+    )?.[1];
+    const rivalryStrategy = stylesheet.match(
+      /\.home-broadcast-sheet__rivalry strong\s*{([^}]*)}/,
+    )?.[1];
+
+    expect(hero).toMatch(/min-height:\s*min\(52rem, calc\(100svh - 5\.5rem\)\)/);
+    expect(heroHeading).toMatch(/font-weight:\s*var\(--weight-display\)/);
+    expect(rivalryCard).toMatch(/display:\s*flex/);
+    expect(rivalryCard).toMatch(/gap:\s*var\(--space-2xs\)/);
+    expect(rivalryStrategy).toMatch(/font-weight:\s*var\(--weight-display\)/);
+  });
+
+  it("keeps agent strategy names intact and centers the versus marker", () => {
+    const agentCard = stylesheet.match(/\.home-agent-card\s*{([^}]*)}/)?.[1];
+    const strategyName = stylesheet.match(
+      /\.home-agent-card__copy strong\s*{([^}]*)}/,
+    )?.[1];
+    const versusMarker = stylesheet.match(
+      /\.home-agent-pair > \.home-agent-pair__versus\s*{([^}]*)}/,
+    )?.[1];
+
+    expect(agentCard).toMatch(
+      /grid-template-columns:\s*minmax\(0, 0\.9fr\) minmax\(15rem, 1\.1fr\)/,
+    );
+    expect(strategyName).toMatch(/overflow-wrap:\s*normal/);
+    expect(strategyName).toMatch(/word-break:\s*normal/);
+    expect(versusMarker).toMatch(/display:\s*grid/);
+    expect(versusMarker).toMatch(/place-items:\s*center/);
+  });
+
+  it("uses the shared display and metadata roles in the lifecycle section", () => {
+    const lifecycleHeading = stylesheet.match(
+      /\.home-system-heading h2\s*{([^}]*)}/,
+    )?.[1];
+    const lifecycleMetadata = stylesheet.match(
+      /\.home-system-track small\s*{([^}]*)}/,
+    )?.[1];
+
+    expect(lifecycleHeading).toMatch(/font-weight:\s*var\(--weight-heading\)/);
+    expect(lifecycleHeading).toMatch(/line-height:\s*1/);
+    expect(lifecycleMetadata).toMatch(/font-family:\s*var\(--font-outlier\)/);
+    expect(lifecycleMetadata).toMatch(/letter-spacing:\s*0\.04em/);
   });
 
   it("leaves no previous hero composition behind", () => {
