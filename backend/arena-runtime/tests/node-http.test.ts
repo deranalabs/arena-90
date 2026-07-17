@@ -8,7 +8,10 @@ import {
   TxlineDataError,
   type TxlineProviderClient,
 } from "../src/adapters/data/index.js";
-import { publicArenaStateV1Schema } from "../src/api/contracts.js";
+import {
+  publicArenaStateV1Schema,
+  publicEventHistoryV1Schema,
+} from "../src/api/contracts.js";
 import { CHECKPOINT_IDS } from "../src/contracts/index.js";
 import {
   classifyNodeHttpRuntimeFailure,
@@ -833,7 +836,7 @@ describe("Node HTTP runtime composition", () => {
     });
 
     try {
-      await resumed.listen({ port: 0 });
+      const address = await resumed.listen({ port: 0 });
       let persisted = await resumed.store.read(liveManifest.arenaId, 0);
       for (let attempt = 0; attempt < 100; attempt += 1) {
         if (persisted !== "NOT_FOUND" && persisted.state.phase === "COMPLETED") {
@@ -843,6 +846,20 @@ describe("Node HTTP runtime composition", () => {
         persisted = await resumed.store.read(liveManifest.arenaId, 0);
       }
       if (persisted === "NOT_FOUND") throw new Error("Arena was not persisted");
+      const publicHistory = publicEventHistoryV1Schema.parse(
+        await fetch(
+          `http://${address.host}:${address.port}/api/arenas/${liveManifest.arenaId}/events`,
+        ).then((response) => response.json()),
+      );
+      const publicKickoffEvents = publicHistory.events.filter(
+        (event) => "checkpointId" in event && event.checkpointId === "KICKOFF",
+      );
+      const publicKickoffOpened = publicKickoffEvents.find(
+        (event) => event.type === "CHECKPOINT_OPENED",
+      );
+      const publicKickoffReveal = publicKickoffEvents.find(
+        (event) => event.type === "ROUND_REVEALED",
+      );
 
       expect({
         interruptedPhase:
@@ -868,6 +885,15 @@ describe("Node HTTP runtime composition", () => {
         completedEvents: persisted.events.filter(
           ({ type }) => type === "COMPLETED",
         ).length,
+        publicEventSequences: publicHistory.events.map(({ sequence }) => sequence),
+        publicKickoffTypes: publicKickoffEvents.map(({ type }) => type),
+        publicKickoffAgents: publicKickoffEvents
+          .flatMap((event) =>
+            event.type === "DECISION_RECEIVED" ? [event.agentId] : [],
+          )
+          .sort(),
+        publicKickoffOpened,
+        publicKickoffReveal,
       }).toEqual({
         interruptedPhase: "RUNNING",
         resumedPhase: "COMPLETED",
@@ -885,6 +911,39 @@ describe("Node HTTP runtime composition", () => {
         uniqueEventIds: persisted.events.length,
         kickoffOpened: 1,
         completedEvents: 1,
+        publicEventSequences: persisted.events.map((_event, index) => index + 1),
+        publicKickoffTypes: [
+          "CHECKPOINT_OPENED",
+          "AGENTS_ANALYZING",
+          "DECISION_RECEIVED",
+          "DECISION_RECEIVED",
+          "ROUND_REVEALED",
+          "ROUND_COMPLETE",
+        ],
+        publicKickoffAgents: ["alpha", "beta"],
+        publicKickoffOpened: expect.objectContaining({
+          payload: {
+            snapshot: expect.objectContaining({
+              fixtureId: liveManifest.fixtureId,
+              checkpointId: "KICKOFF",
+              source: "TXLINE_LIVE",
+              freshness: {
+                marketUpdatedAtUtc: expect.any(String),
+                delayed: false,
+                suspended: false,
+              },
+            }),
+          },
+        }),
+        publicKickoffReveal: expect.objectContaining({
+          payload: expect.objectContaining({
+            decisions: {
+              alpha: expect.objectContaining({ checkpointId: "KICKOFF" }),
+              beta: expect.objectContaining({ checkpointId: "KICKOFF" }),
+            },
+            failures: [],
+          }),
+        }),
       });
     } finally {
       await resumed.shutdown();
