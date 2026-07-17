@@ -27,6 +27,10 @@ import {
 import type { ArenaLifecycleRunner } from "../services/arena-lifecycle.js";
 import { createJsonArenaLifecycleStore } from "../services/json-lifecycle-store.js";
 import type { ArenaLifecycleStore } from "../services/lifecycle-store.js";
+import {
+  createSupporterResolverSupervisor,
+  type SupporterChainResolver,
+} from "../services/supporter-resolver.js";
 import { createNodeArenaLifecycleComposition } from "./node-lifecycle.js";
 
 export type NodeHttpRuntimeMode = "REPLAY" | "LIVE";
@@ -67,6 +71,7 @@ export interface CreateNodeHttpRuntimeCompositionOptions {
       attempt: AgentInvocationRequest["attempt"];
     }>,
   ) => void;
+  readonly supporterResolver?: SupporterChainResolver;
 }
 
 export interface NodeHttpRuntimeComposition {
@@ -410,6 +415,10 @@ export async function createNodeHttpRuntimeComposition(
     },
   });
   const capacityCoordinator = createInMemoryArenaHttpCapacityCoordinator();
+  const supporterSupervisor =
+    options.supporterResolver === undefined
+      ? undefined
+      : createSupporterResolverSupervisor(options.supporterResolver);
   let ready = true;
   const configuredSource =
     mode === "REPLAY"
@@ -447,14 +456,23 @@ export async function createNodeHttpRuntimeComposition(
     | undefined;
 
   async function startManagedRun(): Promise<void> {
-    await lifecycle.runner.create(manifest);
     const controller = new AbortController();
-    const promise = lifecycle.runner.run(manifest.arenaId, controller.signal).then(
-      () => undefined,
-      () => {
+    await supporterSupervisor?.prepare(manifest, controller.signal);
+    await lifecycle.runner.create(manifest);
+    const promise = lifecycle.runner
+      .run(manifest.arenaId, controller.signal)
+      .then(async (state) => {
+        if (state.phase === "COMPLETED" && state.finalResult !== undefined) {
+          await supporterSupervisor?.settle(
+            state.manifest,
+            state.finalResult,
+            controller.signal,
+          );
+        }
+      })
+      .catch(() => {
         if (!controller.signal.aborted) ready = false;
-      },
-    );
+      });
     managedRun = Object.freeze({ controller, promise });
   }
 
