@@ -80,7 +80,7 @@ fallback evidence, not a substitute for the required live integration.
 | 1. Strategy Integrity | Complete locally | Deploy strategy v2 and preserve smoke evidence |
 | 2. Always-On World Cup Live | In progress | Supervisor clean-boot and restart proof |
 | 3. Spectator & Technical Proof | In progress | World Cup API/SSE through browser |
-| 4. Solana Supporter Slice | Not started | Program, Action, and devnet wallet flow |
+| 4. Solana Supporter Slice | In progress | TxLINE receipt, settlement, and frontend wallet proof |
 | 5. Release & Demo | Not started | Rehearsal, security audit, deploy, and recording |
 
 Update this table only from captured acceptance evidence. Local implementation
@@ -132,6 +132,18 @@ or an isolated unit test does not close a gate.
 - Replay runtime is deployed on the agentic VPS; frontend is deployed on
   Vercel through a same-origin read-only gateway.
 - Replay spectator flow and public proof are available as fallback evidence.
+- The legacy Isagi/Aiku USDC and Kamino-mock contract has been replaced by the
+  approved native-SOL V2 supporter program. Rust tests pass and the SBF binary
+  plus IDL build successfully.
+- The V2 program is deployed on Solana devnet at
+  `3eaE8RrpNK3Fo9YNj8bSK8VKZ49uWNVceGntzUSgDLsZ`. A real devnet smoke completed
+  initialize, Alpha backing, permissionless deadline lock, resolver void, and
+  user-signed refund claim for arena
+  `8vn2j5AzDHmz8LgEfkfYxTFno9a8jb8mwBVQeiQpg2SU`.
+- The Solana Action service now returns only unsigned Back Alpha, Back Beta,
+  and Claim transactions after program-owner, origin, wallet, amount, and rate
+  validation. Build and all five HTTP/encoding tests pass; production
+  dependency audit reports zero known vulnerabilities.
 
 ### 3.2 Not Proven
 
@@ -154,18 +166,11 @@ or an isolated unit test does not close a gate.
   Vercel build and homepage response.
 - The Event Ledger changes have not yet been deployed or matched against a
   persisted production World Cup SSE sequence in a browser.
-- Current V2 branch has no aligned Solana Action module. Existing Anchor code
-  and historical Action code are V1/Kamino-mock material and are not accepted
-  as V2 supporter proof.
-- Solana audit confirms the current Anchor account stores aggregate
-  `isagi_stake`/`aiku_stake`, has no backing deadline, supporter ownership
-  record, lifecycle lock, canonical result hash, claim, or refund instruction,
-  and requires the Kamino mock during resolution. Its focused Rust tests pass,
-  but they prove only the legacy initialize/stake path. The historical Action
-  constructs a mock SOL transfer to a treasury from `clash-state.json`; its
-  source is not present on the current V2 branch.
-- Full supporter Blink, escrow, lock, settlement, claim, and refund have not
-  passed devnet end to end.
+- TxLINE terminal proof receipt, winner settlement, Alpha/Beta payout, and
+  rejection paths have not passed devnet end to end. The completed void/refund
+  smoke is necessary but does not close Gate 4.
+- The Action service has not been deployed publicly or exercised through a
+  Blink client. Frontend wallet signing and transaction proof remain absent.
 - Demo-critical frontend routes still contain competing CSS foundations and
   inconsistent information hierarchy.
 

@@ -2,7 +2,8 @@
   "name": "arena90-anchor-tests",
   "private": true,
   "scripts": {
-    "test": "cargo test"
+    "test": "cargo test",
+    "smoke:devnet": "node scripts/devnet-lifecycle-smoke.mjs"
   },
   "devDependencies": {
     "@coral-xyz/anchor": "0.32.1",
