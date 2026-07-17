@@ -26,6 +26,10 @@ import type {
   ArenaLifecycleTiming,
 } from "./arena-lifecycle.js";
 import {
+  ArenaCheckpointMissedError,
+  ArenaCheckpointPendingError,
+} from "./arena-lifecycle.js";
+import {
   ArenaLifecycleStoreError,
   type ArenaLifecycleStore,
 } from "./lifecycle-store.js";
@@ -339,8 +343,27 @@ export function createArenaLifecycleRunner(
             ) {
               throw new Error("Invalid lifecycle snapshot");
             }
-          } catch {
+          } catch (error) {
             if (runSignal.aborted) throw new CheckpointExecutionAbortedError();
+            if (
+              state.manifest.mode === "LIVE" &&
+              error instanceof ArenaCheckpointPendingError
+            ) {
+              await config.timing.wait(5_000, runSignal);
+              continue;
+            }
+            if (
+              state.manifest.mode === "LIVE" &&
+              error instanceof ArenaCheckpointMissedError
+            ) {
+              state = await commitGlobalMiss(
+                state,
+                checkpointId,
+                error.reason,
+              );
+              continue;
+            }
+            if (state.manifest.mode === "LIVE") throw error;
             state = await commitGlobalMiss(
               state,
               checkpointId,

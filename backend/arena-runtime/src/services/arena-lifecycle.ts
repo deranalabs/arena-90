@@ -7,6 +7,25 @@ import type {
   TerminalEvidenceV1,
 } from "../contracts/index.js";
 
+export class ArenaCheckpointPendingError extends Error {
+  constructor() {
+    super("Arena checkpoint evidence is not eligible yet");
+    this.name = "ArenaCheckpointPendingError";
+  }
+}
+
+export type ArenaCheckpointMissReason = "CHECKPOINT_WINDOW_MISSED";
+
+export class ArenaCheckpointMissedError extends Error {
+  readonly reason: ArenaCheckpointMissReason;
+
+  constructor(reason: ArenaCheckpointMissReason) {
+    super("Arena checkpoint cannot execute");
+    this.name = "ArenaCheckpointMissedError";
+    this.reason = reason;
+  }
+}
+
 export interface ArenaLifecycleRunner {
   create(manifest: unknown): Promise<ArenaRunStateV1>;
   run(arenaId: string, signal: AbortSignal): Promise<ArenaRunStateV1>;

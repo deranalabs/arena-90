@@ -60,9 +60,22 @@ The lifecycle module must call `refreshCheckpoint()` before invoking checkpoint
 orchestration. The adapter must not make the current checkpoint orchestrator
 asynchronous.
 
-If refresh or validation fails, the adapter must not expose a new snapshot.
-The existing orchestrator then applies its global missed-round behavior and
-preserves both portfolios.
+The adapter must classify checkpoint preparation without guessing:
+
+- valid evidence inside the checkpoint window prepares a snapshot;
+- verified state before the window, including an idle or timed-out score
+  stream, reports `CHECKPOINT_PENDING` and exposes no snapshot;
+- verified state after the window reports `CHECKPOINT_WINDOW_MISSED` and
+  exposes no snapshot;
+- provider or validation failure exposes no snapshot and fails the current run
+  without writing a round.
+
+The lifecycle retries `CHECKPOINT_PENDING` against the same checkpoint without
+writing a durable round or event. A verified missed window applies global
+missed-round behavior and preserves both portfolios. Other provider or
+validation errors fail the run so the supervisor may retry without fabricating
+history; if verified state later proves that the window passed, the explicit
+missed-window path applies.
 
 ## 3. Provider Client
 
@@ -352,16 +365,26 @@ snapshot through the existing contract.
 
 No fixture, fixture mismatch, missing approved market, malformed provider data,
 stale or future-invalid market data, suspended coverage, duplicate conflicts,
-sequence errors, exhausted provider requests, or resynchronization failure
-must prevent a new snapshot from being exposed.
+sequence errors, exhausted provider requests, or resynchronization failure may
+expose a new snapshot.
 
-These failures use the existing shared-data failure path:
+Before a checkpoint window opens, a cleanly idle score stream or exhausted
+timeout/network attempts are pending evidence, not a missed round. The
+lifecycle retries the same checkpoint after a bounded delay and persists
+nothing. Authentication, authorization, malformed payload, and invalid
+configuration errors are never reclassified as pending.
+
+A verified passed checkpoint window uses the existing shared-data failure
+path:
 
 - emit `GLOBAL_MISSED_DECISION_ROUND` through current orchestration;
 - preserve both portfolios;
 - do not call agents with a fabricated snapshot;
 - do not fabricate decisions or fall back to an older market row;
 - do not silently switch a Live arena to Replay.
+
+An unknown lifecycle or adapter error fails the run. It must not fabricate a
+missed round.
 
 Replay remains an explicit available fallback using the recorded adapter.
 

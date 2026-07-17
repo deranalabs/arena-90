@@ -116,8 +116,13 @@ or an isolated unit test does not close a gate.
   rejects `ARENA90_AUTOSTART=false`. Replay-pass, Live-pass, and manual-start
   rejection are covered by automated tests.
 - World Cup third-place and final fixture bindings were revalidated from the
-  provider. Both full connectivity smokes pass with a bounded 5 MB provider
+  provider. Both full connectivity smokes pass with a bounded 10 MB provider
   response cap; their score streams were correctly idle before kickoff.
+- Local runtime now distinguishes pending checkpoint evidence from a verified
+  missed window and from current-window shared-data failure. Pre-kickoff idle
+  or timed-out streams retry the same checkpoint without durable events;
+  verified passed windows create one explicit global miss. Runtime build and
+  all 422 tests pass serially.
 - TxLINE credentials may now be loaded from one owner-only JSON file outside
   Git and immutable releases. The VPS release artifact and credential file are
   staged, but the active Replay service has not been switched to Live.
@@ -142,8 +147,12 @@ or an isolated unit test does not close a gate.
   `8vn2j5AzDHmz8LgEfkfYxTFno9a8jb8mwBVQeiQpg2SU`.
 - The Solana Action service now returns only unsigned Back Alpha, Back Beta,
   and Claim transactions after program-owner, origin, wallet, amount, and rate
-  validation. Build and all five HTTP/encoding tests pass; production
+  validation. Build and all seven HTTP/encoding tests pass; production
   dependency audit reports zero known vulnerabilities.
+- A separate Solana resolver release is deployed on the VPS with isolated
+  owner-only credentials. Its systemd service is active and idempotently waits
+  for canonical final Live runtime persistence; it has not created the World
+  Cup final arena or submitted a settlement.
 - A second real devnet smoke used TxLINE fixture `17926686`, provider sequence
   `880`, and HOME/AWAY terminal leaves `1-1`. Two wallets backed opposite
   agents, the deadline locked, TxLINE returned true through CPI, the receipt
@@ -157,13 +166,16 @@ or an isolated unit test does not close a gate.
 - The deployed smoke fixture is not the World Cup fixture used by the demo.
 - No World Cup arena has completed TxLINE/TxODDS input through autonomous
   decisions, deterministic execution, API/SSE, and frontend end to end.
-- The VPS Live activation, restart-resume proof, and frontend consumer switch
-  remain pending explicit operator approval.
-- The previously staged VPS supervisor artifact predates the approved
-  Alpha/Beta strategy reassignment. It is obsolete and must not be activated;
-  a strategy-v3 release must replace it.
-- The deployed Replay runtime still uses its older explicit create/run flow;
-  the tested supervisor release is staged but not active.
+- The first third-place Live activation incorrectly converted pre-kickoff idle
+  score-stream timeouts into six `DATA_FAILURE` rounds. Service was stopped and
+  that immutable persistence was preserved. The local pending-window fix has
+  not yet been released or re-smoked against a fresh rehearsal arena identity.
+- The VPS runtime service is currently stopped after the invalid third-place
+  activation. A fresh rehearsal activation, restart-resume proof, deliberate
+  Replay fallback decision, and frontend consumer switch remain pending.
+- The VPS runtime release symlink now targets the supervisor and strategy-v3
+  build, but stopped service and invalid rehearsal persistence are not
+  acceptance evidence.
 - Production Replay evidence shows Alpha allocating once in six rounds and
   Beta returning `NO_TRADE` in all six. Alpha's allocating explanation also
   cites historical probability absent from its invocation.

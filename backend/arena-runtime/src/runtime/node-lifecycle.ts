@@ -1,6 +1,7 @@
 import type { AgentAdapter } from "../adapters/agents/fake.js";
 import { createRecordedDataAdapter } from "../adapters/data/recorded.js";
 import {
+  TxlineDataError,
   createTxlineLiveDataAdapter,
   type TxlineFixtureBinding,
   type TxlineProviderClient,
@@ -9,7 +10,11 @@ import type {
   ArenaAgentId,
   ArenaRuntimeMetadataV1,
 } from "../contracts/index.js";
-import type { ArenaLifecycleTiming } from "../services/arena-lifecycle.js";
+import {
+  ArenaCheckpointMissedError,
+  ArenaCheckpointPendingError,
+  type ArenaLifecycleTiming,
+} from "../services/arena-lifecycle.js";
 import { createArenaLifecycleRunner } from "../services/lifecycle-runner.js";
 import {
   createInMemoryArenaLifecycleStore,
@@ -60,7 +65,22 @@ export function createNodeArenaLifecycleComposition(
           nowMs: config.timing.nowMs,
         });
         return {
-          prepare: live.refreshCheckpoint,
+          async prepare(checkpointId, signal) {
+            try {
+              await live.refreshCheckpoint(checkpointId, signal);
+            } catch (error) {
+              if (!(error instanceof TxlineDataError)) throw error;
+              if (error.code === "CHECKPOINT_PENDING") {
+                throw new ArenaCheckpointPendingError();
+              }
+              if (error.code === "CHECKPOINT_WINDOW_MISSED") {
+                throw new ArenaCheckpointMissedError(
+                  "CHECKPOINT_WINDOW_MISSED",
+                );
+              }
+              throw error;
+            }
+          },
           getSnapshot: live.getSnapshot,
           getTerminalEvidence: live.getTerminalEvidence,
         };

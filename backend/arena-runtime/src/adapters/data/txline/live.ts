@@ -83,6 +83,99 @@ function isCheckpointEligible(
   }
 }
 
+function isCheckpointWindowMissed(
+  checkpointId: CheckpointId,
+  state: TxlineScoreState,
+): boolean {
+  switch (checkpointId) {
+    case "KICKOFF":
+      return (
+        state.status === "HALFTIME" ||
+        state.status === "FINISHED" ||
+        (state.status === "LIVE" && state.minute >= 15)
+      );
+    case "M15":
+      return (
+        state.status === "HALFTIME" ||
+        state.status === "FINISHED" ||
+        (state.status === "LIVE" && state.minute >= 30)
+      );
+    case "M30":
+      return (
+        state.status === "HALFTIME" ||
+        state.status === "FINISHED" ||
+        (state.status === "LIVE" && state.minute > 45)
+      );
+    case "HALFTIME":
+      return (
+        state.status === "FINISHED" ||
+        (state.status === "LIVE" && state.minute > 45)
+      );
+    case "M60":
+      return (
+        state.status === "FINISHED" ||
+        (state.status === "LIVE" && state.minute >= 75)
+      );
+    case "M75":
+      return state.status === "FINISHED";
+    case "FINAL":
+      return false;
+  }
+}
+
+function isCheckpointPending(
+  checkpointId: CheckpointId,
+  state: TxlineScoreState,
+): boolean {
+  switch (checkpointId) {
+    case "KICKOFF":
+      return state.status === "SCHEDULED";
+    case "M15":
+      return (
+        state.status === "SCHEDULED" ||
+        (state.status === "LIVE" && state.minute < 15)
+      );
+    case "M30":
+      return (
+        state.status === "SCHEDULED" ||
+        (state.status === "LIVE" && state.minute < 30)
+      );
+    case "HALFTIME":
+      return (
+        state.status === "SCHEDULED" ||
+        (state.status === "LIVE" && state.minute <= 45)
+      );
+    case "M60":
+      return (
+        state.status === "SCHEDULED" ||
+        state.status === "HALFTIME" ||
+        (state.status === "LIVE" && state.minute < 60)
+      );
+    case "M75":
+      return (
+        state.status === "SCHEDULED" ||
+        state.status === "HALFTIME" ||
+        (state.status === "LIVE" && state.minute < 75)
+      );
+    case "FINAL":
+      return state.status !== "FINISHED";
+  }
+}
+
+function checkpointPending(): TxlineDataError {
+  return new TxlineDataError(
+    "CHECKPOINT_PENDING",
+    "TxLINE checkpoint evidence is not eligible yet",
+  );
+}
+
+function checkpointWindowMissed(): TxlineDataError {
+  return new TxlineDataError(
+    "CHECKPOINT_WINDOW_MISSED",
+    "TxLINE checkpoint window was missed",
+  );
+}
+
 function toUtc(timestampMs: number): string {
   try {
     return new Date(timestampMs).toISOString();
@@ -191,79 +284,101 @@ export function createTxlineLiveDataAdapter(
     let activeEvents = scoreEvents;
     let state = activeReducer.getState();
     if (isCheckpointEligible(checkpointId, state)) return state;
+    if (isCheckpointWindowMissed(checkpointId, state)) {
+      throw checkpointWindowMissed();
+    }
     let resyncUsed = false;
 
-    for await (const event of client.getScoreStream(
-      fixtureBinding.fixtureId,
-      signal,
-    )) {
-      if (signal.aborted) {
-        throw new TxlineDataError("PROVIDER_ABORTED", "TxLINE provider request aborted");
-      }
-      const streamedEventData = event.data;
-      try {
-        if (activeReducer.apply(streamedEventData) === "APPLIED") {
-          activeEvents.push(streamedEventData);
-        }
-      } catch (error) {
-        if (
-          !(error instanceof TxlineDataError) ||
-          error.code !== "SEQUENCE_GAP" ||
-          resyncUsed
-        ) {
-          throw error;
-        }
-        resyncUsed = true;
-        const replay = await client.getHistoricalScoreReplay(
-          fixtureBinding.fixtureId,
-          signal,
-        );
-        if (replay.length === 0) {
-          throw invalidInput("Invalid TxLINE historical score replay");
-        }
-        const candidateEvents: unknown[] = [...activeEvents];
-        const candidateReducer = createTxlineScoreStateReducer({
-          fixture,
-          bootstrapEvents: candidateEvents,
-        });
-        for (const replayEvent of replay) {
-          if (signal.aborted) {
-            throw new TxlineDataError(
-              "PROVIDER_ABORTED",
-              "TxLINE provider request aborted",
-            );
-          }
-          const replayEventData = replayEvent.data;
-          const replayResult = candidateReducer.apply(replayEventData);
-          if (signal.aborted) {
-            throw new TxlineDataError(
-              "PROVIDER_ABORTED",
-              "TxLINE provider request aborted",
-            );
-          }
-          if (replayResult === "APPLIED") {
-            candidateEvents.push(replayEventData);
-          }
-        }
-        const triggeringResult = candidateReducer.apply(streamedEventData);
+    try {
+      for await (const event of client.getScoreStream(
+        fixtureBinding.fixtureId,
+        signal,
+      )) {
         if (signal.aborted) {
           throw new TxlineDataError(
             "PROVIDER_ABORTED",
             "TxLINE provider request aborted",
           );
         }
-        if (triggeringResult === "APPLIED") {
-          candidateEvents.push(streamedEventData);
+        const streamedEventData = event.data;
+        try {
+          if (activeReducer.apply(streamedEventData) === "APPLIED") {
+            activeEvents.push(streamedEventData);
+          }
+        } catch (error) {
+          if (
+            !(error instanceof TxlineDataError) ||
+            error.code !== "SEQUENCE_GAP" ||
+            resyncUsed
+          ) {
+            throw error;
+          }
+          resyncUsed = true;
+          const replay = await client.getHistoricalScoreReplay(
+            fixtureBinding.fixtureId,
+            signal,
+          );
+          if (replay.length === 0) {
+            throw invalidInput("Invalid TxLINE historical score replay");
+          }
+          const candidateEvents: unknown[] = [...activeEvents];
+          const candidateReducer = createTxlineScoreStateReducer({
+            fixture,
+            bootstrapEvents: candidateEvents,
+          });
+          for (const replayEvent of replay) {
+            if (signal.aborted) {
+              throw new TxlineDataError(
+                "PROVIDER_ABORTED",
+                "TxLINE provider request aborted",
+              );
+            }
+            const replayEventData = replayEvent.data;
+            const replayResult = candidateReducer.apply(replayEventData);
+            if (signal.aborted) {
+              throw new TxlineDataError(
+                "PROVIDER_ABORTED",
+                "TxLINE provider request aborted",
+              );
+            }
+            if (replayResult === "APPLIED") {
+              candidateEvents.push(replayEventData);
+            }
+          }
+          const triggeringResult = candidateReducer.apply(streamedEventData);
+          if (signal.aborted) {
+            throw new TxlineDataError(
+              "PROVIDER_ABORTED",
+              "TxLINE provider request aborted",
+            );
+          }
+          if (triggeringResult === "APPLIED") {
+            candidateEvents.push(streamedEventData);
+          }
+          candidateReducer.getState();
+          activeReducer = candidateReducer;
+          activeEvents = candidateEvents;
+          scoreReducer = candidateReducer;
+          scoreEvents = candidateEvents;
         }
-        candidateReducer.getState();
-        activeReducer = candidateReducer;
-        activeEvents = candidateEvents;
-        scoreReducer = candidateReducer;
-        scoreEvents = candidateEvents;
+        state = activeReducer.getState();
+        if (isCheckpointEligible(checkpointId, state)) return state;
+        if (isCheckpointWindowMissed(checkpointId, state)) {
+          throw checkpointWindowMissed();
+        }
       }
-      state = activeReducer.getState();
-      if (isCheckpointEligible(checkpointId, state)) return state;
+    } catch (error) {
+      if (
+        error instanceof TxlineDataError &&
+        (error.code === "PROVIDER_TIMEOUT" ||
+          error.code === "PROVIDER_NETWORK_FAILURE") &&
+        isCheckpointPending(checkpointId, state)
+      ) {
+        throw checkpointPending();
+      }
+      throw error;
     }
+    if (isCheckpointPending(checkpointId, state)) throw checkpointPending();
     throw invalidInput("TxLINE checkpoint state unavailable");
   }
 

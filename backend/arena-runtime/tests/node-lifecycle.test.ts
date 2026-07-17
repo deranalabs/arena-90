@@ -2,7 +2,10 @@ import { readFile } from "node:fs/promises";
 
 import { describe, expect, it } from "vitest";
 
-import type { TxlineProviderClient } from "../src/adapters/data/index.js";
+import {
+  TxlineDataError,
+  type TxlineProviderClient,
+} from "../src/adapters/data/index.js";
 import { CHECKPOINT_IDS } from "../src/contracts/index.js";
 import { createNodeArenaLifecycleComposition } from "../src/runtime/node-lifecycle.js";
 
@@ -166,6 +169,122 @@ async function loadRecordedFixture(): Promise<unknown> {
 }
 
 describe("Node arena lifecycle composition", () => {
+  it("keeps real TxLINE pre-kickoff idle state READY without durable miss", async () => {
+    const liveManifest = {
+      ...manifest,
+      arenaId: "arena-live-upcoming-001",
+      mode: "LIVE" as const,
+      fixtureId: String(liveFixtureBinding.fixtureId),
+      kickoffUtc: new Date(liveFixtureBinding.startTime).toISOString(),
+    };
+    const baseClient = createLiveClient(() => undefined);
+    const controller = new AbortController();
+    let notifyRetryWait!: () => void;
+    const retryWaiting = new Promise<void>((resolve) => {
+      notifyRetryWait = resolve;
+    });
+    const composition = createNodeArenaLifecycleComposition({
+      live: {
+        fixtureBinding: liveFixtureBinding,
+        delayed: false,
+        client: {
+          ...baseClient,
+          getScoreSnapshot: async () => [scoreEvent(0, 1, undefined)],
+          getScoreStream: async function* () {},
+        },
+      },
+      agents: {
+        alpha: { agentId: "alpha", invoke: async () => undefined },
+        beta: { agentId: "beta", invoke: async () => undefined },
+      },
+      runtimeMetadata,
+      timing: {
+        nowMs: () => 1_783_164_010_000,
+        wait: async (delayMs, signal) => {
+          if (delayMs === 5_000) notifyRetryWait();
+          await new Promise<void>((resolve) => {
+            if (signal.aborted) resolve();
+            else
+              signal.addEventListener("abort", () => resolve(), { once: true });
+          });
+        },
+        waitForCheckpoint: async () => undefined,
+      },
+      lease: { ownerId: "live-upcoming", ttlMs: 10_000, renewEveryMs: 1_000 },
+    });
+    await composition.runner.create(liveManifest);
+
+    const run = composition.runner.run(liveManifest.arenaId, controller.signal);
+    const outcome = await Promise.race([
+      retryWaiting.then(() => "RETRYING" as const),
+      run.then(
+        () => "SETTLED" as const,
+        () => "SETTLED" as const,
+      ),
+    ]);
+    expect(outcome).toBe("RETRYING");
+    controller.abort();
+    await expect(run).rejects.toMatchObject({ code: "ABORTED" });
+
+    await expect(
+      composition.store.read(liveManifest.arenaId, 0),
+    ).resolves.toMatchObject({
+      state: { phase: "READY", checkpoints: [], lastEventSequence: 1 },
+      events: [{ sequence: 1, type: "ARENA_READY" }],
+    });
+  });
+
+  it("fails LIVE provider authentication without fabricating missed rounds", async () => {
+    const liveManifest = {
+      ...manifest,
+      arenaId: "arena-live-auth-failure-001",
+      mode: "LIVE" as const,
+      fixtureId: String(liveFixtureBinding.fixtureId),
+      kickoffUtc: new Date(liveFixtureBinding.startTime).toISOString(),
+    };
+    const baseClient = createLiveClient(() => undefined);
+    const composition = createNodeArenaLifecycleComposition({
+      live: {
+        fixtureBinding: liveFixtureBinding,
+        delayed: false,
+        client: {
+          ...baseClient,
+          getFixtureSnapshot: async () => {
+            throw new TxlineDataError(
+              "PROVIDER_AUTHENTICATION_FAILURE",
+              "TxLINE provider authentication failure",
+            );
+          },
+        },
+      },
+      agents: {
+        alpha: { agentId: "alpha", invoke: async () => undefined },
+        beta: { agentId: "beta", invoke: async () => undefined },
+      },
+      runtimeMetadata,
+      timing: {
+        nowMs: () => 1_783_164_010_000,
+        wait: heartbeatWait,
+        waitForCheckpoint: async () => undefined,
+      },
+      lease: { ownerId: "live-auth-failure", ttlMs: 10_000, renewEveryMs: 1_000 },
+    });
+    await composition.runner.create(liveManifest);
+
+    await expect(
+      composition.runner.run(
+        liveManifest.arenaId,
+        new AbortController().signal,
+      ),
+    ).rejects.toMatchObject({ code: "PROVIDER_AUTHENTICATION_FAILURE" });
+    await expect(
+      composition.store.read(liveManifest.arenaId, 0),
+    ).resolves.toMatchObject({
+      state: { phase: "READY", checkpoints: [], lastEventSequence: 1 },
+      events: [{ sequence: 1, type: "ARENA_READY" }],
+    });
+  });
+
   it("runs the mandatory Replay recording through six decisions and FINAL", async () => {
     const invoked: string[] = [];
     const agent = (agentId: "alpha" | "beta") => ({

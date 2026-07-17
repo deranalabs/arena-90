@@ -14,6 +14,8 @@ import {
   createArenaLifecycleRunner,
   createInMemoryArenaLifecycleStore,
   createJsonArenaLifecycleStore,
+  ArenaCheckpointMissedError,
+  ArenaCheckpointPendingError,
   ArenaLifecycleStoreError,
   type ArenaLifecycleDataSource,
   type ArenaLifecycleStore,
@@ -139,6 +141,137 @@ function rejectingHeartbeatWait(
 }
 
 describe("Arena lifecycle runner", () => {
+  it("keeps a LIVE checkpoint pending without durable miss until aborted", async () => {
+    const liveManifest = {
+      ...manifest,
+      arenaId: "arena-live-pending-001",
+      mode: "LIVE" as const,
+      fixtureId: "18185036",
+    };
+    const store = createInMemoryArenaLifecycleStore({ nowMs: () => 1_000 });
+    const controller = new AbortController();
+    let prepareCalls = 0;
+    let notifyRetryWait!: () => void;
+    const retryWaiting = new Promise<void>((resolve) => {
+      notifyRetryWait = resolve;
+    });
+    const runner = createArenaLifecycleRunner({
+      store,
+      dataSourceFactory: () => ({
+        async prepare() {
+          prepareCalls += 1;
+          throw new ArenaCheckpointPendingError();
+        },
+        getSnapshot() {
+          throw new Error("not used");
+        },
+        getTerminalEvidence() {
+          throw new Error("not used");
+        },
+      }),
+      agents: {
+        alpha: { agentId: "alpha", invoke: async () => undefined },
+        beta: { agentId: "beta", invoke: async () => undefined },
+      },
+      runtimeMetadata,
+      timing: {
+        nowMs: () => 1_000,
+        wait: async (delayMs, signal) => {
+          if (delayMs === 5_000) notifyRetryWait();
+          await waitUntilAborted(signal);
+        },
+        waitForCheckpoint: async () => undefined,
+      },
+      lease: { ownerId: "runner-a", ttlMs: 10_000, renewEveryMs: 1_000 },
+    });
+    await runner.create(liveManifest);
+
+    const run = runner.run(liveManifest.arenaId, controller.signal);
+    await retryWaiting;
+    controller.abort();
+    await expect(run).rejects.toMatchObject({ code: "ABORTED" });
+
+    const persisted = await store.read(liveManifest.arenaId, 0);
+    expect(prepareCalls).toBe(1);
+    expect(persisted).toMatchObject({
+      state: { phase: "READY", checkpoints: [], lastEventSequence: 1 },
+      events: [{ sequence: 1, type: "ARENA_READY" }],
+    });
+  });
+
+  it("commits one verified LIVE checkpoint-window miss then waits on next", async () => {
+    const liveManifest = {
+      ...manifest,
+      arenaId: "arena-live-missed-001",
+      mode: "LIVE" as const,
+      fixtureId: "18185036",
+    };
+    const store = createInMemoryArenaLifecycleStore({ nowMs: () => 1_000 });
+    const controller = new AbortController();
+    let notifyRetryWait!: () => void;
+    const retryWaiting = new Promise<void>((resolve) => {
+      notifyRetryWait = resolve;
+    });
+    const runner = createArenaLifecycleRunner({
+      store,
+      dataSourceFactory: () => ({
+        async prepare(checkpointId) {
+          if (checkpointId === "KICKOFF") {
+            throw new ArenaCheckpointMissedError("CHECKPOINT_WINDOW_MISSED");
+          }
+          throw new ArenaCheckpointPendingError();
+        },
+        getSnapshot() {
+          throw new Error("not used");
+        },
+        getTerminalEvidence() {
+          throw new Error("not used");
+        },
+      }),
+      agents: {
+        alpha: { agentId: "alpha", invoke: async () => undefined },
+        beta: { agentId: "beta", invoke: async () => undefined },
+      },
+      runtimeMetadata,
+      timing: {
+        nowMs: () => 1_000,
+        wait: async (delayMs, signal) => {
+          if (delayMs === 5_000) notifyRetryWait();
+          await waitUntilAborted(signal);
+        },
+        waitForCheckpoint: async () => undefined,
+      },
+      lease: { ownerId: "runner-a", ttlMs: 10_000, renewEveryMs: 1_000 },
+    });
+    await runner.create(liveManifest);
+
+    const run = runner.run(liveManifest.arenaId, controller.signal);
+    await retryWaiting;
+    controller.abort();
+    await expect(run).rejects.toMatchObject({ code: "ABORTED" });
+
+    const persisted = await store.read(liveManifest.arenaId, 0);
+    expect(persisted).toMatchObject({
+      state: {
+        phase: "RUNNING",
+        checkpoints: [
+          {
+            checkpointId: "KICKOFF",
+            outcome: "GLOBAL_MISSED",
+            failures: [
+              { scope: "GLOBAL", reason: "CHECKPOINT_WINDOW_MISSED" },
+            ],
+          },
+        ],
+      },
+      events: [
+        { sequence: 1, type: "ARENA_READY" },
+        { sequence: 2, type: "GLOBAL_MISSED_DECISION_ROUND" },
+        { sequence: 3, type: "ROUND_COMPLETE" },
+      ],
+    });
+  });
+
   it("creates an idempotent READY arena with equal manifest bankrolls", async () => {
     const store = createInMemoryArenaLifecycleStore({ nowMs: () => 1_000 });
     const runner = createArenaLifecycleRunner({

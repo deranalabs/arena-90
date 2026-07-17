@@ -154,6 +154,51 @@ describe("TxLINE live data adapter", () => {
     });
   });
 
+  it("reports pre-kickoff idle state as pending instead of failed", async () => {
+    const adapter = createTxlineLiveDataAdapter({
+      arenaId: "arena-live-001",
+      fixtureBinding,
+      delayed: false,
+      client: createClient({
+        getScoreSnapshot: async () => [
+          scoreEvent({ StatusId: 1, Clock: undefined }),
+        ],
+      }),
+      nowMs: () => 1_783_164_010_000,
+    });
+
+    await expect(
+      adapter.refreshCheckpoint("KICKOFF", new AbortController().signal),
+    ).rejects.toMatchObject({ code: "CHECKPOINT_PENDING" });
+    expect(() => adapter.getSnapshot("KICKOFF")).toThrow(
+      "Missing live decision checkpoint: KICKOFF",
+    );
+  });
+
+  it("keeps pre-kickoff state pending when idle score stream times out", async () => {
+    const adapter = createTxlineLiveDataAdapter({
+      arenaId: "arena-live-001",
+      fixtureBinding,
+      delayed: false,
+      client: createClient({
+        getScoreSnapshot: async () => [
+          scoreEvent({ StatusId: 1, Clock: undefined }),
+        ],
+        getScoreStream: async function* () {
+          throw new TxlineDataError(
+            "PROVIDER_TIMEOUT",
+            "TxLINE provider request timed out",
+          );
+        },
+      }),
+      nowMs: () => 1_783_164_010_000,
+    });
+
+    await expect(
+      adapter.refreshCheckpoint("KICKOFF", new AbortController().signal),
+    ).rejects.toMatchObject({ code: "CHECKPOINT_PENDING" });
+  });
+
   it("rejects a concurrent refresh while the active refresh can complete", async () => {
     let releaseFixture: ((value: unknown) => void) | undefined;
     const fixtureSnapshot = new Promise<unknown>((resolve) => {
@@ -306,6 +351,46 @@ describe("TxLINE live data adapter", () => {
     });
     expect(() => adapter.getSnapshot("HALFTIME")).toThrow();
   });
+
+  it.each([
+    ["KICKOFF", 2, 1_800],
+    ["M15", 2, 900],
+    ["M30", 3, undefined],
+    ["M30", 4, 1_800],
+    ["HALFTIME", 4, 2_640],
+    ["M60", 4, 900],
+    ["M75", 5, undefined],
+  ] as const)(
+    "reports %s as missed when verified score state has passed its window",
+    async (checkpointId, statusId, seconds) => {
+      const adapter = createTxlineLiveDataAdapter({
+        arenaId: "arena-live-001",
+        fixtureBinding,
+        delayed: false,
+        client: createClient({
+          getScoreSnapshot: async () => [
+            scoreEvent({
+              Action:
+                statusId === 3
+                  ? "halftime_finalised"
+                  : statusId === 5
+                    ? "game_finalised"
+                    : "coverage_update",
+              StatusId: statusId,
+              ...(seconds === undefined
+                ? { Clock: undefined }
+                : { Clock: { Running: true, Seconds: seconds } }),
+            }),
+          ],
+        }),
+        nowMs: () => 1_783_164_010_000,
+      });
+
+      await expect(
+        adapter.refreshCheckpoint(checkpointId, new AbortController().signal),
+      ).rejects.toMatchObject({ code: "CHECKPOINT_WINDOW_MISSED" });
+    },
+  );
 
   it.each([5, 100])(
     "does not accept status %s without game_finalised as FINAL",
