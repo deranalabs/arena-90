@@ -1949,8 +1949,9 @@ button {
 .home-arena-board h2 {
   margin-block-start: var(--space-2xs);
   font-size: clamp(var(--text-2xl), 5vw, var(--text-display));
-  font-weight: var(--weight-heading);
+  font-weight: var(--weight-display);
   line-height: 0.95;
+  color: var(--arena-text);
 }
 
 .home-arena-board > header > p {
@@ -1989,7 +1990,7 @@ button {
 }
 
 .home-arena-board__status strong {
-  color: var(--color-data);
+  color: var(--arena-data);
 }
 
 .home-arena-board h3 {
@@ -2031,11 +2032,13 @@ button {
   font-size: var(--text-sm);
   font-weight: var(--weight-label);
   white-space: nowrap;
+  color: var(--arena-text);
 }
 
 .home-arena-board__grid article > a:hover {
   border-color: var(--color-data);
   color: var(--color-data);
+  background: var(--color-night-2);
 }
 
 .home-arena-board__grid article > a:active {
