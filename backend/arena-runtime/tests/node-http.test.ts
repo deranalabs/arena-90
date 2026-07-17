@@ -8,6 +8,7 @@ import {
   TxlineDataError,
   type TxlineProviderClient,
 } from "../src/adapters/data/index.js";
+import { publicArenaStateV1Schema } from "../src/api/contracts.js";
 import { CHECKPOINT_IDS } from "../src/contracts/index.js";
 import {
   classifyNodeHttpRuntimeFailure,
@@ -289,6 +290,78 @@ function completingLiveClient(
 }
 
 describe("Node HTTP runtime composition", () => {
+  it("waits until locked kickoff before autonomously polling LIVE evidence", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(liveBinding.startTime - 1_000);
+    const liveManifest = lockedLiveManifest("arena-live-kickoff-wait-001");
+    const providerCalls: string[] = [];
+    const client = completingLiveClient((operation) => {
+      providerCalls.push(operation);
+    });
+    const composition = await createNodeHttpRuntimeComposition({
+      env: liveEnv,
+      readFile: liveFiles(liveManifest),
+      agents: {
+        alpha: noTradeAgent("alpha"),
+        beta: noTradeAgent("beta"),
+      },
+      store: testStore(),
+      txlineClientFactory: () => client,
+    });
+
+    try {
+      const address = await composition.listen({ port: 0 });
+      await Promise.resolve();
+
+      expect(providerCalls).toEqual([]);
+      expect(
+        await fetch(`http://${address.host}:${address.port}/ready`).then(
+          (response) => response.status,
+        ),
+      ).toBe(200);
+
+      await vi.advanceTimersByTimeAsync(999);
+      expect(providerCalls).toEqual([]);
+
+      await vi.advanceTimersByTimeAsync(1);
+      await vi.waitFor(() =>
+        expect(providerCalls).toContain("provider:fixture"),
+      );
+
+      const state = publicArenaStateV1Schema.parse(
+        await fetch(
+          `http://${address.host}:${address.port}/api/arenas/${liveManifest.arenaId}`,
+        ).then((response) => response.json()),
+      );
+      const kickoff = state.checkpoints[0];
+      expect(kickoff).toBeDefined();
+      if (kickoff === undefined) throw new Error("Missing KICKOFF checkpoint");
+      expect(kickoff).toMatchObject({
+        checkpointId: "KICKOFF",
+        snapshot: { source: "TXLINE_LIVE" },
+        portfoliosBefore: {
+          alpha: { navMicros: "100000000" },
+          beta: { navMicros: "100000000" },
+        },
+      });
+      const { snapshot } = kickoff;
+      const { alpha, beta } = kickoff.revealedDecisions;
+      expect({ snapshot, alpha, beta }).toMatchObject({
+        snapshot: { checkpointId: "KICKOFF" },
+        alpha: { checkpointId: "KICKOFF" },
+        beta: { checkpointId: "KICKOFF" },
+      });
+      if (snapshot === undefined || alpha === undefined || beta === undefined) {
+        throw new Error("Missing revealed KICKOFF evidence");
+      }
+      expect(alpha.snapshotId).toBe(snapshot.snapshotId);
+      expect(beta.snapshotId).toBe(snapshot.snapshotId);
+    } finally {
+      await composition.shutdown();
+      vi.useRealTimers();
+    }
+  });
+
   it("keeps LIVE supervised while retrying one transient provider timeout", async () => {
     vi.useFakeTimers();
     const liveManifest = lockedLiveManifest(

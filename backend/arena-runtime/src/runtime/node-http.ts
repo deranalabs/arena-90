@@ -59,6 +59,7 @@ type Environment = Readonly<Record<string, string | undefined>>;
 type TextFileReader = (path: string) => Promise<string>;
 
 const MANAGED_RUN_RETRY_INTERVAL_MS = 5_000;
+const LIVE_KICKOFF_WAIT_CHUNK_MS = 60_000;
 
 function isRetryableManagedRunFailure(error: unknown): boolean {
   return (
@@ -417,7 +418,18 @@ export async function createNodeHttpRuntimeComposition(
     timing: {
       nowMs,
       wait: abortableWait,
-      waitForCheckpoint: async () => undefined,
+      waitForCheckpoint: async (lockedManifest, checkpointId, signal) => {
+        if (mode !== "LIVE" || checkpointId !== "KICKOFF") return;
+        const kickoffMs = Date.parse(lockedManifest.kickoffUtc);
+        while (!signal.aborted) {
+          const remainingMs = kickoffMs - nowMs();
+          if (remainingMs <= 0) return;
+          await abortableWait(
+            Math.min(remainingMs, LIVE_KICKOFF_WAIT_CHUNK_MS),
+            signal,
+          );
+        }
+      },
     },
     lease: {
       ownerId: "arena90-node-http-runtime",
