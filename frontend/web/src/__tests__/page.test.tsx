@@ -42,7 +42,7 @@ describe("Arena90 homepage", () => {
       screen.getByRole("heading", { name: "Evidence in. Autonomous decisions out." }),
     ).toBeInTheDocument();
     expect(main).toHaveTextContent(/simultaneous reveal/i);
-    expect(screen.getByRole("heading", { name: "Home FC vs Away FC" })).toBeInTheDocument();
+    expect(screen.getByRole("article", { name: "Home FC vs Away FC" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Watch first. Verify when ready." })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Compare both agents" })).toHaveAttribute(
       "href",
@@ -52,9 +52,12 @@ describe("Arena90 homepage", () => {
       "href",
       "/arena/arena-replay-001/proof",
     );
-    expect(screen.getByText("Decision rounds")).toBeInTheDocument();
-    expect(screen.getByText("Six checkpoints")).toBeInTheDocument();
     expect(main).not.toHaveTextContent(/state completed/i);
+    expect(screen.getByRole("heading", { name: "World Cup arenas" })).toBeInTheDocument();
+    expect(screen.getByRole("article", { name: "France vs England" })).toHaveTextContent(/UPCOMING|UNAVAILABLE/);
+    expect(screen.getByRole("article", { name: "Spain vs Argentina" })).toHaveTextContent(/UPCOMING|UNAVAILABLE/);
+    expect(screen.getByRole("article", { name: "Home FC vs Away FC" })).toHaveTextContent("REPLAY");
+    expect(main).not.toHaveTextContent(/backing open/i);
     expect(main.querySelectorAll(":scope > section")).toHaveLength(5);
     expect(main).not.toHaveTextContent(/place bet|guaranteed edge|live now/i);
   });

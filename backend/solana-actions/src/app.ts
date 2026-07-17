@@ -55,10 +55,13 @@ function rateLimiter(limit: number) {
 async function requireArena(
   chain: ChainReader,
   arena: PublicKey,
-  programId: PublicKey,
+  config: Pick<ActionsConfig, "arenaAddress" | "programId">,
 ): Promise<ArenaLifecycle> {
+  if (!arena.equals(config.arenaAddress)) {
+    throw new PublicError("Arena is not the configured canonical Arena90 arena", 404);
+  }
   const account = await chain.getAccountInfo(arena);
-  if (!account || !account.owner.equals(programId)) {
+  if (!account || !account.owner.equals(config.programId)) {
     throw new PublicError("Arena is not an Arena90 V2 on-chain account", 404);
   }
   try {
@@ -88,6 +91,21 @@ export function createApp(
     next();
   });
   app.use(rateLimiter(config.rateLimitPerMinute));
+  app.use((request, response, next) => {
+    if (request.method !== "POST") {
+      next();
+      return;
+    }
+    const origin = request.headers.origin;
+    // Browser-origin defense only: server-side Blink clients may omit Origin.
+    // Canonical arena binding, schema checks, unsigned transactions, and rate
+    // limits remain the authorization boundary for those requests.
+    if (origin !== undefined && !config.allowedOrigins.has(origin)) {
+      response.status(403).json({ message: "Origin is not allowed" });
+      return;
+    }
+    next();
+  });
 
   app.get("/health", (_request, response) => {
     response.json({ status: "ok", network: "solana-devnet" });
@@ -107,14 +125,14 @@ export function createApp(
   app.get("/actions/arena/:arena", async (request, response, next) => {
     try {
       const arena = publicKey(request.params.arena, "arena");
-      const lifecycle = await requireArena(chain, arena, config.programId);
+      const lifecycle = await requireArena(chain, arena, config);
       const base = `${config.publicBaseUrl}/actions/arena/${arena.toBase58()}`;
       const backingOpen =
         lifecycle.state === "OPEN" &&
         BigInt(Math.floor(now() / 1_000)) < lifecycle.backingDeadlineUnix;
       const claimOpen =
         lifecycle.state === "SETTLED" || lifecycle.state === "VOID";
-      const actions = backingOpen
+      const lifecycleActions = backingOpen
         ? [
             {
               type: "transaction",
@@ -156,6 +174,14 @@ export function createApp(
               },
             ]
           : [];
+      const actions = [
+        ...lifecycleActions,
+        {
+          type: "external-link",
+          href: config.arenaPageUrl,
+          label: "View Arena",
+        },
+      ];
       response.json({
         type: "action",
         icon: `${config.frontendOrigin}/media/brand/arena90-mark.png`,
@@ -167,9 +193,9 @@ export function createApp(
           : claimOpen
             ? "Claim supporter funds"
             : "Backing closed",
-        disabled: actions.length === 0,
-        ...(actions.length > 0 ? { links: { actions } } : {}),
-        ...(actions.length === 0
+        disabled: false,
+        links: { actions },
+        ...(lifecycleActions.length === 0
           ? { error: { message: "Backing is closed; settlement is pending." } }
           : {}),
       });
@@ -198,7 +224,7 @@ export function createApp(
       if (lamports < config.minBackLamports || lamports > config.maxBackLamports) {
         throw new PublicError("amount is outside allowed bounds", 400);
       }
-      const lifecycle = await requireArena(chain, arena, config.programId);
+      const lifecycle = await requireArena(chain, arena, config);
       if (
         lifecycle.state !== "OPEN" ||
         BigInt(Math.floor(now() / 1_000)) >= lifecycle.backingDeadlineUnix
@@ -233,7 +259,7 @@ export function createApp(
     try {
       const arena = publicKey(request.params.arena, "arena");
       const supporter = publicKey(request.body?.account, "account");
-      const lifecycle = await requireArena(chain, arena, config.programId);
+      const lifecycle = await requireArena(chain, arena, config);
       if (lifecycle.state !== "SETTLED" && lifecycle.state !== "VOID") {
         throw new PublicError("Claim is not available yet", 409);
       }

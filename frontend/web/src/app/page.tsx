@@ -1,10 +1,38 @@
 import Link from "next/link";
 
 import { AgentPortrait } from "@/components/agents/AgentPortrait";
-import { FEATURED_ARENA } from "@/lib/featured-arena";
+import { FEATURED_ARENA, resolveFeaturedArena } from "@/lib/featured-arena";
+
+export const dynamic = "force-dynamic";
+
+function scheduledStatus(kickoffUtc: string) {
+  return Date.now() < Date.parse(kickoffUtc) ? "UPCOMING" : "UNAVAILABLE";
+}
 
 export default function LandingPage() {
   const featured = FEATURED_ARENA;
+  const thirdPlace = resolveFeaturedArena("WORLD_CUP_THIRD_PLACE");
+  const final = resolveFeaturedArena("WORLD_CUP_FINAL");
+  const arenaCatalog = [
+    {
+      arena: thirdPlace,
+      status: scheduledStatus(thirdPlace.kickoffUtc),
+      detail: "Eligible fixture. Open the arena for canonical runtime and supporter status.",
+      available: true,
+    },
+    {
+      arena: final,
+      status: scheduledStatus(final.kickoffUtc),
+      detail: "Eligible fixture. Arena activation and fixture revalidation pending.",
+      available: false,
+    },
+    {
+      arena: resolveFeaturedArena("FOUNDATION_REPLAY"),
+      status: "REPLAY",
+      detail: "Recorded TxLINE feed through the same autonomous competition engine.",
+      available: true,
+    },
+  ] as const;
 
   return (
     <main className="home-page product-page" aria-label="Arena90 home">
@@ -126,32 +154,39 @@ export default function LandingPage() {
         <Link className="product-text-link home-system-link" href="/how-it-works">See the complete system <span aria-hidden="true">→</span></Link>
       </section>
 
-      <section className="home-preview home-preview--replay home-split-section" aria-labelledby="home-replay-title">
-        <div className="home-replay-poster">
-          <p>{featured.mode === "LIVE" ? "Featured World Cup arena" : "Featured autonomous replay"}</p>
-          <h2 id="home-replay-title">
-            <span>{featured.homeTeam}</span>
-            <b>vs</b>
-            <span>{featured.awayTeam}</span>
-          </h2>
-          <div className="home-replay-poster__agents" aria-label="Agent matchup">
-            <strong>Alpha</strong>
-            <span>strategy arena</span>
-            <strong>Beta</strong>
+      <section className="home-arena-board" aria-labelledby="home-arenas-title">
+        <header>
+          <div>
+            <p className="product-eyebrow">ARENA PROGRAM</p>
+            <h2 id="home-arenas-title">World Cup arenas</h2>
           </div>
-        </div>
-        <div className="home-preview__copy home-replay-copy">
-          <p>
-            {featured.mode === "LIVE"
-              ? "The arena waits for verified TxLINE/TxODDS checkpoints, then both agents decide without public manual triggers."
-              : "Recorded match data. Six decision checkpoints. New autonomous decisions generated for this run—not scripted playback."}
-          </p>
-          <dl className="home-replay-dossier">
-            <div><dt>Mode</dt><dd>{featured.mode}</dd></div>
-            <div><dt>Source</dt><dd>{featured.sourceLabel}</dd></div>
-            <div><dt>Decision rounds</dt><dd>Six checkpoints</dd></div>
-          </dl>
-          <Link className="product-action product-action--primary" href={featured.watchHref}>{featured.watchLabel} <span aria-hidden="true">→</span></Link>
+          <p>Fixture eligibility is distinct from an activated Arena90 run. Replay remains the accelerated proof path.</p>
+        </header>
+        <div className="home-arena-board__grid">
+          {arenaCatalog.map(({ arena, status, detail, available }) => (
+            <article aria-label={`${arena.homeTeam} vs ${arena.awayTeam}`} key={arena.preset}>
+              <div className="home-arena-board__status">
+                <span>{arena.competition}</span>
+                <strong>{status}</strong>
+              </div>
+              <h3>{arena.homeTeam} <span>vs</span> {arena.awayTeam}</h3>
+              <p>{detail}</p>
+              <time dateTime={arena.kickoffUtc}>
+                {new Date(arena.kickoffUtc).toLocaleString("en-GB", {
+                  dateStyle: "medium",
+                  timeStyle: "short",
+                  timeZone: "UTC",
+                })} UTC
+              </time>
+              {available ? (
+                <Link href={arena.watchHref}>
+                  {arena.mode === "LIVE" ? "Enter Live Arena" : "Run Autonomous Replay"} →
+                </Link>
+              ) : (
+                <span className="home-arena-board__pending">Awaiting arena activation</span>
+              )}
+            </article>
+          ))}
         </div>
       </section>
 

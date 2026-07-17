@@ -21,6 +21,9 @@ VPS Solana resolver (separate process + key)
       |-- reads canonical runtime persistence
       |-- prepares and locks supporter arena
       `-- TxLINE proof + canonical result --> Anchor devnet settlement
+
+VPS Solana Actions (loopback :8787, no signing key)
+      `-- GET metadata + POST unsigned supporter transactions
 ```
 
 The browser sees only Vercel. Vercel forwards allowlisted GET requests to the
@@ -36,6 +39,13 @@ The Solana resolver is a separate systemd service. Its resolver key is never
 present in the runtime, ZeroClaw, frontend, public Action service, or immutable
 runtime release. It reads the same atomic runtime persistence and retries
 idempotent prepare, lock, proof, and settlement operations.
+
+The Solana Actions service has no wallet or resolver key. Caddy exposes only
+its GET, POST, and OPTIONS Action routes; all transactions remain unsigned for
+the supporter wallet to approve. Its Origin allowlist is a browser/CORS
+defense, not request authentication: server-side Blink clients may omit
+`Origin`, while canonical arena binding, strict input validation, unsigned
+transactions, and rate limits remain active.
 
 ## Preflight
 

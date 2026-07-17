@@ -18,6 +18,9 @@ const config: ActionsConfig = {
   programId,
   publicBaseUrl: "https://api.example.com",
   frontendOrigin: "https://arena-90.vercel.app",
+  arenaPageUrl: "https://arena-90.vercel.app/arena/world-cup-final",
+  arenaAddress: arena,
+  allowedOrigins: new Set(["https://arena-90.vercel.app", "https://dial.to"]),
   minBackLamports: 1_000_000n,
   maxBackLamports: 1_000_000_000n,
   rateLimitPerMinute: 60,
@@ -93,7 +96,7 @@ test("GET exposes only actions valid for the on-chain lifecycle", async () => {
   assert.equal(response.body.type, "action");
   assert.deepEqual(
     response.body.links.actions.map((action: { label: string }) => action.label),
-    ["Back Alpha", "Back Beta"],
+    ["Back Alpha", "Back Beta", "View Arena"],
   );
 
   const pending = await request(
@@ -101,8 +104,11 @@ test("GET exposes only actions valid for the on-chain lifecycle", async () => {
   )
     .get(`/actions/arena/${arena.toBase58()}`)
     .expect(200);
-  assert.equal(pending.body.disabled, true);
-  assert.equal(pending.body.links, undefined);
+  assert.equal(pending.body.disabled, false);
+  assert.deepEqual(
+    pending.body.links.actions.map((action: { label: string }) => action.label),
+    ["View Arena"],
+  );
 
   const settled = await request(
     createApp(config, new FakeChain(arenaAccount(2)), () => 1_000_000),
@@ -111,7 +117,7 @@ test("GET exposes only actions valid for the on-chain lifecycle", async () => {
     .expect(200);
   assert.deepEqual(
     settled.body.links.actions.map((action: { label: string }) => action.label),
-    ["Claim or refund"],
+    ["Claim or refund", "View Arena"],
   );
 
   await request(createApp(config, new FakeChain(null)))
@@ -142,6 +148,11 @@ test("rejects amount and account abuse", async () => {
     .set("origin", "https://evil.example")
     .expect(200);
   await request(app)
+    .post(`/actions/arena/${arena.toBase58()}/back/alpha?amount=0.01`)
+    .set("origin", "https://evil.example")
+    .send({ account: supporter.toBase58() })
+    .expect(403);
+  await request(app)
     .post(`/actions/arena/${arena.toBase58()}/back/alpha?amount=100`)
     .send({ account: supporter.toBase58() })
     .expect(400);
@@ -149,6 +160,13 @@ test("rejects amount and account abuse", async () => {
     .post(`/actions/arena/${arena.toBase58()}/back/alpha?amount=0.01`)
     .send({ account: "not-a-wallet" })
     .expect(400);
+});
+
+test("rejects a valid program account that is not the configured canonical arena", async () => {
+  const otherArena = new PublicKey("11111111111111111111111111111111");
+  await request(createApp(config, new FakeChain()))
+    .get(`/actions/arena/${otherArena.toBase58()}`)
+    .expect(404);
 });
 
 test("POST returns unsigned wallet transactions", async () => {

@@ -1,0 +1,27 @@
+[Unit]
+Description=Arena90 public Solana Actions API
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=derana
+Group=derana
+WorkingDirectory=/home/derana/apps/arena90-actions/current
+EnvironmentFile=/home/derana/apps/arena90-actions/shared/actions.env
+ExecStart=/home/derana/apps/arena90/toolchains/node-v22.23.0-linux-x64/bin/node dist/src/server.js
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+KillSignal=SIGTERM
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+UMask=0077
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=arena90-solana-actions
+
+[Install]
+WantedBy=multi-user.target

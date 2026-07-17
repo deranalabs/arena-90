@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { AgentPortrait } from "@/components/agents/AgentPortrait";
 import { ArenaEventLedger } from "@/components/arena/ArenaEventLedger";
+import { SupporterPanel } from "@/components/solana/SupporterPanel";
 import {
   ArenaNextEvent,
   ArenaScoreboard,
@@ -21,11 +22,14 @@ import type {
 } from "@/lib/arena-api/contracts";
 import type { RuntimeTransport } from "@/lib/arena-api/transport";
 import { validateSpectatorView } from "@/lib/arena-api/view-invariants";
+import type { SupporterArena } from "@/lib/solana-actions/supporter-arena";
 
 type ArenaExperienceProps = {
   arenaId: string;
   experience: "arena" | "replay" | "proof";
   transport?: RuntimeTransport;
+  supporterArena?: SupporterArena;
+  publicOrigin?: string;
 };
 
 function formatMicros(value: string) {
@@ -274,6 +278,8 @@ export function ArenaExperience({
   arenaId,
   experience,
   transport,
+  supporterArena,
+  publicOrigin,
 }: ArenaExperienceProps) {
   const session = useArenaSession(arenaId, transport);
   const inconsistent = session.state
@@ -383,6 +389,16 @@ export function ArenaExperience({
         <div><span>Lead margin</span><strong>{formatMicros(leadMarginMicros.toString())}</strong></div>
         <div><span>Beta NAV</span><strong>{formatMicros(state.portfolios.beta.navMicros)}</strong></div>
       </section>
+
+      {state.manifest.mode === "LIVE" && supporterArena ? (
+        <SupporterPanel
+          arenaAddress={supporterArena.arenaAddress}
+          backingDeadlineUtc={supporterArena.backingDeadlineUtc}
+          programId={supporterArena.programId}
+          publicOrigin={publicOrigin}
+          rpcUrl={supporterArena.rpcUrl}
+        />
+      ) : null}
 
       <section className="arena-agent-grid" aria-label="Agent comparison">
         <AgentCard

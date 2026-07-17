@@ -6,6 +6,9 @@ export interface ActionsConfig {
   programId: PublicKey;
   publicBaseUrl: string;
   frontendOrigin: string;
+  arenaPageUrl: string;
+  arenaAddress: PublicKey;
+  allowedOrigins: ReadonlySet<string>;
   minBackLamports: bigint;
   maxBackLamports: bigint;
   rateLimitPerMinute: number;
@@ -21,6 +24,13 @@ function requiredUrl(name: string, value: string | undefined): string {
   return url.origin;
 }
 
+function required(name: string, value: string | undefined): string {
+  if (!value || value.trim() !== value) {
+    throw new Error(`${name} is required and must not contain surrounding whitespace`);
+  }
+  return value;
+}
+
 export function solToLamports(value: string): bigint {
   if (!/^(0|[1-9]\d*)(\.\d{1,9})?$/.test(value)) {
     throw new Error("SOL amount must be a positive decimal with at most 9 decimals");
@@ -32,6 +42,27 @@ export function solToLamports(value: string): bigint {
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): ActionsConfig {
   const publicBaseUrl = requiredUrl("PUBLIC_BASE_URL", env.PUBLIC_BASE_URL);
   const frontendOrigin = requiredUrl("FRONTEND_ORIGIN", env.FRONTEND_ORIGIN);
+  const arenaPageUrl = new URL(
+    required("ARENA_PAGE_URL", env.ARENA_PAGE_URL),
+  );
+  if (
+    (arenaPageUrl.protocol !== "https:" && arenaPageUrl.hostname !== "localhost") ||
+    arenaPageUrl.origin !== frontendOrigin ||
+    arenaPageUrl.username ||
+    arenaPageUrl.password ||
+    arenaPageUrl.search ||
+    arenaPageUrl.hash ||
+    !arenaPageUrl.pathname.startsWith("/arena/")
+  ) {
+    throw new Error("ARENA_PAGE_URL must be a canonical arena path on the frontend origin");
+  }
+  const arenaAddress = new PublicKey(required("ARENA_ADDRESS", env.ARENA_ADDRESS));
+  const allowedOrigins = new Set(
+    required("ALLOWED_ORIGINS", env.ALLOWED_ORIGINS)
+      .split(",")
+      .map((value) => required("ALLOWED_ORIGINS entry", value))
+      .map((value) => requiredUrl("ALLOWED_ORIGINS entry", value)),
+  );
   const rpcUrl = requiredUrl("SOLANA_RPC_URL", env.SOLANA_RPC_URL);
   const programId = new PublicKey(env.ARENA90_PROGRAM_ID ?? "");
   const minBackLamports = solToLamports(env.MIN_BACK_SOL ?? "0.001");
@@ -51,6 +82,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ActionsConfig 
     programId,
     publicBaseUrl,
     frontendOrigin,
+    arenaPageUrl: arenaPageUrl.toString(),
+    arenaAddress,
+    allowedOrigins,
     minBackLamports,
     maxBackLamports,
     rateLimitPerMinute,

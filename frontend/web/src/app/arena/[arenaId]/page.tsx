@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { ArenaExperience } from "@/components/arena/ArenaExperience";
+import { resolveSupporterArena } from "@/lib/solana-actions/supporter-arena";
 
 type ArenaPageProps = {
   params: Promise<{ arenaId: string }>;
@@ -17,5 +18,12 @@ export async function generateMetadata({ params }: ArenaPageProps): Promise<Meta
 
 export default async function ArenaPage({ params }: ArenaPageProps) {
   const { arenaId } = await params;
-  return <ArenaExperience arenaId={arenaId} experience="arena" />;
+  return (
+    <ArenaExperience
+      arenaId={arenaId}
+      experience="arena"
+      publicOrigin={process.env.NEXT_PUBLIC_SITE_ORIGIN}
+      supporterArena={resolveSupporterArena(arenaId)}
+    />
+  );
 }
