@@ -7,8 +7,13 @@ import { useEffect, useMemo, useState } from "react";
 import {
   parseSupporterRecord,
   type SupporterRecord,
+  verifySupporterClaim,
   verifySupporterRecord,
 } from "@/lib/solana-actions/supporter-proof";
+import {
+  readVerifiedSupporterSettlement,
+  type VerifiedSupporterSettlement,
+} from "@/lib/solana-actions/supporter-settlement-proof";
 
 type ActionLink = {
   type: string;
@@ -33,6 +38,7 @@ type WalletProvider = {
 type SupporterPanelProps = {
   arenaAddress: string;
   backingDeadlineUtc: string;
+  finalResultHash?: string;
   programId: string;
   publicOrigin?: string;
   rpcUrl: string;
@@ -72,6 +78,21 @@ function validTransactionAction(
   }
 }
 
+function validClaimAction(link: ActionLink, actionUrl: string) {
+  try {
+    const href = new URL(link.href);
+    const expected = new URL(`${actionUrl}/claim`);
+    return (
+      link.type === "transaction" &&
+      href.origin === expected.origin &&
+      href.pathname === expected.pathname &&
+      href.search === ""
+    );
+  } catch {
+    return false;
+  }
+}
+
 function canonicalArenaPage(metadata: ActionMetadata | undefined, origin: string) {
   const link = metadata?.links?.actions?.find((candidate) => candidate.type === "external-link");
   if (!link) return undefined;
@@ -88,6 +109,7 @@ function canonicalArenaPage(metadata: ActionMetadata | undefined, origin: string
 export function SupporterPanel({
   arenaAddress,
   backingDeadlineUtc,
+  finalResultHash,
   programId,
   publicOrigin,
   rpcUrl,
@@ -104,26 +126,30 @@ export function SupporterPanel({
   >("LOADING");
   const [message, setMessage] = useState("Loading on-chain backing state…");
   const [record, setRecord] = useState<SupporterRecord>();
+  const [settlement, setSettlement] = useState<VerifiedSupporterSettlement>();
   const [review, setReview] = useState<{ side: "alpha" | "beta"; wallet: string }>();
   const deadlineMs = Date.parse(backingDeadlineUtc);
   const [deadlinePassed, setDeadlinePassed] = useState(() => Date.now() >= deadlineMs);
 
   useEffect(() => {
     const saved = localStorage.getItem(recordKey);
-    let restored = false;
     if (saved) {
       const parsed = parseSupporterRecord(saved);
       if (!parsed) {
         localStorage.removeItem(recordKey);
       } else {
-        restored = true;
-        const submitted = { ...parsed, state: "SUBMITTED" } satisfies SupporterRecord;
+        const submitted = {
+          ...parsed,
+          state: "SUBMITTED" as const,
+          ...(parsed.claim
+            ? { claim: { ...parsed.claim, state: "SUBMITTED" as const } }
+            : {}),
+        } satisfies SupporterRecord;
         setRecord(submitted);
         setStatus("SUBMITTED");
         setMessage("Transaction submitted; checking Solana proof until confirmed.");
       }
     }
-    if (restored) return;
     const controller = new AbortController();
     void fetch(actionPath, {
       cache: "no-store",
@@ -185,6 +211,42 @@ export function SupporterPanel({
   }, [arenaAddress, programId, record, recordKey, rpcUrl]);
 
   useEffect(() => {
+    if (!record?.claim || record.state !== "CONFIRMED" || record.claim.state !== "SUBMITTED") {
+      return;
+    }
+    const claim = record.claim;
+    let active = true;
+    let checking = false;
+    const check = async () => {
+      if (checking) return;
+      checking = true;
+      const verified = await verifySupporterClaim(
+        record,
+        claim.signature,
+        arenaAddress,
+        programId,
+        rpcUrl,
+      );
+      checking = false;
+      if (!active || !verified) return;
+      const confirmed = {
+        ...record,
+        claim: { ...claim, state: "CONFIRMED" as const },
+      } satisfies SupporterRecord;
+      localStorage.setItem(recordKey, JSON.stringify(confirmed));
+      setRecord(confirmed);
+      setStatus("CONFIRMED");
+      setMessage("Supporter claim or refund verified on Solana devnet.");
+    };
+    void check();
+    const timer = window.setInterval(() => void check(), 5_000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, [arenaAddress, programId, record, recordKey, rpcUrl]);
+
+  useEffect(() => {
     if (!Number.isFinite(deadlineMs) || deadlinePassed) return;
     const delay = Math.min(deadlineMs - Date.now(), 2_147_483_647);
     const timer = window.setTimeout(() => {
@@ -196,12 +258,40 @@ export function SupporterPanel({
     return () => window.clearTimeout(timer);
   }, [deadlineMs, deadlinePassed]);
 
+  useEffect(() => {
+    if (!finalResultHash) return;
+    let active = true;
+    let checking = false;
+    const check = async () => {
+      if (checking) return;
+      checking = true;
+      const verified = await readVerifiedSupporterSettlement(
+        finalResultHash,
+        arenaAddress,
+        programId,
+        rpcUrl,
+      );
+      checking = false;
+      if (active && verified) setSettlement(verified);
+    };
+    void check();
+    const timer = window.setInterval(() => void check(), 5_000);
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+    };
+  }, [arenaAddress, finalResultHash, programId, rpcUrl]);
+
   const actions = useMemo(() => {
     const links = metadata?.links?.actions ?? [];
-    if (deadlinePassed) return { alpha: undefined, beta: undefined };
     return {
-      alpha: links.find((link) => validTransactionAction(link, actionUrl, "alpha")),
-      beta: links.find((link) => validTransactionAction(link, actionUrl, "beta")),
+      alpha: deadlinePassed
+        ? undefined
+        : links.find((link) => validTransactionAction(link, actionUrl, "alpha")),
+      beta: deadlinePassed
+        ? undefined
+        : links.find((link) => validTransactionAction(link, actionUrl, "beta")),
+      claim: links.find((link) => validClaimAction(link, actionUrl)),
     };
   }, [actionUrl, deadlinePassed, metadata]);
 
@@ -285,6 +375,55 @@ export function SupporterPanel({
     }
   }
 
+  async function submitClaim() {
+    const action = actions.claim;
+    const provider = walletProvider();
+    if (!record || record.state !== "CONFIRMED" || record.claim || !action) return;
+    if (!provider) {
+      setStatus("ERROR");
+      setMessage("The supporter wallet is required to approve this claim or refund.");
+      return;
+    }
+    try {
+      setStatus("CONNECTING");
+      setMessage("Connecting the original supporter wallet…");
+      const connected = await provider.connect();
+      const wallet = connected.publicKey?.toString() ?? provider.publicKey?.toString();
+      if (wallet !== record.wallet) {
+        throw new Error("Connect the same wallet that owns this supporter position.");
+      }
+      setStatus("SUBMITTING");
+      setMessage("Approve the Arena90 claim or refund in your wallet.");
+      const response = await fetch(action.href, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ account: record.wallet }),
+      });
+      if (!response.ok) {
+        const failure = await response.json().catch(() => undefined) as { message?: string } | undefined;
+        throw new Error(failure?.message ?? "Claim transaction could not be created");
+      }
+      const payload = await response.json() as { transaction?: string };
+      if (!payload.transaction) throw new Error("Action response did not include a transaction");
+      const { Transaction } = await import("@solana/web3.js");
+      const transaction = Transaction.from(Buffer.from(payload.transaction, "base64"));
+      const submitted = await provider.signAndSendTransaction(transaction);
+      const signature = typeof submitted === "string" ? submitted : submitted.signature;
+      if (!signature) throw new Error("Wallet did not return a transaction signature");
+      const nextRecord = {
+        ...record,
+        claim: { signature, state: "SUBMITTED" as const },
+      } satisfies SupporterRecord;
+      localStorage.setItem(recordKey, JSON.stringify(nextRecord));
+      setRecord(nextRecord);
+      setStatus("SUBMITTED");
+      setMessage("Claim submitted; checking Solana proof until confirmed.");
+    } catch (error) {
+      setStatus("ERROR");
+      setMessage(error instanceof Error ? error.message : "Supporter claim failed");
+    }
+  }
+
   const blinkUrl = canonicalArenaPage(metadata, origin);
   const busy = status === "CONNECTING" || status === "SUBMITTING" || status === "VERIFYING";
   const backingDisabled = busy || Boolean(record) || Boolean(review) || deadlinePassed;
@@ -327,6 +466,9 @@ export function SupporterPanel({
         <button disabled={backingDisabled || !actions.beta} onClick={() => void prepareBack("beta")} type="button">
           Back Beta
         </button>
+        {record?.state === "CONFIRMED" && actions.claim && !record.claim ? (
+          <button onClick={() => void submitClaim()} type="button">Claim or refund</button>
+        ) : null}
         {blinkUrl ? (
           <a href={blinkUrl} rel="noreferrer" target="_blank">Share public Blink ↗</a>
         ) : null}
@@ -368,6 +510,40 @@ export function SupporterPanel({
             View transaction proof ↗
           </a>
         </div>
+      ) : null}
+      {record?.claim ? (
+        <div className="supporter-panel__proof">
+          <strong>{record.claim.state === "CONFIRMED" ? "CLAIMED" : "CLAIM SUBMITTED"}</strong>
+          <span>{shortened(record.wallet)}</span>
+          <a
+            href={`https://explorer.solana.com/tx/${record.claim.signature}?cluster=devnet`}
+            rel="noreferrer"
+            target="_blank"
+          >
+            View claim proof ↗
+          </a>
+        </div>
+      ) : null}
+      {finalResultHash ? (
+        settlement ? (
+          <div className="supporter-panel__proof">
+            <strong>SETTLEMENT VERIFIED</strong>
+            <span>{settlement.result.toUpperCase()} · {settlement.finalScore.home}–{settlement.finalScore.away}</span>
+            <code>{settlement.finalResultHash}</code>
+            <span>TxLINE receipt slot {settlement.verificationSlot}</span>
+            <a
+              href={`https://explorer.solana.com/address/${arenaAddress}?cluster=devnet`}
+              rel="noreferrer"
+              target="_blank"
+            >
+              View arena account ↗
+            </a>
+          </div>
+        ) : (
+          <p className="supporter-panel__status" role="status">
+            Runtime is final; matching on-chain settlement proof is pending.
+          </p>
+        )
       ) : null}
     </section>
   );

@@ -394,6 +394,7 @@ export function ArenaExperience({
         <SupporterPanel
           arenaAddress={supporterArena.arenaAddress}
           backingDeadlineUtc={supporterArena.backingDeadlineUtc}
+          finalResultHash={state.finalResult?.finalResultHash}
           programId={supporterArena.programId}
           publicOrigin={publicOrigin}
           rpcUrl={supporterArena.rpcUrl}

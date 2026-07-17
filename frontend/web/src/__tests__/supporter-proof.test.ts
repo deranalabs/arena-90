@@ -6,6 +6,7 @@ import { PublicKey } from "@solana/web3.js";
 import {
   parseSupporterRecord,
   type SupporterRecord,
+  verifySupporterClaim,
   verifySupporterRecord,
 } from "../lib/solana-actions/supporter-proof";
 
@@ -131,5 +132,59 @@ describe("supporter proof", () => {
     await expect(
       verifySupporterRecord(record, arenaAddress, programId.toBase58(), "https://api.devnet.solana.com"),
     ).resolves.toBe(false);
+  });
+
+  it("confirms a claim only after its exact instruction marks the owned position claimed", async () => {
+    const claimSignature = "6".repeat(88);
+    const arena = new PublicKey(arenaAddress);
+    const [position] = PublicKey.findProgramAddressSync(
+      [Buffer.from("position"), arena.toBuffer(), arena.toBuffer()],
+      programId,
+    );
+    const positionData = Buffer.alloc(83);
+    Buffer.from([235, 34, 48, 162, 250, 227, 34, 170]).copy(positionData);
+    arena.toBuffer().copy(positionData, 8);
+    arena.toBuffer().copy(positionData, 40);
+    positionData[72] = 0;
+    positionData.writeBigUInt64LE(BigInt("10000000"), 73);
+    positionData[81] = 1;
+    const claimData = Buffer.from([62, 198, 214, 193, 213, 159, 108, 210]);
+    const keys = [programId, arena, arena, position];
+    getSignatureStatus.mockResolvedValue({
+      value: { confirmationStatus: "finalized", err: null },
+    });
+    getAccountInfo.mockResolvedValue({ owner: programId, data: positionData });
+    getTransaction.mockResolvedValue({
+      meta: { err: null, loadedAddresses: null },
+      transaction: {
+        signatures: [claimSignature],
+        message: {
+          compiledInstructions: [{
+            programIdIndex: 0,
+            accountKeyIndexes: [1, 2, 3],
+            data: claimData,
+          }],
+          getAccountKeys: () => ({ get: (index: number) => keys[index] }),
+          isAccountSigner: (index: number) => index === 2,
+        },
+      },
+    });
+
+    await expect(verifySupporterClaim(
+      { ...record, state: "CONFIRMED" },
+      claimSignature,
+      arenaAddress,
+      programId.toBase58(),
+      "https://api.devnet.solana.com",
+    )).resolves.toBe(true);
+
+    positionData[81] = 0;
+    await expect(verifySupporterClaim(
+      { ...record, state: "CONFIRMED" },
+      claimSignature,
+      arenaAddress,
+      programId.toBase58(),
+      "https://api.devnet.solana.com",
+    )).resolves.toBe(false);
   });
 });
