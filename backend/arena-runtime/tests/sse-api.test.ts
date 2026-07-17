@@ -510,9 +510,11 @@ describe("Arena SSE API", () => {
     expect(store.readCalls).toBeGreaterThanOrEqual(10);
   });
 
-  it("sends heartbeat comments without advancing the cursor", async () => {
+  it("immediately acknowledges an idle stream without advancing the cursor", async () => {
     const store = new ControlledStore(readyPersistence);
-    const { origin } = await startServer(store);
+    const { origin } = await startServer(store, {
+      heartbeatIntervalMs: 60_000,
+    });
     const stream = await openStream(
       `${origin}/api/arenas/${manifest.arenaId}/events/stream`,
       { "last-event-id": "1" },

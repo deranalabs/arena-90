@@ -818,6 +818,13 @@ export function createArenaHttpServer(
         connection: "keep-alive",
       });
       response.flushHeaders();
+      await writeSseChunk(
+        response,
+        ": heartbeat\n\n",
+        streamController.signal,
+        sseDrainTimeoutMs,
+      );
+      lastWriteAtMs = Date.now();
       let observedLastEventSequence = persisted.state.lastEventSequence;
       let observedPhase = persisted.state.phase;
       let nextEvents = projected.events;
