@@ -14,16 +14,19 @@ describe("featured arena catalog seam", () => {
   it("switches every public link to the verified World Cup third-place arena", () => {
     expect(resolveFeaturedArena("WORLD_CUP_THIRD_PLACE")).toEqual({
       preset: "WORLD_CUP_THIRD_PLACE",
-      arenaId: "world-cup-2026-france-england-third-place",
+      arenaId: "world-cup-2026-france-england-third-place-rehearsal-v2",
       mode: "LIVE",
       competition: "World Cup 2026 · Third place",
       homeTeam: "France",
       awayTeam: "England",
       kickoffUtc: "2026-07-18T21:00:00.000Z",
       sourceLabel: "TxLINE + TxODDS live",
-      arenaHref: "/arena/world-cup-2026-france-england-third-place",
-      watchHref: "/arena/world-cup-2026-france-england-third-place",
-      proofHref: "/arena/world-cup-2026-france-england-third-place/proof",
+      arenaHref:
+        "/arena/world-cup-2026-france-england-third-place-rehearsal-v2",
+      watchHref:
+        "/arena/world-cup-2026-france-england-third-place-rehearsal-v2",
+      proofHref:
+        "/arena/world-cup-2026-france-england-third-place-rehearsal-v2/proof",
       navigationLabel: "Live Arena",
       watchLabel: "Watch Live Arena",
     });
