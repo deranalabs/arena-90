@@ -351,7 +351,7 @@ button {
 .home-typographic-hero__eyebrow {
   margin: 0 0 1.5rem;
   color: var(--arena-replay);
-  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: clamp(0.62rem, 0.8vw, 0.72rem);
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -637,7 +637,7 @@ button {
 .product-eyebrow {
   margin: 0 0 1rem;
   color: var(--arena-data);
-  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.13em;
@@ -725,7 +725,7 @@ button {
 .product-proof-strip li {
   padding: 1rem;
   color: var(--arena-muted);
-  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 0.65rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -832,7 +832,7 @@ button {
 
 .product-steps li > span {
   color: var(--arena-data);
-  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-family: var(--font-mono);
 }
 
 .product-steps h2 {
@@ -909,7 +909,7 @@ button {
 .arena-state-panel strong,
 .arena-state-panel span {
   display: block;
-  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-family: var(--font-mono);
 }
 
 .arena-state-panel strong {
@@ -949,7 +949,7 @@ button {
 .arena-proof dt {
   display: block;
   color: var(--arena-muted);
-  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 0.62rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -1052,7 +1052,7 @@ button {
 }
 
 .arena-equal-conditions span {
-  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 0.62rem;
   text-transform: uppercase;
 }
@@ -1222,7 +1222,7 @@ button {
 
 .arena-round > header span {
   color: var(--arena-data);
-  font-family: ui-monospace, "SFMono-Regular", Consolas, monospace;
+  font-family: var(--font-mono);
   font-size: 0.65rem;
 }
 
@@ -2772,7 +2772,7 @@ body:has(.arena-experience) {
   margin: 0;
   font-size: clamp(1.55rem, 4vw, 4.4rem);
   font-weight: 900;
-  line-height: 0.92;
+  line-height: 1.02;
   text-transform: uppercase;
   overflow-wrap: anywhere;
 }
@@ -2834,7 +2834,7 @@ body:has(.arena-experience) {
   font-family: var(--font-display);
   font-size: clamp(2rem, 4vw, 4rem);
   font-weight: 900;
-  line-height: 0.95;
+  line-height: 1.02;
   text-transform: uppercase;
 }
 
@@ -3165,7 +3165,7 @@ body:has(.arena-experience) {
   font-family: var(--font-display);
   font-size: clamp(2.4rem, 5vw, 5rem);
   font-weight: 900;
-  line-height: 0.9;
+  line-height: 1.02;
   text-transform: uppercase;
 }
 
