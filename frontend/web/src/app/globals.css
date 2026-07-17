@@ -1970,8 +1970,13 @@ button {
   min-width: 0;
   align-content: start;
   gap: var(--space-md);
-  padding: var(--space-lg);
+  padding: var(--space-xl);
   border-inline-end: 1px solid var(--color-night-rule);
+  transition: background-color var(--dur-short) var(--ease-out);
+}
+
+.home-arena-board__grid article:hover {
+  background: var(--arena-raised);
 }
 
 .home-arena-board__grid article:last-child {
@@ -1995,17 +2000,21 @@ button {
 
 .home-arena-board h3 {
   min-height: 2.4em;
-  font-size: var(--text-xl);
-  font-weight: var(--weight-heading);
+  color: var(--arena-text);
+  font-family: var(--font-display);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-display);
   line-height: 1.08;
+  letter-spacing: -0.02em;
   overflow-wrap: anywhere;
 }
 
 .home-arena-board h3 span {
-  color: var(--color-night-muted);
+  color: var(--arena-muted);
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
   text-transform: uppercase;
+  margin-inline: var(--space-2xs);
 }
 
 .home-arena-board__grid article > p {
@@ -2033,12 +2042,15 @@ button {
   font-weight: var(--weight-label);
   white-space: nowrap;
   color: var(--arena-text);
+  border-radius: 6px;
+  background: var(--arena-surface);
+  transition: border-color var(--dur-short) var(--ease-out), color var(--dur-short) var(--ease-out), background-color var(--dur-short) var(--ease-out);
 }
 
 .home-arena-board__grid article > a:hover {
-  border-color: var(--color-data);
-  color: var(--color-data);
-  background: var(--color-night-2);
+  border-color: var(--arena-signal);
+  color: var(--arena-signal);
+  background: var(--arena-night);
 }
 
 .home-arena-board__grid article > a:active {
