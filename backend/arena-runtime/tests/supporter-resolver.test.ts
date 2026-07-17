@@ -70,6 +70,7 @@ function finalResult() {
 function resolver(): SupporterChainResolver {
   return {
     prepare: vi.fn(async () => "PREPARED" as const),
+    lock: vi.fn(async () => "LOCKED" as const),
     settle: vi.fn(async () => "SETTLED" as const),
   };
 }
@@ -83,6 +84,7 @@ describe("supporter resolver supervisor", () => {
     await expect(supervisor.prepare(liveManifest, signal)).resolves.toBe(
       "PREPARED",
     );
+    await expect(supervisor.lock(liveManifest, signal)).resolves.toBe("LOCKED");
     await expect(
       supervisor.settle(liveManifest, finalResult(), signal),
     ).resolves.toBe("SETTLED");
@@ -101,6 +103,10 @@ describe("supporter resolver supervisor", () => {
       }),
       signal,
     );
+    expect(adapter.lock).toHaveBeenCalledWith(
+      expect.objectContaining({ backingDeadlineUtc: liveManifest.kickoffUtc }),
+      signal,
+    );
   });
 
   it("never invokes chain adapter for Replay", async () => {
@@ -112,10 +118,12 @@ describe("supporter resolver supervisor", () => {
     await expect(supervisor.prepare(replay, signal)).resolves.toBe(
       "NOT_ELIGIBLE",
     );
+    await expect(supervisor.lock(replay, signal)).resolves.toBe("NOT_ELIGIBLE");
     await expect(supervisor.settle(replay, finalResult(), signal)).resolves.toBe(
       "NOT_ELIGIBLE",
     );
     expect(adapter.prepare).not.toHaveBeenCalled();
+    expect(adapter.lock).not.toHaveBeenCalled();
     expect(adapter.settle).not.toHaveBeenCalled();
   });
 

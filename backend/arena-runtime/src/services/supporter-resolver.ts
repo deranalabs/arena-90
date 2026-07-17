@@ -17,12 +17,21 @@ export type SupporterSettlementResult =
   | "SETTLED"
   | "ALREADY_SETTLED"
   | "NOT_ELIGIBLE";
+export type SupporterLockResult =
+  | "LOCKED"
+  | "ALREADY_LOCKED"
+  | "NOT_DUE"
+  | "NOT_ELIGIBLE";
 
 export interface SupporterChainResolver {
   prepare(
     intent: SolanaArenaPreparationIntentV1,
     signal: AbortSignal,
   ): Promise<"PREPARED" | "ALREADY_PREPARED">;
+  lock(
+    intent: SolanaArenaPreparationIntentV1,
+    signal: AbortSignal,
+  ): Promise<"LOCKED" | "ALREADY_LOCKED" | "NOT_DUE">;
   settle(
     intent: SolanaSettlementIntentV1,
     signal: AbortSignal,
@@ -34,6 +43,10 @@ export interface SupporterResolverSupervisor {
     manifest: ArenaManifest,
     signal: AbortSignal,
   ): Promise<SupporterPreparationResult>;
+  lock(
+    manifest: ArenaManifest,
+    signal: AbortSignal,
+  ): Promise<SupporterLockResult>;
   settle(
     manifest: ArenaManifest,
     finalResult: ArenaFinalResultV2,
@@ -50,6 +63,12 @@ export function createSupporterResolverSupervisor(
       const manifest = arenaManifestSchema.parse(manifestInput);
       if (manifest.mode !== "LIVE") return "NOT_ELIGIBLE";
       return resolver.prepare(createSolanaArenaPreparationIntent(manifest), signal);
+    },
+    async lock(manifestInput: ArenaManifest, signal: AbortSignal) {
+      signal.throwIfAborted();
+      const manifest = arenaManifestSchema.parse(manifestInput);
+      if (manifest.mode !== "LIVE") return "NOT_ELIGIBLE";
+      return resolver.lock(createSolanaArenaPreparationIntent(manifest), signal);
     },
     async settle(
       manifestInput: ArenaManifest,
