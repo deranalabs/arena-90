@@ -101,7 +101,7 @@ const rawOddsEnvelopeSchema = z
     Bookmaker: z.string(),
     BookmakerId: z.number().int().safe(),
     SuperOddsType: z.string(),
-    GameState: z.string().optional(),
+    GameState: z.string().nullable().optional(),
     InRunning: z.boolean().optional(),
     MarketPeriod: z.string().nullable().optional(),
     MarketParameters: z.string().nullable().optional(),

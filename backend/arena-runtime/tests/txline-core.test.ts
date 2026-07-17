@@ -254,6 +254,20 @@ describe("selectTxlineMarket", () => {
     ).toBe("from-updates");
   });
 
+  it("accepts provider odds rows with a null GameState", () => {
+    const fixture = normalizedFixture();
+
+    expect(
+      selectTxlineMarket({
+        fixture,
+        snapshot: [],
+        updates: [
+          approvedMarket({ MessageId: "null-game-state", GameState: null }),
+        ],
+      }).messageId,
+    ).toBe("null-game-state");
+  });
+
   it("does not require fields outside the approved market contract", () => {
     const fixture = normalizedFixture();
     const { InRunning: _ignored, ...row } = approvedMarket();
