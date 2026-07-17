@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "manifest": {
+    "schemaVersion": 1,
+    "arenaId": "world-cup-final-18257739",
+    "mode": "LIVE",
+    "competition": "World Cup Hackathon 2026",
+    "fixtureId": "18257739",
+    "homeTeam": { "name": "Spain", "code": "ESP" },
+    "awayTeam": { "name": "Argentina", "code": "ARG" },
+    "kickoffUtc": "2026-07-19T19:00:00.000Z",
+    "startingBankrollMicros": "100000000",
+    "currency": "VIRTUAL_USD_MICROS",
+    "assets": [
+      { "id": "HOME", "market": "FULL_TIME_1X2", "label": "Spain win" },
+      { "id": "DRAW", "market": "FULL_TIME_1X2", "label": "Draw" },
+      { "id": "AWAY", "market": "FULL_TIME_1X2", "label": "Argentina win" }
+    ],
+    "checkpoints": ["KICKOFF", "M15", "M30", "HALFTIME", "M60", "M75", "FINAL"],
+    "createdAtUtc": "2026-07-17T10:00:00.000Z"
+  },
+  "canonicalManifestJson": "{\"schemaVersion\":1,\"arenaId\":\"world-cup-final-18257739\",\"mode\":\"LIVE\",\"competition\":\"World Cup Hackathon 2026\",\"fixtureId\":\"18257739\",\"homeTeam\":{\"name\":\"Spain\",\"code\":\"ESP\"},\"awayTeam\":{\"name\":\"Argentina\",\"code\":\"ARG\"},\"kickoffUtc\":\"2026-07-19T19:00:00.000Z\",\"startingBankrollMicros\":\"100000000\",\"currency\":\"VIRTUAL_USD_MICROS\",\"assets\":[{\"id\":\"HOME\",\"market\":\"FULL_TIME_1X2\",\"label\":\"Spain win\"},{\"id\":\"DRAW\",\"market\":\"FULL_TIME_1X2\",\"label\":\"Draw\"},{\"id\":\"AWAY\",\"market\":\"FULL_TIME_1X2\",\"label\":\"Argentina win\"}],\"checkpoints\":[\"KICKOFF\",\"M15\",\"M30\",\"HALFTIME\",\"M60\",\"M75\",\"FINAL\"],\"createdAtUtc\":\"2026-07-17T10:00:00.000Z\"}",
+  "identityHash": "7758eef5fa8354113f2ff21e66a4b33712bfddba314c56221ce0565f0efba162",
+  "manifestHash": "aa8c82fa4716e46be86a853d4182b0bdc214cbd7aa69f3a95f5dbf19bc46c83e"
+}

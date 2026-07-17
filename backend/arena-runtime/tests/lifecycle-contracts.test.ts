@@ -1,12 +1,18 @@
+import { readFileSync } from "node:fs";
+
 import { describe, expect, it } from "vitest";
 
 import {
   CHECKPOINT_IDS,
   arenaFinalResultV2Schema,
   arenaRunStateV1Schema,
+  calculateArenaIdentityHash,
+  calculateArenaManifestHash,
   calculateFinalResultHash,
   calculateSnapshotHash,
   calculateTerminalEvidenceHash,
+  canonicalArenaManifestJson,
+  type ArenaManifest,
 } from "../src/contracts/index.js";
 import { initializePortfolio, settlePortfolio } from "../src/engine/index.js";
 
@@ -121,6 +127,28 @@ function snapshotFor(
 }
 
 describe("Arena lifecycle contracts", () => {
+  it("matches the shared cross-layer arena identity vector", () => {
+    const vector = JSON.parse(
+      readFileSync(
+        new URL("../../../contracts/fixtures/arena-identity-v1.json", import.meta.url),
+        "utf8",
+      ),
+    ) as {
+      manifest: ArenaManifest;
+      canonicalManifestJson: string;
+      identityHash: string;
+      manifestHash: string;
+    };
+
+    expect(calculateArenaIdentityHash(vector.manifest.arenaId)).toBe(
+      vector.identityHash,
+    );
+    expect(canonicalArenaManifestJson(vector.manifest)).toBe(
+      vector.canonicalManifestJson,
+    );
+    expect(calculateArenaManifestHash(vector.manifest)).toBe(vector.manifestHash);
+  });
+
   it("hashes the fixed-order final result fields and validates the winner", () => {
     const terminalEvidenceInput = {
       schemaVersion: 1 as const,

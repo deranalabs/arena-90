@@ -74,3 +74,45 @@ pub mod arena_escrow {
         instructions::handle_claim(ctx)
     }
 }
+
+#[cfg(test)]
+mod identity_vector_tests {
+    use serde::Deserialize;
+    use solana_sha256_hasher::hash;
+    use std::fmt::Write;
+
+    #[derive(Deserialize)]
+    #[serde(rename_all = "camelCase")]
+    struct IdentityVector {
+        manifest: serde_json::Value,
+        canonical_manifest_json: String,
+        identity_hash: String,
+        manifest_hash: String,
+    }
+
+    fn hex(bytes: &[u8]) -> String {
+        bytes.iter().fold(String::new(), |mut output, byte| {
+            write!(&mut output, "{byte:02x}").unwrap();
+            output
+        })
+    }
+
+    #[test]
+    fn matches_shared_arena_identity_vector() {
+        let vector: IdentityVector = serde_json::from_str(include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../../../fixtures/arena-identity-v1.json"
+        )))
+        .unwrap();
+        let arena_id = vector.manifest["arenaId"].as_str().unwrap();
+
+        assert_eq!(
+            hex(hash(arena_id.as_bytes()).as_ref()),
+            vector.identity_hash
+        );
+        assert_eq!(
+            hex(hash(vector.canonical_manifest_json.as_bytes()).as_ref()),
+            vector.manifest_hash
+        );
+    }
+}
