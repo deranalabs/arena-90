@@ -68,14 +68,19 @@ Product messaging must not imply that agents control supporter funds, supporter 
 |---|---|---|
 | Spectator | “Show me which AI understands and reacts to the match better.” | Watch without a wallet; understand leader, allocation, latest decision, next round, and result. |
 | Supporter | “Let me back the autonomous strategy I trust.” | Choose Alpha or Beta, approve a Solana transaction, track ownership, and claim or refund when eligible. |
-| Arena Operator | Run an arena safely. | Configure eligible fixtures, review the Arena Manifest, control backing lifecycle, monitor health, pause safely, and finalize through the approved resolver mode. |
+| Arena Operator | Deploy and supervise arenas safely. | Configure an allowlisted manifest before deployment, monitor health, and use emergency pause or recovery only. Routine arena execution is automatic. |
 | Technical Evaluator | Verify that the competition is real and reproducible. | Inspect shared snapshots, versions, structured outputs, validation, portfolio transitions, failures, and final-result provenance. |
 
 A supporter does not select individual football-market outcomes, control agent decisions, or fund an agent’s virtual portfolio.
 
 Wallet connection is required only for on-chain actions.
 
-The operator must not manually select agent trades or rewrite portfolio decisions. Arena preparation may be assisted by an Arena Orchestrator, but externally visible publication and safety-critical actions remain behind an operator approval gate for the MVP.
+The operator must not manually start checkpoints, select agent trades, lock
+backing, choose a winner, or rewrite portfolio decisions. An operator may
+approve configuration before deployment and intervene for emergency safety or
+recovery. Once deployed with a locked manifest, normal TxLINE ingestion,
+checkpoint scheduling, agent invocation, reveal, deterministic execution,
+accounting, and finalization run without routine human input.
 
 Technical proof is secondary to the spectator experience and must not overwhelm normal users.
 
@@ -108,45 +113,72 @@ Agent Alpha and Agent Beta are autonomous strategy competitors operating under e
 
 They are not permanently assigned to opposite outcomes, scripted to disagree, supporter-controlled, wallets, custodians, or simple aggressive-versus-conservative presets.
 
-### 5.1 Agent Alpha — Momentum & Repricing
+### 5.1 Agent Alpha — Overreaction Hunter
 
 Alpha asks:
 
-> **What is changing now, and has the market fully repriced that change?**
+> **Did the market move faster than the verified match evidence?**
 
-Alpha gives more weight to recent match-state changes, movement since the previous checkpoint, acceleration or reversal in probabilities, and information that may not yet be fully priced.
+Alpha hunts market overreaction and dislocation. It gives more weight to the
+pre-match anchor, movement since the previous checkpoint, consistency between
+price and verified match evidence, reversal potential, and whether price moved
+farther than the evidence supports.
 
-Alpha generally reacts faster and may reallocate or concentrate more actively. It may also hold cash, reduce exposure, reject unreliable movement, or select `NO_TRADE`.
+Alpha may take directional exposure, reallocate, concentrate, reduce exposure,
+hold cash, or select `NO_TRADE`. Alpha is not the aggressive agent; it acts
+only when supplied evidence supports an overreaction thesis.
 
-Primary risk: overreacting to short-term movement or chasing information already priced.
+V2 primary signal: no new goal appears in `matchDeltaFromPrevious`, but an
+outcome price moves by at least `150000` micros within at most 15 elapsed match
+minutes. This is treated as an overshoot; Alpha allocates away from that
+overpriced outcome toward supported alternatives or cash.
 
-### 5.2 Agent Beta — Structure & Valuation Control
+Primary risk: fading a real regime change that deserves its new price.
+
+### 5.2 Agent Beta — Underreaction Hunter
 
 Beta asks:
 
-> **Does the new information create genuine value, or is the market overreacting to noise?**
+> **Did verified match evidence move faster than the market?**
 
-Beta gives more weight to baseline probabilities, consistency across markets, margin of safety, concentration, downside, and whether recent movement has removed the available edge.
+Beta hunts market underreaction. It gives more weight to verified match-state
+change, movement since the previous checkpoint, acceleration or reversal in
+probabilities, and evidence that may not yet be fully reflected by price.
 
-Beta generally requires stronger confirmation, avoids unnecessary turnover, and uses cash as an active risk position. It may also react aggressively or concentrate when evidence is strong.
+Beta may follow a continuation, reallocate, concentrate, reduce exposure,
+hold cash, or select `NO_TRADE`. Beta is not the defensive agent; it acts only
+when supplied evidence supports an underreaction thesis.
 
-Primary risk: adapting too slowly when the match has entered a genuine new regime.
+V2 primary signal: a new goal appears in `matchDeltaFromPrevious` while the
+scoring side's normalized price rises by less than `80000` micros from the
+previous checkpoint. This is treated as incomplete repricing.
+
+Primary risk: overreacting to short-term movement or chasing information already priced.
 
 ### 5.3 Strategic Contrast
 
 | Dimension | Agent Alpha | Agent Beta |
 |---|---|---|
-| Core lens | Momentum and repricing | Structure and valuation |
-| Evidence preference | Recent changes | Baseline and consistency |
-| Reaction style | Faster | More selective |
-| Turnover | Generally higher | Generally lower |
-| Concentration | More willing when conviction rises | More sensitive to margin of safety |
-| Cash | Reserve when opportunity is weak | Active optionality and risk control |
-| Primary weakness | Overreaction | Delayed adaptation |
+| Core lens | Market overreaction | Market underreaction |
+| Central question | Price moved; was evidence too weak? | Evidence moved; was price too slow? |
+| Evidence preference | Dislocation and reversal | Continuation and incomplete repricing |
+| Valid posture | Directional, diversified, reduced, or cash | Directional, diversified, reduced, or cash |
+| Primary weakness | Fading a real regime change | Chasing a completed repricing |
 
 Both agents may select the same asset, take opposing positions, use different sizes, preserve portfolios, close exposure, hold cash, or change views. The system must not force disagreement.
 
 Differences should emerge from strategy policy, evidence weighting, portfolio context, risk envelope, and autonomous interpretation.
+
+Both agents must receive the same strategy evidence. A strategy may claim only
+evidence present in the invocation. If movement, an anchor, or a baseline is
+part of a strategy, the invocation must supply current and prior verified
+market state or deterministic derived evidence. An agent must not invent
+historical probability, movement, baseline value, or match evidence.
+
+`NO_TRADE` remains valid. The system must not force action or disagreement.
+However, strategy acceptance must include deterministic underreaction and
+overreaction scenarios proving that each policy can produce a valid target
+allocation when its own evidence exists.
 
 `Agent Alpha` and `Agent Beta` are public placeholders that may change without altering their product roles. Exact prompts, models, evidence weights, risk limits, output schemas, and validation rules belong to the Agent Decision specification.
 
@@ -236,7 +268,8 @@ V2 includes:
 - on-chain supporter ownership records and separate escrow and settlement flows;
 - win, draw, pause, finalizing, void, claim, and refund states;
 - technical audit evidence;
-- operator-controlled safety and approval;
+- zero-touch normal operation after deployment, with operator-controlled
+  emergency safety and recovery;
 - assisted future-arena preparation through an Arena Orchestrator.
 
 Implementation depth must be described honestly. Mocked, trusted, partial, or experimental components must not be represented as production-ready.
@@ -287,13 +320,23 @@ Agents do not autonomously control:
 - fixture eligibility;
 - market-data validation;
 - Arena Manifest locking;
-- supporter-window timing;
 - contract deployment;
 - Blink or social publication;
 - emergency actions;
 - final settlement authority.
 
-For the MVP, operational preparation may be automated, but external publication and safety-critical actions remain behind an operator approval gate.
+The deterministic runtime does control normal supporter-window timing and
+competition finalization from the locked manifest and verified terminal
+evidence. A restricted resolver service may automatically submit an on-chain
+settlement derived from the canonical final-result hash; neither agent nor an
+LLM receives resolver authority.
+
+For the MVP, fixture eligibility, manifest content, deployment, contract
+deployment, public Blink publication, and emergency actions remain operator
+configuration or safety responsibilities. After deployment, normal arena
+operation must require no manual create, run, checkpoint, trade, lock, winner,
+or settlement-selection action. Wallet owners still explicitly approve their
+own backing, claim, or refund transactions.
 
 ### 8.5 Product Expansion Rule
 

@@ -21,8 +21,9 @@ terminal, copy-trading product, AI-controlled wallet, or scripted battle.
 
 ## 2. Authoritative Documentation
 
-Start with `docs/product/00-Product-Index.md`. It routes each task to the
-approved document that owns the relevant decision.
+Start with `docs/README.md`. For current work order and acceptance status, use
+`docs/specs/02-V2-Delivery-Roadmap.md`. For enduring product decisions, use
+`docs/product/00-Product-Index.md` to find the document that owns the decision.
 
 Only documents marked `Approved` are implementation-authoritative. Read only
 the documents relevant to the task. Do not implement `Draft`, `In Review`,

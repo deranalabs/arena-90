@@ -45,7 +45,7 @@ Excluded:
 Do not add excluded work without explicit authorization.
 
 Production TxLINE authentication and live-data integration were excluded from
-the original P0 baseline. They are explicitly authorized for Slice 5 by
+the original P0 baseline. They are explicitly authorized for the live adapter by
 `specs/03-TxLINE-Live-Data-Adapter.md`, which extends this specification without
 changing the historical P0 scope.
 
@@ -167,6 +167,60 @@ Rules:
 - the data adapter owns normalization and deterministic remainder allocation;
 - recorded fixtures store canonical `priceMicros` values directly.
 
+### 5.1 Strategy Evidence
+
+Canonical snapshots remain provider observations. Agent strategy requires a
+separate deterministic view over current and prior accepted snapshots:
+
+```ts
+interface StrategyEvidenceV1 {
+  schemaVersion: 1;
+  arenaId: string;
+  currentSnapshotId: string;
+  anchorSnapshotId: string | null;
+  previousSnapshotId: string | null;
+  anchorPriceMicros: Record<ArenaAssetId, number> | null;
+  previousPriceMicros: Record<ArenaAssetId, number> | null;
+  priceDeltaFromAnchorMicros: Record<ArenaAssetId, number> | null;
+  priceDeltaFromPreviousMicros: Record<ArenaAssetId, number> | null;
+  matchDeltaFromPrevious: {
+    minutesElapsed: number;
+    homeScoreDelta: number;
+    awayScoreDelta: number;
+  } | null;
+}
+```
+
+One strategy-evidence module owns this derivation. Its interface accepts the
+current canonical snapshot and ordered accepted snapshot history, then returns
+one immutable `StrategyEvidenceV1`. Callers must not calculate competing deltas
+inside prompts, frontend code, or agent adapters.
+
+Rules:
+
+- kickoff becomes the arena anchor; if kickoff was missed, anchor fields remain
+  `null` rather than substituting a later observation;
+- the previous snapshot is the immediately preceding accepted decision
+  checkpoint, never an unaccepted provider event;
+- all price deltas use signed integer micros and exact subtraction;
+- match deltas use accepted score and minute fields only;
+- evidence identity must bind to current, anchor, and previous snapshot IDs;
+- Alpha and Beta receive byte-equivalent strategy evidence;
+- missing history is represented explicitly with `null`, never inferred;
+- delayed or suspended state remains part of the current canonical snapshot;
+- no historical win rate, external model, baseline probability, event, or
+  movement may be claimed unless a future approved evidence adapter supplies it
+  through this interface.
+
+V2 policy thresholds:
+
+- Alpha primary overreaction: no new goal and an absolute price move of at least
+  `150000` micros within at most 15 elapsed match minutes;
+- Beta primary underreaction: one new goal and less than `80000` micros price
+  increase for the scoring side since the previous accepted checkpoint;
+- absent a primary signal or another edge strictly supported by supplied
+  fields, the policy returns `NO_TRADE`.
+
 ## 6. Agent Decision
 
 ```ts
@@ -205,13 +259,15 @@ Raw model output may be retained for restricted debugging. Public APIs expose on
 At each decision checkpoint:
 
 1. build one canonical snapshot;
-2. create separate Alpha and Beta requests;
-3. invoke both without sharing the other decision;
-4. collect results privately;
-5. validate each result;
-6. allow at most one schema-repair attempt;
-7. close at the configured deadline;
-8. reveal validated outcomes simultaneously.
+2. derive one shared `StrategyEvidenceV1` from accepted snapshot history;
+3. create separate Alpha and Beta requests containing the same snapshot and
+   strategy evidence plus each agent's own portfolio;
+4. invoke both without sharing the other decision;
+5. collect results privately;
+6. validate each result;
+7. allow at most one schema-repair attempt;
+8. close at the configured deadline;
+9. reveal validated outcomes simultaneously.
 
 The repair request may describe validation errors but must not inject a trade.
 
@@ -410,6 +466,9 @@ Minimum coverage:
 - manifest rejects missing `1X2` assets;
 - malformed snapshots are rejected;
 - both agents receive the same snapshot ID;
+- both agents receive byte-equivalent strategy evidence;
+- strategy evidence binds current, anchor, and previous snapshot identities;
+- signed price and match deltas are derived deterministically;
 - agent calls are independent;
 - valid allocations sum to `10000`;
 - invalid output gets no more than one repair;
@@ -421,6 +480,10 @@ Minimum coverage:
 - settlement covers home, draw, and away results;
 - Replay uses the same engine and makes new agent calls;
 - APIs never expose prompts, private reasoning, or secrets.
+- Alpha can allocate in an overreaction scenario using only supplied evidence;
+- Beta can allocate in an underreaction scenario using only supplied evidence;
+- both agents can return `NO_TRADE` when supplied evidence contains no edge;
+- public explanations cannot cite evidence absent from the invocation.
 
 ## 15. P0 Acceptance
 
@@ -440,16 +503,8 @@ P0 is accepted only when:
 - paths are repository-relative and environment variables are documented;
 - the runtime starts outside the original developer machine.
 
-## 16. Implementation Order
+## 16. Current Implementation Order
 
-1. scaffold package and folders;
-2. implement contracts and validators;
-3. add recorded fixture and data adapter;
-4. build deterministic portfolio engine and tests;
-5. test orchestration with fake agents;
-6. add ZeroClaw Alpha/Beta adapter;
-7. expose state and event APIs;
-8. prove one end-to-end recorded run;
-9. integrate frontend;
-10. add TxLINE live adapter;
-11. add Solana participation.
+Current work order and completion evidence are owned only by
+`02-V2-Delivery-Roadmap.md`. This specification defines runtime interfaces and
+must not be used as a stale delivery checklist.

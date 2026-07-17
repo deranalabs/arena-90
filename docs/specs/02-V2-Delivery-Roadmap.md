@@ -1,285 +1,383 @@
 # Arena90 — V2 Delivery Roadmap
 
 **Status:** Approved
-
-This document defines V2 delivery order, slice boundaries, and acceptance
-gates. It does not override approved product documents or
-`specs/01-P0-Arena-Runtime.md`. Those documents remain authoritative for
-product behavior and runtime contracts. When a conflict exists, stop and
-resolve it before implementation. Within those boundaries, this roadmap is
-implementation-authoritative for delivery sequencing and acceptance.
-
-## 1. Completed Baseline
-
-- **Slice 0 — Product and repository guidance:** complete.
-- **Slice 1 — Runtime contracts and validation:** complete at commit
-  `7ca6ff8`.
-- **Slice 2 — Deterministic portfolio engine:** complete at commit `630b819`.
-- **Slice 3 — Checkpoint orchestration:** complete at commit `7951465`.
-- **Slice 4 — Real ZeroClaw agents:** complete at commit `d2714ab`.
-- **Slice 4.1 — Agentic VPS staging deployment and live Alpha/Beta smoke:**
-  complete.
-
-## 2. Delivery Guardrails
-
-- The recorded checkpoint fixture remains a mandatory fallback through final
-  submission. Live-data availability must not remove or weaken Replay.
-- Live data, Replay data, agents, APIs, and the frontend use the same canonical
-  runtime contracts. Adapters translate into those contracts; consumers do not
-  create competing schemas or accounting rules.
-- Live and Replay use the same validation, orchestration, execution,
-  accounting, settlement, and winner logic.
-- Solana does not execute LLM inference or portfolio accounting. It consumes
-  only the approved arena and final-result contracts required for supporter
-  participation and settlement proof.
-- A slice is complete only when its acceptance gate passes without fallback
-  decisions, fabricated states, or claims beyond the verified integration.
-
-## 3. Delivery Order
-
-The critical path is:
-
-`Slice 5 → Slice 6 → Slice 7 → Slice 8 → Slice 10 → Slice 11`
-
-Slice 9 may begin after Slice 6 freezes the final-result contract. It may
-proceed in parallel with Slices 7 and 8, but it must pass before Slice 11.
-
-## 4. Slice 5 — TxLINE/TxODDS Live Data Adapter
-
-**Goal:** Convert verified live provider updates into the existing canonical
-snapshot contract without changing runtime rules.
-
-**In-scope deliverables:**
-
-- configurable TxLINE/TxODDS client boundary and live data adapter;
-- deterministic mapping of fixture state and normalized `1X2` prices;
-- provider sequence, duplicate ID, freshness, suspension, checkpoint, arena,
-  and snapshot-hash validation;
-- explicit provider and data-failure behavior using existing global missed
-  round semantics;
-- unit tests with recorded provider-shaped inputs;
-- an authorized live connectivity smoke using the provisioned project
-  credentials;
-- provisioned TxLINE/TxODDS credentials kept outside Git and sanitized adapter
-  and smoke logs that never expose tokens.
-
-**Non-goals:**
-
-- changing canonical contracts, portfolio formulas, agent behavior, or winner
-  rules;
-- lifecycle scheduling, persistence, HTTP APIs, frontend work, or Solana;
-- removing or bypassing the recorded fixture.
-
-**Acceptance gate:** Identical provider inputs produce identical canonical
-snapshots; malformed, stale, suspended, duplicate, or out-of-order data cannot
-create a trade; build, tests, diff check, and scope audit pass; the authorized
-live connectivity smoke passes using the provisioned project credentials and
-produces only sanitized logs; Replay remains fully operational.
-
-## 5. Slice 6 — Arena Lifecycle Runner and Persistence
-
-**Goal:** Run one arena deterministically from creation through final
-settlement with restart-safe state.
-
-**In-scope deliverables:**
-
-- one-arena lifecycle state machine for Live and Replay;
-- ordered checkpoint scheduling and terminal settlement without a `FINAL`
-  agent call;
-- persistence for the locked manifest, canonical snapshots, public events,
-  portfolios, revealed decisions, failures, and final result;
-- idempotent run, checkpoint, resume, and settlement behavior;
-- explicit mode selection with the recorded fixture retained as fallback;
-- end-to-end lifecycle and restart-recovery tests.
-
-**Non-goals:**
-
-- multi-arena concurrency, distributed scheduling, or high availability;
-- public HTTP/SSE surfaces, frontend integration, or Solana settlement;
-- changes to deterministic execution or accounting.
-
-**Acceptance gate:** A recorded arena completes every checkpoint and final
-settlement after clean start and restart; a live arena follows the same path
-when valid data is available; duplicate work is harmless; persisted state and
-events reproduce the terminal result; the final-result contract is frozen for
-Slice 9.
-
-**Frozen handoff contract:** The nested terminal result is schema V2 with
-`FINAL_NAV_ONLY_V1`, provider-bound terminal evidence, completed-event binding,
-pre-settlement event-log hash, and final-result hash. Persistence is atomic
-JSON with restart recovery. These are breaking consumer changes from the old
-schema V1 result.
-
-## 6. Slice 7 — HTTP and SSE API
-
-**Goal:** Expose the lifecycle through stable public state and ordered event
-stream contracts.
-
-**In-scope deliverables:**
-
-- health, arena creation, run, state, and event endpoints required by the
-  runtime specification;
-- an SSE stream using the same ordered public events as persisted history;
-- reconnect and resume behavior without duplicate or reordered events;
-- request, response, and error validation at the API boundary;
-- protection against exposure of prompts, raw model output, secrets, private
-  reasoning, hidden decisions, and infrastructure logs;
-- API and stream contract tests.
-
-**Non-goals:**
-
-- frontend implementation, wallet authentication, Solana actions, or public
-  operator administration;
-- new agent, engine, accounting, or lifecycle behavior;
-- WebSocket or multi-arena infrastructure.
-
-**Acceptance gate:** API tests prove idempotent run behavior, canonical state,
-monotonic resumable SSE events, simultaneous decision reveal, honest failure
-states, and absence of private data; build, tests, diff check, scope audit, and
-local API smoke pass.
-
-## 7. Slice 8 — Frontend Live Arena Integration
-
-**Goal:** Connect the approved spectator experience to the canonical runtime
-API without mocked competition progress.
-
-**In-scope deliverables:**
-
-- Live Arena state loading and SSE subscription;
-- match state, checkpoint progress, portfolios, NAV, returns, leader, revealed
-  decisions, failures, final result, and source-mode presentation;
-- reconnect, delayed, suspended, missed-round, finalizing, completed, and
-  unavailable states;
-- explicit Live and Replay labeling with Replay fallback access;
-- responsive and accessible integration tests for the critical spectator
-  flow.
-
-**Slice 8 handoff:** Update frontend state, history, and SSE consumers to parse
-the nested final-result schema V2 and render terminal evidence safely. Do not
-infer legacy tie-breakers or accept the removed schema V1 final result.
-
-**Non-goals:**
-
-- redesigning unrelated routes or restoring V1 battle concepts;
-- direct market trading, editable prompts, manual agent control, or fabricated
-  reasoning streams;
-- wallet, backing, claim, refund, or other Solana UX.
-
-**Acceptance gate:** A spectator can follow one arena from ready state through
-completion using real API/SSE state; decisions remain hidden until reveal;
-failure and reconnect states are honest; Live and Replay render from the same
-contracts; frontend build, tests, scope audit, and browser smoke pass.
-
-## 8. Slice 9 — Minimal Solana Devnet Settlement Proof
-
-**Goal:** Prove that one canonical arena settlement can be recorded on devnet
-from the frozen runtime result.
-
-**In-scope deliverables:**
-
-- initialize or record an arena settlement;
-- store the canonical final snapshot hash;
-- store a deterministic final-result or event-log hash;
-- record the winning agent and Alpha/Beta final NAV;
-- reject duplicate or unauthorized settlement;
-- return transaction evidence usable by the frontend.
-
-**Non-goals:**
-
-- participation, escrow, claim, refund, tokenomics, custody, or supporter-fund
-  handling;
-- mainnet deployment, broad wallet UX, or unrestricted transaction
-  construction;
-- allowing agents to access wallets, keys, or settlement authority;
-- LLM inference, portfolio execution, portfolio accounting, or winner
-  calculation on Solana.
-
-**Acceptance gate:** One authorized devnet transaction records the final
-snapshot hash, deterministic final-result or event-log hash, winning agent, and
-both final NAV values; duplicate and unauthorized settlement attempts fail;
-the frontend can consume the returned transaction evidence; required tests,
-builds, diff check, scope audit, and devnet smoke pass.
-
-## 9. Slice 10 — Deployment Hardening
-
-**Goal:** Make the critical-path backend/runtime repeatably deployable on the
-current agentic VPS and the frontend repeatably deployable to an approved
-separate hosting target.
-
-**In-scope deliverables:**
-
-- reproducible backend/runtime and frontend release builds on Mac or CI;
-- versioned backend/runtime and frontend artifacts with deployment and rollback
-  steps;
-- backend/runtime environment validation, secret handling, process supervision,
-  health checks, restart policy, bounded logs, and release diagnostics on the
-  agentic VPS;
-- backend reverse-proxy and transport configuration required for HTTP and SSE;
-- frontend deployment to an approved separate static or application hosting
-  target with explicit backend connectivity configuration;
-- recorded end-to-end smoke plus safe live provider and agent connectivity
-  checks.
-
-**Non-goals:**
-
-- building source on the VPS;
-- hosting the frontend on the agentic VPS;
-- multiple active arenas, horizontal scaling, Kubernetes, or high availability;
-- replacing the recorded fallback or weakening runtime validation for uptime.
-
-**Acceptance gate:** A clean backend/runtime release artifact deploys to the
-agentic VPS, starts, survives process restart, and serves API/SSE health checks;
-a clean frontend artifact deploys to the approved separate hosting target and
-connects to that backend; rollback steps work; the recorded end-to-end smoke
-and live provider and agent connectivity smokes pass without VPS source builds
-or secret exposure.
-
-## 10. Slice 11 — Final Demo and Submission
-
-**Goal:** Deliver a truthful, reproducible demonstration and complete submission
-package.
-
-**In-scope deliverables:**
-
-- final Live-preferred demo flow with mandatory recorded Replay fallback;
-- operator runbook covering startup, arena execution, failure recovery,
-  settlement proof, and fallback activation;
-- verified evidence for shared snapshots, independent Alpha/Beta calls,
-  reveal, deterministic accounting, final result, public API/frontend state,
-  and any devnet proof;
-- final validation report, architecture summary, limitations, and submission
-  assets.
-
-**Non-goals:**
-
-- new product features, late contract changes, unsupported production claims,
-  or removal of fallback paths;
-- presenting recorded, mocked, trusted, partial, or devnet components as live,
-  autonomous, trustless, mainnet, or production-ready.
-
-**Acceptance gate:** The release completes the critical spectator flow and
-final settlement, the recorded fallback works from a clean start, the required
-builds, tests, diff checks, scope audits, browser/API/runtime smokes, and devnet
-proof pass, and all submission claims match verified behavior.
-
-## 11. Branch Policy
-
-- `v2/integration` is the integration baseline.
-- Use one short-lived branch per slice.
-- Merge only after build, tests, `git diff --check`, scope audit, and required
-  smoke tests pass for that slice.
-- Do not create all future branches in advance.
-- A parallel Slice 9 branch starts only after Slice 6 freezes the final-result
-  contract.
-
-## 12. Agentic VPS Deployment Constraints
-
-- Run one active arena.
-- Allow two parallel agent calls, one for Alpha and one for Beta.
-- Host the backend/runtime release only on the agentic VPS.
-- Build the backend/runtime and frontend on Mac or CI.
-- Deploy the frontend to an approved separate static or application hosting
-  target.
-- Run backend/runtime release artifacts only on the agentic VPS.
-- Do not expand these limits until the current critical path and final demo are
-  accepted.
+**Last verified:** 2026-07-17
+
+This document is the single source of truth for current work order, delivery
+status, and acceptance evidence. Product documents own enduring behavior.
+Technical specifications own module interfaces. This roadmap does not copy
+their details.
+
+## 1. Demo Outcome
+
+Arena90 is complete for submission only when one vertical workflow is proven:
+
+```text
+TxLINE + TxODDS live fixture
+        |
+        v
+same verified strategy evidence
+        |
+        +-- Agent Alpha: hunts market overreaction
+        `-- Agent Beta: hunts market underreaction
+        |
+        v
+deterministic validation, simultaneous reveal, execution, accounting
+        |
+        +-- public state + ordered SSE events --> frontend
+        `-- canonical final result -----------> Solana settlement
+
+supporter -- user-signed Blink --> Solana escrow --> claim or refund
+```
+
+This workflow is the delivery interface. A layer is not complete merely
+because its unit tests or isolated smoke pass. Completion requires its output
+to cross the next seam and remain visible in the final demo.
+
+### 1.1 Hackathon Acceptance Lens
+
+The official track rewards a working agent over a polished but inactive demo.
+Arena90 must demonstrate all five judging dimensions:
+
+| Criterion | Arena90 proof |
+| --- | --- |
+| Core Functionality & Data Ingestion | Real TxLINE fixture, odds, and score input reaches canonical snapshots and produces decisions. |
+| Autonomous Operation | A deployed supervisor runs ingestion, checkpoints, both agents, reveal, execution, and finalization without routine human calls. |
+| Logic & Code Architecture | Shared evidence, distinct threshold policies, structured output, fail-closed validation, and deterministic integer accounting are documented and tested. |
+| Innovation & Novelty | Two agents compete on the same verified feed using overreaction versus underreaction strategies with auditable portfolio consequences. |
+| Production Readiness | Restart recovery, idempotency, bounded inputs/logs, secret isolation, health checks, read-only public APIs, and rollback are demonstrated. |
+
+Submission acceptance also requires a public repository, working deployed URL
+or API/devnet endpoint, brief technical documentation naming the TxLINE
+endpoints used, integration feedback, and a demo video no longer than five
+minutes. Submission closes **2026-07-19 23:59 UTC**. The video must capture
+real live-input behavior before the match opportunity disappears; Replay is
+fallback evidence, not a substitute for the required live integration.
+
+## 2. Non-Negotiable Invariants
+
+- Alpha and Beta receive the same verified evidence and equal virtual
+  bankrolls.
+- Agents decide only at approved checkpoints. They do not trade continuously.
+- Agent output is structured. Invalid or missing output never becomes a fake
+  fallback trade.
+- Validation, execution, accounting, and winner resolution are deterministic.
+- Public explanations claim only evidence supplied to the agent invocation.
+- Live and Replay use the same runtime. Replay remains the mandatory fallback,
+  but it is not the primary submission proof.
+- Supporter funds never become agent capital or strategy input.
+- Wallets sign supporter transactions. Agents never receive wallet authority,
+  keys, funds, or settlement authority.
+- Public UI may expose verified events, not private reasoning or raw
+  infrastructure logs.
+
+## 3. Verified Current State
+
+### 3.0 Gate Status
+
+| Gate | Status | Next acceptance evidence |
+| --- | --- | --- |
+| 1. Strategy Integrity | Complete locally | Deploy strategy v2 and preserve smoke evidence |
+| 2. Always-On World Cup Live | In progress | Supervisor clean-boot and restart proof |
+| 3. Spectator & Technical Proof | In progress | World Cup API/SSE through browser |
+| 4. Solana Supporter Slice | Not started | Program, Action, and devnet wallet flow |
+| 5. Release & Demo | Not started | Rehearsal, security audit, deploy, and recording |
+
+Update this table only from captured acceptance evidence. Local implementation
+or an isolated unit test does not close a gate.
+
+### 3.1 Proven
+
+- Runtime contracts, deterministic portfolio engine, checkpoint orchestration,
+  simultaneous reveal, persistence, final result, and Replay lifecycle exist.
+- Alpha and Beta run as independent ZeroClaw invocations.
+- TxLINE/TxODDS adapter implements fixture binding, score state, approved `1X2`
+  selection, deterministic normalization, freshness, suspension, sequence, and
+  fail-closed behavior.
+- Authorized TxLINE connectivity smoke passes against the deployed provider.
+- HTTP state and ordered resumable SSE contracts exist.
+- A local strategy-evidence module now derives kickoff anchor, previous
+  checkpoint state, exact price movement, and match movement. Both invocation
+  paths receive the same evidence object, including schema repair attempts.
+- Local strategy identities are now Alpha Overreaction Hunter and Beta
+  Underreaction Hunter with strategy metadata version `3`. Runtime build and
+  all 401 tests pass.
+- Real ZeroClaw acceptance smoke passes Alpha overreaction allocation, Beta
+  underreaction allocation, and Alpha/Beta no-edge `NO_TRADE` scenarios. The
+  smoke also rejects unsupported historical/baseline claims in public output.
+- A replacement immutable runtime artifact,
+  `arena90-runtime-20260717-strategy-v3.tar.gz`, builds locally and its SHA-256
+  checksum verifies. It has not been uploaded or activated on the VPS.
+- Local runtime now has an operator-owned autostart supervisor. LIVE fails
+  closed if autostart is disabled; supervised runtimes hide public create/run
+  mutations; graceful shutdown aborts the managed run. Build and all 401 tests
+  pass.
+- Deployment preflight now validates both Replay and Live configurations and
+  rejects `ARENA90_AUTOSTART=false`. Replay-pass, Live-pass, and manual-start
+  rejection are covered by automated tests.
+- World Cup third-place and final fixture bindings were revalidated from the
+  provider. Both full connectivity smokes pass with a bounded 5 MB provider
+  response cap; their score streams were correctly idle before kickoff.
+- TxLINE credentials may now be loaded from one owner-only JSON file outside
+  Git and immutable releases. The VPS release artifact and credential file are
+  staged, but the active Replay service has not been switched to Live.
+- Frontend now resolves one approved catalog preset across home, header,
+  footer, agent CTA, and proof links. Replay and World Cup Live builds pass;
+  Replay-default code is deployed to `arena-90.vercel.app`.
+- Frontend now includes a read-only public Event Ledger derived from the same
+  SSE event stream as the arena view. It supports agent/type filtering,
+  display pause, and copying public proof identity without exposing prompts,
+  private reasoning, raw model output, or infrastructure logs. Frontend lint,
+  all 89 tests, Replay build, and World Cup Live build pass locally.
+- Replay runtime is deployed on the agentic VPS; frontend is deployed on
+  Vercel through a same-origin read-only gateway.
+- Replay spectator flow and public proof are available as fallback evidence.
+
+### 3.2 Not Proven
+
+- The deployed smoke fixture is not the World Cup fixture used by the demo.
+- No World Cup arena has completed TxLINE/TxODDS input through autonomous
+  decisions, deterministic execution, API/SSE, and frontend end to end.
+- The VPS Live activation, restart-resume proof, and frontend consumer switch
+  remain pending explicit operator approval.
+- The previously staged VPS supervisor artifact predates the approved
+  Alpha/Beta strategy reassignment. It is obsolete and must not be activated;
+  a strategy-v3 release must replace it.
+- The deployed Replay runtime still uses its older explicit create/run flow;
+  the tested supervisor release is staged but not active.
+- Production Replay evidence shows Alpha allocating once in six rounds and
+  Beta returning `NO_TRADE` in all six. Alpha's allocating explanation also
+  cites historical probability absent from its invocation.
+- Current public navigation and featured arena are Replay-first.
+- The latest external same-origin API smoke did not finish before the local
+  tool network/usage limit. Gateway health remains unproven despite successful
+  Vercel build and homepage response.
+- The Event Ledger changes have not yet been deployed or matched against a
+  persisted production World Cup SSE sequence in a browser.
+- Current V2 branch has no aligned Solana Action module. Existing Anchor code
+  and historical Action code are V1/Kamino-mock material and are not accepted
+  as V2 supporter proof.
+- Solana audit confirms the current Anchor account stores aggregate
+  `isagi_stake`/`aiku_stake`, has no backing deadline, supporter ownership
+  record, lifecycle lock, canonical result hash, claim, or refund instruction,
+  and requires the Kamino mock during resolution. Its focused Rust tests pass,
+  but they prove only the legacy initialize/stake path. The historical Action
+  constructs a mock SOL transfer to a treasury from `clash-state.json`; its
+  source is not present on the current V2 branch.
+- Full supporter Blink, escrow, lock, settlement, claim, and refund have not
+  passed devnet end to end.
+- Demo-critical frontend routes still contain competing CSS foundations and
+  inconsistent information hierarchy.
+
+No incomplete item above may be described as live, autonomous end to end,
+production-ready, or Solana-complete.
+
+## 4. Current Demo Targets
+
+Provider discovery on 2026-07-17 identified these World Cup fixtures:
+
+- France vs England, fixture `18257865`, third-place match. Use as Live
+  rehearsal and capture opportunity.
+- Spain vs Argentina, fixture `18257739`, final. Use as primary featured arena.
+
+Fixture identity, participants, start time, approved market availability, and
+freshness must be revalidated from TxLINE/TxODDS before locking a manifest.
+These identifiers are operational targets, not permanent product constants.
+
+The runtime may execute one active arena. The frontend may list multiple
+eligible or completed fixtures, but listing a fixture must not imply that an
+Arena90 run exists. Every item must disclose `UPCOMING`, `LIVE`, `COMPLETED`,
+`REPLAY`, or `UNAVAILABLE` honestly.
+
+## 5. Work Order
+
+Work strictly in this order. Do not start broad redesign, social automation,
+or multi-arena infrastructure while an earlier gate is open.
+
+### Gate 1 — Strategy Integrity
+
+**Goal:** Both agents receive sufficient, identical evidence and express two
+active, defensible policies.
+
+Required:
+
+- add one strategy-evidence module at the agent invocation seam;
+- derive evidence deterministically from current and prior canonical snapshots;
+- include pre-match anchor, previous checkpoint state, price movement, score
+  movement, and elapsed match state without floating point;
+- define Alpha as the overreaction policy and Beta as the underreaction policy;
+- prohibit unsupported historical probability, baseline, movement, or event
+  claims;
+- keep `NO_TRADE` valid and never force action or disagreement;
+- add scenario tests for underreaction, overreaction, no edge, stale data, and
+  suspended data.
+
+Acceptance evidence:
+
+- both agents receive byte-equivalent shared strategy evidence;
+- Alpha can allocate in a deterministic overreaction scenario;
+- Beta can allocate in a deterministic underreaction scenario;
+- both can return `NO_TRADE` in a no-edge scenario;
+- explanations reference only supplied evidence;
+- runtime build and focused tests pass.
+
+### Gate 2 — Always-On World Cup Live Arena
+
+**Goal:** One approved World Cup arena stays ready, starts without a public
+manual trigger, survives restart, and consumes live provider data.
+
+Required:
+
+- prepare a locked Live manifest from revalidated TxLINE fixture identity;
+- add an arena supervisor that starts with the VPS runtime;
+- resume incomplete persisted state after restart;
+- wait safely for valid kickoff/checkpoint evidence;
+- invoke Alpha and Beta in parallel only at approved checkpoints;
+- expose explicit waiting, delayed, suspended, missed-round, finalizing, and
+  completed states;
+- keep create/run controls private to the operator seam.
+- require zero routine operator calls after service start; browser traffic must
+  never trigger arena execution;
+
+Acceptance evidence:
+
+- clean boot reaches an honest Upcoming/Ready state without browser traffic;
+- valid TxLINE input opens the correct checkpoint automatically;
+- both agents resolve and reveal simultaneously;
+- restart resumes without duplicate checkpoint or event;
+- state and SSE show `TXLINE_LIVE` provenance;
+- Replay still completes from a clean start.
+- captured process and event evidence shows the complete run was supervisor-
+  driven rather than manually advanced.
+
+### Gate 3 — Spectator and Technical Proof
+
+**Goal:** Normal users understand the competition; evaluators can verify it.
+
+Required:
+
+- make the current featured Live arena the primary action;
+- show eligible World Cup fixtures without fabricating arena availability;
+- show fixture, source, freshness, score, checkpoint, equal conditions,
+  allocations, NAV, leader, next event, and final result;
+- add a read-only Live Agent Activity/Event Ledger backed only by public SSE;
+- allow filter, pause, inspect, and copy-proof actions, but no commands,
+  prompts, manual decisions, or raw logs;
+- show structured evidence and simultaneous reveal on the proof surface;
+- retain Replay as a clearly labeled fallback.
+
+Acceptance evidence:
+
+- browser follows one Live arena from Upcoming/Ready through at least one
+  checkpoint using real API/SSE state;
+- Event Ledger entries match persisted public event sequence and hashes;
+- loading, reconnect, delayed, suspended, and unavailable states are honest;
+- desktop and mobile critical flows pass;
+- frontend lint, tests, and build pass.
+
+### Gate 4 — Solana Supporter Vertical Slice
+
+**Goal:** A supporter backs one agent through a Blink and receives a verifiable
+devnet outcome derived from the canonical arena result.
+
+Before implementation, approve the missing Supporter Escrow and Blink
+Settlement specification. At minimum it must own the accepted devnet token,
+supporter-position account model, backing deadline and lock authority, payout
+and fee mathematics, draw/void refunds, canonical final-result binding,
+settlement authority, and replay exclusion. Product documents intentionally do
+not define these implementation-critical decisions; legacy code is not a
+default.
+
+Required:
+
+- replace legacy names and Kamino-mock coupling with a V2 supporter program;
+- initialize an arena from canonical arena identity and backing deadline;
+- accept a user-signed Alpha or Beta backing transaction before lock;
+- store supporter ownership separately from agent virtual capital;
+- lock new backing at the approved deadline;
+- settle once from authorized canonical final-result evidence;
+- reject duplicate and unauthorized settlement;
+- allow claim for an eligible terminal outcome and refund for draw/void;
+- automatically lock from manifest time and submit deterministic settlement
+  from canonical final-result evidence through a restricted resolver service;
+- expose Solana Action/Blink metadata and transaction construction without
+  custody or server-side user signing;
+- display devnet transaction evidence in frontend and proof.
+
+Acceptance evidence:
+
+- initialize, back, lock, settle, claim, and refund paths pass program tests;
+- Action GET/POST contracts pass;
+- one wallet completes a devnet Blink transaction;
+- duplicate/late backing and unauthorized/duplicate settlement fail;
+- final result hash and transaction signature match frontend proof;
+- no agent or LLM process can access wallet keys or supporter funds.
+
+### Gate 5 — Release and Demo
+
+**Goal:** A truthful demo can be repeated under live-match and fallback
+conditions by the pitching team.
+
+Required:
+
+- harden VPS firewall, rate limits, process supervision, bounded logs, secret
+  handling, health checks, release, rollback, and restart behavior;
+- remove competing frontend foundations only where demo-critical;
+- write one operator runbook and one timed demo script;
+- rehearse Live using the earliest eligible World Cup fixture;
+- record Live-preferred evidence and a clean Replay fallback;
+- publish public repository, architecture summary, limitations, and demo video.
+
+Acceptance evidence:
+
+- clean release deploys without building source on VPS;
+- backend/runtime and frontend survive restart and reconnect;
+- Live rehearsal, Solana devnet flow, and Replay fallback each pass;
+- all required builds, tests, diff checks, browser smokes, API smokes, provider
+  smokes, security checks, and program tests pass;
+- every submission claim matches recorded evidence.
+
+## 6. Explicit Deferrals
+
+Not required before demo acceptance:
+
+- mainnet funds or mainnet deployment;
+- Kamino or yield integration;
+- multiple simultaneously running arenas;
+- autonomous fixture selection without operator approval;
+- autonomous X posting or social scheduler;
+- public terminal commands, editable prompts, or user-controlled agents;
+- direct user football-market trading;
+- advanced markets beyond approved full-match `1X2`;
+- broad redesign of non-demo-critical pages.
+
+## 7. Branch and Completion Policy
+
+- `v2/integration` remains the integration baseline.
+- Current `v2/frontend-rebuild` is a deploy candidate, not an accepted final
+  integration branch.
+- Use one short-lived branch per open gate when work can be isolated. Cross-layer
+  vertical changes may share one branch only when one acceptance test exercises
+  the entire workflow.
+- Merge only after the gate's commands, smoke, diff check, and scope audit pass.
+- Never mark a gate complete from isolated tests when its downstream handoff is
+  missing.
+- Preserve unrelated user changes and never commit credentials, environment
+  files, wallets, local ledgers, generated output, or private logs.
+
+## 8. Demo Narrative
+
+The pitching team should be able to say and show:
+
+1. Arena90 receives live football and market evidence from TxLINE/TxODDS.
+2. Alpha and Beta receive the same evidence and equal virtual bankrolls.
+3. Alpha hunts overreaction; Beta hunts underreaction.
+4. Both decide autonomously at fixed checkpoints.
+5. Arena90 validates, reveals, executes, accounts, and selects the winner
+   deterministically.
+6. Spectators watch without a wallet and inspect verified public events.
+7. Supporters may back an agent through a user-signed Solana Blink.
+8. Canonical final-result evidence settles the supporter record on devnet.
+
+If any sentence cannot be shown with current evidence, the corresponding gate
+remains open.

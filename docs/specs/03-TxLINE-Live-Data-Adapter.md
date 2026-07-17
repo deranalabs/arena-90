@@ -2,16 +2,16 @@
 
 **Status:** Approved
 
-This specification defines the Slice 5 TxLINE/TxODDS live-data integration. It
+This specification defines the TxLINE/TxODDS live-data adapter module. It
 extends, but does not replace, `specs/01-P0-Arena-Runtime.md`.
 
 The recorded adapter remains the mandatory Replay and final-submission
-fallback. Slice 5 does not change canonical runtime contracts, deterministic
+fallback. The adapter does not change canonical runtime contracts, deterministic
 engine formulas, agents, or the checkpoint orchestrator.
 
 ## 1. Scope
 
-Slice 5 converts verified provider data into the existing
+The adapter converts verified provider data into the existing
 `CanonicalSnapshot` contract and exposes the existing deterministic final
 result.
 
@@ -56,8 +56,8 @@ must retain the verified final score, provider sequence and event identity,
 observation time, source mode, winning asset, and deterministic evidence hash;
 an asset enum alone is not sufficient for settlement.
 
-Slice 6 must call `refreshCheckpoint()` before invoking checkpoint
-orchestration. Slice 5 must not make the current checkpoint orchestrator
+The lifecycle module must call `refreshCheckpoint()` before invoking checkpoint
+orchestration. The adapter must not make the current checkpoint orchestrator
 asynchronous.
 
 If refresh or validation fails, the adapter must not expose a new snapshot.
@@ -80,7 +80,7 @@ GET /api/scores/historical/{fixtureId}
 The score stream and historical score replay are SSE. Historical replay is
 used only for tests and provider resynchronization.
 
-Slice 5 must not define or call a per-fixture scores-updates endpoint. Provider
+The adapter must not define or call a per-fixture scores-updates endpoint. Provider
 access must accept `AbortSignal`, use bounded timeouts, and keep authentication
 credentials outside Git.
 
@@ -136,7 +136,7 @@ Every fixture and dependent score or odds record must match the configured
 fixture. Participant identity, home/away designation, or start-time mismatch is
 invalid provider data.
 
-These checks remain adapter configuration. Slice 5 must not expand the
+These checks remain adapter configuration. The adapter must not expand the
 canonical arena manifest.
 
 ## 6. Score State
@@ -367,7 +367,7 @@ Replay remains an explicit available fallback using the recorded adapter.
 
 ## 15. Acceptance
 
-Slice 5 is accepted only when:
+The adapter is accepted only when:
 
 - runtime build and full tests pass;
 - recorded Replay remains unchanged and fully operational;

@@ -5,6 +5,10 @@
 This file is the routing map for Arena90 V2 product documentation. It does not
 define product behavior by itself.
 
+For current implementation order, verified gaps, and completion evidence, use
+`../specs/02-V2-Delivery-Roadmap.md`. Product documents define what must remain
+true; they do not indicate whether current code is complete.
+
 ## 1. Authority Rules
 
 Only documents explicitly marked `Approved` are implementation-authoritative.
@@ -72,6 +76,8 @@ or transaction-experience work.
 
 ## 3. Reading Order by Task
 
+- **What to build next or whether the demo is ready:** read
+  `../specs/02-V2-Delivery-Roadmap.md` first.
 - **Competition or agent runtime:** read `01`, then relevant boundaries in `02`.
 - **Product or scope:** read `02`, then consult `01` or `03` only when affected.
 - **Routes or UI/UX:** read `03` and the relevant product constraints in `02`.

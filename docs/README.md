@@ -1,21 +1,46 @@
 # Arena90 Documentation
 
-This directory separates approved V2 product decisions, implementation
-specifications, external references, and archived V1 material.
+Arena90 has one delivery workflow:
+
+```text
+TxLINE + TxODDS
+        |
+        v
+Arena Runtime
+  |-- same verified evidence --> Alpha + Beta
+  |-- deterministic validation, execution, accounting, winner
+  |-- public state + SSE ------> Frontend
+  `-- final result evidence ---> Solana settlement
+
+Frontend -- user-signed Blink --> Solana supporter escrow
+```
+
+The Arena Runtime is the deep module. Its public state, ordered events, and
+final result are the interfaces used by the frontend and Solana modules.
+Provider payloads, prompts, raw model output, private reasoning, and wallet
+authority stay behind their respective seams.
 
 ## Start Here
 
-- `product/00-Product-Index.md` routes product questions to the document that
-  owns each decision.
-- `specs/01-P0-Arena-Runtime.md` defines the approved implementation contract
-  for the hackathon runtime vertical slice.
-- `specs/02-V2-Delivery-Roadmap.md` defines delivery order, slice boundaries,
-  acceptance gates, and branch and deployment progression.
-- `specs/03-TxLINE-Live-Data-Adapter.md` defines the approved TxLINE client
-  boundaries, normalization, freshness, sequencing, and live-data failure
-  behavior for Slice 5.
+- **What must be built next and what proves completion:**
+  `specs/02-V2-Delivery-Roadmap.md`.
+- **How deployment activation and rollback work:**
+  `../ops/deployment/README.md`.
+- **What Arena90 is and what it must never become:**
+  `product/02-Product-Definition-V2.md`.
+- **How one autonomous competition works:**
+  `product/01-Autonomous-Game-Loop-Decision.md`.
+- **What users see on each route:**
+  `product/03-User-Experience-and-Routes.md`.
+- **Runtime and provider implementation contracts:**
+  `specs/01-P0-Arena-Runtime.md` and
+  `specs/03-TxLINE-Live-Data-Adapter.md`.
 
 Read only the documents relevant to the current task.
+
+Do not infer current delivery priority from document length or section order.
+The Delivery Roadmap is the only owner of current work order and acceptance
+status. Product documents define enduring behavior, not current completion.
 
 ## Approved Product Documents
 
@@ -36,9 +61,9 @@ requirements.
   - deterministic execution, accounting, settlement, and winner calculation;
   - runtime events, HTTP API, recorded fixture, tests, and P0 acceptance.
 - `specs/02-V2-Delivery-Roadmap.md`
-  - completed and remaining delivery slices;
-  - critical path, slice boundaries, and acceptance gates;
-  - branch policy and deployment progression through final submission.
+  - verified current state and remaining gaps;
+  - one vertical delivery workflow and acceptance gates;
+  - branch, deployment, rehearsal, and submission progression.
 - `specs/03-TxLINE-Live-Data-Adapter.md`
   - TxLINE client and asynchronous refresh boundaries;
   - fixture, score, market, sequence, and canonical identity rules;
@@ -54,6 +79,9 @@ implementation-authoritative unless explicitly authorized.
 ## References
 
 Technical research and protocol notes are stored in `references/`.
+
+- `references/txline-world-cup-hackathon.md` records the verified track,
+  submission, and TxLINE integration facts that shape the delivery gates.
 
 References provide supporting context only. They do not define Arena90 product
 behavior or override approved product documents and specifications.

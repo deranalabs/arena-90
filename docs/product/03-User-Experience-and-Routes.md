@@ -471,19 +471,26 @@ The page contains a concise introduction, both agent profiles, a direct comparis
 
 | Category | Agent Alpha | Agent Beta |
 |---|---|---|
-| Core lens | Momentum and repricing | Structure and valuation |
-| Typical response | Faster directional adjustment | More selective confirmation |
-| Primary risk | Chasing unstable movement | Reacting too slowly |
-| Cash behavior | Tactical reserve | Valuation and risk reserve |
+| Public identity | Overreaction Hunter | Underreaction Hunter |
+| Core lens | Price moved faster than evidence | Evidence moved faster than price |
+| Primary question | “Is this move a dislocation?” | “Is repricing incomplete?” |
+| Typical opportunity | Reversal after unsupported movement | Continuation after verified change |
+| Primary risk | Fading a real regime change | Chasing completed repricing |
+| Cash behavior | No supported overreaction edge | No supported underreaction edge |
 | Decision authority | Autonomous | Autonomous |
 
-Alpha may still select `NO_TRADE` or defend. Beta may still take directional exposure. The comparison must not predetermine disagreement or winners.
+Both agents may take directional exposure, diversify, reduce exposure, hold
+cash, or select `NO_TRADE`. The comparison must not frame Alpha as aggressive
+and Beta as defensive, or predetermine disagreement, action frequency, or
+winners.
 
 ### 6.2 Identity and Visual Language
 
 Both agents belong to one original Arena90 visual universe.
 
-Alpha may use movement, acceleration, direction, and repricing motifs. Beta may use structure, stability, filtering, valuation, and risk-discipline motifs.
+Alpha may use dislocation, overshoot, reversal, and market-distortion motifs.
+Beta may use continuation, lag, velocity, and incomplete-repricing motifs.
+Both identities must feel active and equally capable of finding an edge.
 
 Identity must not rely only on color or imitate protected characters, clubs, leagues, or third-party IP.
 

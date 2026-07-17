@@ -56,6 +56,12 @@ Each checkpoint is one autonomous competition round:
 6. Decisions are revealed after both agents resolve or reach their deadlines.
 7. Portfolio states and competition metrics are updated.
 
+Once the runtime is deployed with a locked manifest, the lifecycle supervisor
+must perform this sequence from TxLINE input without a browser request,
+operator command, or manual checkpoint trigger. Operator activity is limited
+to pre-deployment configuration and exceptional pause or recovery; it is not a
+normal step in the competition loop.
+
 Final Settlement is a terminal arena event, not a trading checkpoint. Agents cannot submit a new decision after the 75-minute checkpoint.
 
 Agents control strategy selection only. Pricing, validation, execution, accounting, and settlement remain deterministic system responsibilities.
