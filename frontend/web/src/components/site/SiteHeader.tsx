@@ -8,7 +8,7 @@ const arenaHref = `/arena/${FEATURED_REPLAY_ARENA_ID}`;
 const proofHref = `/arena/${FEATURED_REPLAY_ARENA_ID}/proof`;
 
 const navigation = [
-  { label: "Live Arena", href: arenaHref },
+  { label: "Replay Arena", href: arenaHref },
   { label: "Agents", href: "/agents" },
   { label: "Replays", href: "/replays" },
   { label: "How it works", href: "/how-it-works" },

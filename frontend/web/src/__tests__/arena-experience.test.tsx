@@ -256,7 +256,7 @@ describe("Arena90 spectator experience", () => {
     );
 
     expect(await screen.findByText("DATA DELAYED")).toBeInTheDocument();
-    expect(screen.getByText("TXLINE_RECORDED")).toBeInTheDocument();
+    expect(screen.getAllByText("TXLINE_RECORDED").length).toBeGreaterThanOrEqual(1);
     expect(document.body).not.toHaveTextContent(/data live|live arena/i);
   });
 
@@ -278,6 +278,30 @@ describe("Arena90 spectator experience", () => {
     expect(screen.getByText(run.state.finalResult!.finalResultHash)).toBeInTheDocument();
     expect(screen.getByText(run.state.finalResult!.terminalEvidence.terminalEvidenceHash)).toBeInTheDocument();
     expect(screen.getByText("FINAL_NAV_ONLY_V1")).toBeInTheDocument();
+    expect(screen.getByLabelText("Final score 2 to 1 at 90 minutes")).toBeInTheDocument();
+    expect(screen.getAllByText("TXLINE_RECORDED").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("Final")).toBeInTheDocument();
+    expect(document.body).not.toHaveTextContent(/awaiting verified state|awaiting snapshot/i);
+  });
+
+  it("uses the latest committed checkpoint as proof after the active snapshot is cleared", async () => {
+    const run = revealedRun();
+    const checkpointSnapshot = run.state.checkpoints[0].snapshot!;
+    const state = {
+      ...run.state,
+      currentSnapshot: undefined,
+    } as PublicArenaStateV1;
+
+    render(
+      <ArenaExperience
+        arenaId={arenaId}
+        experience="proof"
+        transport={transportFor(state, run.events)}
+      />,
+    );
+
+    expect(await screen.findByText(checkpointSnapshot.snapshotHash)).toBeInTheDocument();
+    expect(screen.getByText("Latest checkpoint snapshot hash")).toBeInTheDocument();
   });
 
   it("fails closed when a Replay route receives a LIVE arena binding", async () => {

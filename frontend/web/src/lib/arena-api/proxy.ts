@@ -21,6 +21,19 @@ function unavailable() {
   );
 }
 
+function methodNotAllowed() {
+  return Response.json(
+    {
+      schemaVersion: 1,
+      error: { code: "INVALID_REQUEST", message: "Method not allowed" },
+    },
+    {
+      status: 405,
+      headers: { Allow: "GET", "Cache-Control": "no-store" },
+    },
+  );
+}
+
 function safeRuntimeOrigin(candidate?: string) {
   if (!candidate) return undefined;
   try {
@@ -45,6 +58,7 @@ export async function proxyArenaRequest(
   request: Request,
   options: ArenaProxyOptions = {},
 ) {
+  if (request.method.toUpperCase() !== "GET") return methodNotAllowed();
   const runtimeOrigin = safeRuntimeOrigin(options.runtimeOrigin);
   if (!runtimeOrigin) return unavailable();
 
@@ -62,14 +76,9 @@ export async function proxyArenaRequest(
   const target = `${runtimeOrigin}${incomingUrl.pathname}${incomingUrl.search}`;
   const fetcher = options.fetcher ?? fetch;
   try {
-    const method = request.method.toUpperCase();
-    const body = method === "GET" || method === "HEAD"
-      ? undefined
-      : await request.arrayBuffer();
     const upstream = await fetcher(target, {
-      method,
+      method: "GET",
       headers,
-      body,
       cache: "no-store",
       redirect: "manual",
       signal: request.signal,

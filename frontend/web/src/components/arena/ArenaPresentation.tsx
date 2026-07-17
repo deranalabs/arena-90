@@ -15,6 +15,7 @@ type ArenaScoreboardProps = {
   awayScore?: number;
   checkpoint?: string;
   freshness?: string;
+  scoreLabel?: string;
 };
 
 export function ArenaScoreboard({
@@ -32,6 +33,7 @@ export function ArenaScoreboard({
   awayScore,
   checkpoint,
   freshness,
+  scoreLabel,
 }: ArenaScoreboardProps) {
   const hasSnapshot = minute !== undefined && homeScore !== undefined && awayScore !== undefined;
 
@@ -51,7 +53,7 @@ export function ArenaScoreboard({
           <span>Home</span>
           <p className="arena-scoreboard__team-name" aria-hidden="true">{homeTeam}</p>
         </div>
-        <div className="arena-scoreboard__score" aria-label={hasSnapshot ? `${homeScore} to ${awayScore} at ${minute} minutes` : "Score unavailable"}>
+        <div className="arena-scoreboard__score" aria-label={hasSnapshot ? (scoreLabel ?? `${homeScore} to ${awayScore} at ${minute} minutes`) : "Score unavailable"}>
           <strong>{hasSnapshot ? `${homeScore}–${awayScore}` : "—"}</strong>
           <span>{hasSnapshot ? `${minute}′` : "Awaiting verified state"}</span>
         </div>

@@ -76,45 +76,22 @@ describe("Arena runtime same-origin proxy", () => {
     expect(await response.text()).toBe(frame);
   });
 
-  it("forwards POST method, query, JSON body, and allowlisted content headers", async () => {
-    const body = JSON.stringify({ requestedBy: "spectator" });
-    const fetcher = jest.fn().mockResolvedValue(
-      new Response(JSON.stringify({ status: "STARTED" }), {
-        status: 202,
-        headers: { "content-type": "application/json" },
-      }),
-    );
+  it("rejects public write methods without contacting the runtime", async () => {
+    const fetcher = jest.fn();
     const response = await proxyArenaRequest(
       new Request(
         "http://frontend.local/api/arenas/arena-replay-001/run?source=foundation",
         {
           method: "POST",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json; charset=utf-8",
-            "X-Internal-Mode": "LIVE",
-          },
-          body,
+          body: JSON.stringify({ requestedBy: "spectator" }),
         },
       ),
       { runtimeOrigin: "http://127.0.0.1:3100", fetcher },
     );
 
-    expect(response.status).toBe(202);
-    expect(fetcher).toHaveBeenCalledTimes(1);
-    const [target, init] = fetcher.mock.calls[0] as [string, RequestInit];
-    const headers = new Headers(init.headers);
-    expect(target).toBe(
-      "http://127.0.0.1:3100/api/arenas/arena-replay-001/run?source=foundation",
-    );
-    expect(init.method).toBe("POST");
-    expect(init.redirect).toBe("manual");
-    expect(new TextDecoder().decode(init.body as ArrayBuffer)).toBe(body);
-    expect(headers.get("accept")).toBe("application/json");
-    expect(headers.get("content-type")).toBe(
-      "application/json; charset=utf-8",
-    );
-    expect(headers.has("x-internal-mode")).toBe(false);
+    expect(response.status).toBe(405);
+    expect(response.headers.get("allow")).toBe("GET");
+    expect(fetcher).not.toHaveBeenCalled();
   });
 
   it("rejects upstream redirects instead of following or exposing them", async () => {

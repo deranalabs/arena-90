@@ -312,6 +312,14 @@ export function ArenaExperience({
       : `Agent ${state.finalResult.winner === "alpha" ? "Alpha" : "Beta"} wins`
     : undefined;
   const latestCheckpoint = state.checkpoints.at(-1);
+  const latestCheckpointSnapshot = [...state.checkpoints]
+    .reverse()
+    .find((checkpoint) => checkpoint.snapshot)?.snapshot;
+  const displaySnapshot = state.currentSnapshot ?? latestCheckpointSnapshot;
+  const terminalEvidence = state.finalResult?.terminalEvidence;
+  const displayMatch = state.currentSnapshot?.match ?? terminalEvidence?.match ?? displaySnapshot?.match;
+  const displaySource = state.currentSnapshot?.source ?? terminalEvidence?.source ?? displaySnapshot?.source;
+  const displayCheckpoint = state.currentSnapshot?.checkpointId ?? (terminalEvidence ? "Final" : displaySnapshot?.checkpointId);
   const labels = {
     HOME: state.manifest.homeTeam.name,
     DRAW: "Draw",
@@ -319,14 +327,14 @@ export function ArenaExperience({
     cash: "Cash",
   };
   const roundStatus = currentRoundStatus(state, session.events);
-  const freshness = state.currentSnapshot?.freshness;
+  const freshness = state.currentSnapshot?.freshness ?? displaySnapshot?.freshness;
   const freshnessLabel = freshness?.suspended
     ? "MARKET SUSPENDED"
     : freshness?.delayed
       ? "DATA DELAYED"
-      : state.currentSnapshot?.source === "TXLINE_LIVE"
+      : displaySource === "TXLINE_LIVE"
         ? "DATA LIVE"
-        : state.currentSnapshot
+        : displaySource
           ? "RECORDED DATA"
           : undefined;
   const alphaNav = BigInt(state.portfolios.alpha.navMicros);
@@ -344,19 +352,20 @@ export function ArenaExperience({
       aria-label={`Arena90 ${experience} ${arenaId}`}
     >
       <ArenaScoreboard
-        awayScore={state.currentSnapshot?.match.awayScore}
+        awayScore={displayMatch?.awayScore}
         awayTeam={state.manifest.awayTeam.name}
-        checkpoint={state.currentSnapshot?.checkpointId}
+        checkpoint={displayCheckpoint}
         connection={connectionMessage(session.status)}
         connectionWarning={session.status === "RECONNECTING"}
         eyebrow={experienceEyebrow(experience, state)}
         freshness={freshnessLabel}
-        homeScore={state.currentSnapshot?.match.homeScore}
+        homeScore={displayMatch?.homeScore}
         homeTeam={state.manifest.homeTeam.name}
-        minute={state.currentSnapshot?.match.minute}
+        minute={displayMatch?.minute}
         mode={state.manifest.mode}
         phase={state.phase}
-        source={state.currentSnapshot?.source}
+        scoreLabel={terminalEvidence ? `Final score ${terminalEvidence.match.homeScore} to ${terminalEvidence.match.awayScore} at ${terminalEvidence.match.minute} minutes` : undefined}
+        source={displaySource}
         statement={experience === "replay" ? "The match is recorded. The decisions are new." : undefined}
       />
 
@@ -539,7 +548,7 @@ export function ArenaExperience({
             <div><dt>Runtime version</dt><dd>{state.runtimeVersions.runtimeVersion}</dd></div>
             <div><dt>Execution rules</dt><dd>{state.runtimeVersions.executionRuleVersion}</dd></div>
             <div><dt>Winner rules</dt><dd>{state.runtimeVersions.winnerRuleVersion}</dd></div>
-            <div><dt>Current snapshot hash</dt><dd>{state.currentSnapshot?.snapshotHash ?? "No checkpoint snapshot yet"}</dd></div>
+            <div><dt>Latest checkpoint snapshot hash</dt><dd>{displaySnapshot?.snapshotHash ?? "No checkpoint snapshot committed"}</dd></div>
             <div><dt>Public events loaded</dt><dd>{session.events.length}</dd></div>
             {state.finalResult ? (
               <>

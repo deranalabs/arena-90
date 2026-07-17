@@ -17,7 +17,7 @@ describe("Arena90 site header", () => {
     expect(
       screen.getByRole("img", { name: "World Cup Hackathon 2026" }),
     ).toHaveAttribute("src", expect.stringContaining("wc-hackathon.png"));
-    expect(screen.getByRole("link", { name: "Live Arena" })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: "Replay Arena" })).toHaveAttribute(
       "href",
       "/arena/arena-replay-001",
     );

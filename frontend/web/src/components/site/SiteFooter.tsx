@@ -5,7 +5,7 @@ import { FEATURED_REPLAY_ARENA_ID } from "@/lib/featured-arena";
 
 const replayHref = `/arena/${FEATURED_REPLAY_ARENA_ID}/replay`;
 const navigation = [
-  { label: "Live Arena", href: `/arena/${FEATURED_REPLAY_ARENA_ID}` },
+  { label: "Replay Arena", href: `/arena/${FEATURED_REPLAY_ARENA_ID}` },
   { label: "Agents", href: "/agents" },
   { label: "Replays", href: "/replays" },
   { label: "How it works", href: "/how-it-works" },

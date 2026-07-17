@@ -1,15 +1,31 @@
-{$ARENA90_API_HOST} {
-  encode zstd gzip
+http://:3200 {
+	bind 127.0.0.1
+	encode zstd gzip
 
-  reverse_proxy 127.0.0.1:3100 {
-    flush_interval -1
-    transport http {
-      read_timeout 0
-    }
-  }
+	route {
+		@write_methods method POST PUT PATCH DELETE CONNECT TRACE
+		respond @write_methods 405
 
-  header {
-    X-Content-Type-Options nosniff
-    Referrer-Policy no-referrer
-  }
+		@public_reads {
+			method GET
+			path /health /ready /api/arenas/*
+		}
+		reverse_proxy @public_reads 127.0.0.1:3100 {
+			flush_interval -1
+			transport http {
+				read_timeout 0
+			}
+		}
+
+		respond 404
+	}
+
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		Referrer-Policy no-referrer
+		-Server
+	}
 }
