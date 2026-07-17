@@ -1,6 +1,13 @@
-import { describe, expect, it } from "vitest";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
-import type { TxlineProviderClient } from "../src/adapters/data/index.js";
+import { describe, expect, it, onTestFinished, vi } from "vitest";
+
+import {
+  TxlineDataError,
+  type TxlineProviderClient,
+} from "../src/adapters/data/index.js";
 import { CHECKPOINT_IDS } from "../src/contracts/index.js";
 import {
   classifyNodeHttpRuntimeFailure,
@@ -120,7 +127,295 @@ function replayFiles(
   });
 }
 
+const liveBinding = {
+  fixtureId: 18_185_036,
+  participant1Id: 101,
+  participant2Id: 202,
+  participant1IsHome: true,
+  startTime: Date.parse(manifest.kickoffUtc),
+} as const;
+
+const liveEnv = {
+  ARENA90_RUNTIME_MODE: "LIVE",
+  ARENA90_AUTOSTART: "true",
+  ARENA90_MANIFEST_FILE: "manifest.json",
+  ARENA90_LIVE_FIXTURE_BINDING_FILE: "binding.json",
+  ARENA90_LIVE_DELAYED: "false",
+  ARENA90_AGENT_TIMEOUT_MS: "1000",
+  TXLINE_CREDENTIALS_FILE: "txline-credentials.json",
+  TXLINE_TIMEOUT_MS: "1000",
+  TXLINE_MAX_RESPONSE_BYTES: "65536",
+  TXLINE_MAX_SSE_EVENTS: "100",
+} as const;
+
+function lockedLiveManifest(arenaId: string) {
+  return {
+    ...manifest,
+    arenaId,
+    mode: "LIVE" as const,
+    fixtureId: String(liveBinding.fixtureId),
+  };
+}
+
+function liveFiles(liveManifest: unknown) {
+  return fileReader({
+    "manifest.json": liveManifest,
+    "binding.json": liveBinding,
+    "txline-credentials.json": {
+      apiOrigin: "https://provider.example.test",
+      jwt: "configured-secret",
+      apiToken: "configured-secret",
+      network: "test",
+    },
+  });
+}
+
+function failingBootstrapClient(
+  error: TxlineDataError,
+  onFixtureCall: () => void,
+): TxlineProviderClient {
+  return {
+    async getFixtureSnapshot() {
+      onFixtureCall();
+      throw error;
+    },
+    async getOddsSnapshot() {
+      return [];
+    },
+    async getOddsUpdates() {
+      return [];
+    },
+    async getScoreSnapshot() {
+      return [];
+    },
+    async *getScoreStream() {},
+    async getHistoricalScoreReplay() {
+      return [];
+    },
+  };
+}
+
+function liveFixtureRow() {
+  return {
+    FixtureId: liveBinding.fixtureId,
+    Participant1Id: liveBinding.participant1Id,
+    Participant2Id: liveBinding.participant2Id,
+    Participant1IsHome: liveBinding.participant1IsHome,
+    StartTime: liveBinding.startTime,
+  };
+}
+
+function liveScoreEvent(
+  sequence: number,
+  statusId: number,
+  seconds: number | undefined,
+  action = "coverage_update",
+) {
+  return {
+    FixtureId: liveBinding.fixtureId,
+    Seq: sequence,
+    Id: sequence + 1,
+    Ts: liveBinding.startTime + sequence * 60_000,
+    Action: action,
+    StatusId: statusId,
+    ...(seconds === undefined
+      ? { Clock: undefined }
+      : { Clock: { Running: true, Seconds: seconds } }),
+    Stats: sequence === 6 ? { "1": 2, "2": 1 } : { "1": 0, "2": 0 },
+  };
+}
+
+function liveMarketRow(messageId: string) {
+  return {
+    FixtureId: liveBinding.fixtureId,
+    MessageId: messageId,
+    Ts: liveBinding.startTime + 5_000,
+    Bookmaker: "TXLineStablePriceDemargined",
+    BookmakerId: 10_021,
+    SuperOddsType: "1X2_PARTICIPANT_RESULT",
+    InRunning: true,
+    MarketPeriod: null,
+    MarketParameters: null,
+    PriceNames: ["part1", "draw", "part2"],
+    Pct: ["50.000", "30.000", "20.000"],
+  };
+}
+
+function completingLiveClient(
+  onCall: (operation: string) => void,
+  bootstrapSequence = 0,
+): TxlineProviderClient {
+  const allEvents = [
+    liveScoreEvent(0, 2, 2_700),
+    liveScoreEvent(1, 2, 1_800),
+    liveScoreEvent(2, 2, 900),
+    liveScoreEvent(3, 3, undefined, "halftime_finalised"),
+    liveScoreEvent(4, 4, 1_800),
+    liveScoreEvent(5, 4, 900),
+    liveScoreEvent(6, 5, undefined, "game_finalised"),
+  ];
+  const streamEvents = allEvents.filter(
+    (event) => event.Seq > bootstrapSequence,
+  );
+  let marketSequence = 0;
+  return {
+    async getFixtureSnapshot() {
+      onCall("provider:fixture");
+      return [liveFixtureRow()];
+    },
+    async getOddsSnapshot() {
+      onCall("provider:odds-snapshot");
+      return [];
+    },
+    async getOddsUpdates() {
+      onCall("provider:odds-updates");
+      marketSequence += 1;
+      return [liveMarketRow(`odds-${marketSequence}`)];
+    },
+    async getScoreSnapshot() {
+      onCall("provider:score-snapshot");
+      return [allEvents[bootstrapSequence]];
+    },
+    async *getScoreStream() {
+      onCall("provider:score-stream");
+      const event = streamEvents.shift();
+      if (event !== undefined) yield { data: event };
+    },
+    async getHistoricalScoreReplay() {
+      onCall("provider:historical");
+      return [];
+    },
+  };
+}
+
 describe("Node HTTP runtime composition", () => {
+  it("keeps LIVE supervised while retrying one transient provider timeout", async () => {
+    vi.useFakeTimers();
+    const liveManifest = lockedLiveManifest(
+      "arena-live-supervisor-retry-001",
+    );
+    let fixtureCalls = 0;
+    const client = {
+      async getFixtureSnapshot() {
+        fixtureCalls += 1;
+        if (fixtureCalls === 1) {
+          throw new TxlineDataError(
+            "PROVIDER_TIMEOUT",
+            "TxLINE provider request timed out",
+          );
+        }
+        return [liveFixtureRow()];
+      },
+      async getOddsSnapshot() {
+        return [];
+      },
+      async getOddsUpdates() {
+        return [];
+      },
+      async getScoreSnapshot() {
+        return [
+          {
+            FixtureId: liveBinding.fixtureId,
+            Seq: 0,
+            Id: 1,
+            Ts: liveBinding.startTime,
+            Action: "coverage_update",
+            StatusId: 1,
+            Stats: { "1": 0, "2": 0 },
+          },
+        ];
+      },
+      async *getScoreStream() {},
+      async getHistoricalScoreReplay() {
+        return [];
+      },
+    } satisfies TxlineProviderClient;
+    const store = testStore();
+    const composition = await createNodeHttpRuntimeComposition({
+      env: liveEnv,
+      readFile: liveFiles(liveManifest),
+      agents: { alpha: agent("alpha"), beta: agent("beta") },
+      store,
+      txlineClientFactory: () => client,
+    });
+
+    try {
+      const address = await composition.listen({ port: 0 });
+      await vi.waitFor(() => expect(fixtureCalls).toBe(1));
+      const supervisedReadiness = await fetch(
+        `http://${address.host}:${address.port}/ready`,
+      );
+      expect(supervisedReadiness.status).toBe(200);
+      await vi.advanceTimersByTimeAsync(5_000);
+
+      expect({ fixtureCalls, ready: composition.isReady() }).toEqual({
+        fixtureCalls: 2,
+        ready: true,
+      });
+      await expect(store.read(liveManifest.arenaId, 0)).resolves.toMatchObject({
+        state: { phase: "READY", checkpoints: [], lastEventSequence: 1 },
+      });
+    } finally {
+      await composition.shutdown();
+      vi.useRealTimers();
+    }
+  });
+
+  it("fails LIVE readiness without retrying provider authentication failure", async () => {
+    const liveManifest = lockedLiveManifest(
+      "arena-live-supervisor-auth-failure-001",
+    );
+    let fixtureCalls = 0;
+    const client = failingBootstrapClient(
+      new TxlineDataError(
+        "PROVIDER_AUTHENTICATION_FAILURE",
+        "TxLINE provider authentication failed",
+      ),
+      () => {
+        fixtureCalls += 1;
+      },
+    );
+    const composition = await createNodeHttpRuntimeComposition({
+      env: liveEnv,
+      readFile: liveFiles(liveManifest),
+      agents: { alpha: agent("alpha"), beta: agent("beta") },
+      store: testStore(),
+      txlineClientFactory: () => client,
+    });
+
+    try {
+      const address = await composition.listen({ port: 0 });
+      await vi.waitFor(() => expect(composition.isReady()).toBe(false));
+      const readiness = await fetch(
+        `http://${address.host}:${address.port}/ready`,
+      );
+
+      expect({
+        fixtureCalls,
+        ready: composition.isReady(),
+        readiness: {
+          status: readiness.status,
+          body: await readiness.json(),
+        },
+      }).toEqual({
+        fixtureCalls: 1,
+        ready: false,
+        readiness: {
+          status: 503,
+          body: {
+            schemaVersion: 1,
+            error: {
+              code: "NOT_READY",
+              message: "The arena runtime is not ready",
+            },
+          },
+        },
+      });
+    } finally {
+      await composition.shutdown();
+    }
+  });
+
   it("composes one locked Replay lifecycle and HTTP runtime without external calls", async () => {
     const composition = await createNodeHttpRuntimeComposition({
       env: replayEnv,
@@ -292,6 +587,59 @@ describe("Node HTTP runtime composition", () => {
     expect(composition.isReady()).toBe(false);
   });
 
+  it("does not report autostart readiness before canonical state is persisted", async () => {
+    const baseStore = testStore();
+    let markInitializeStarted!: () => void;
+    const initializeStarted = new Promise<void>((resolve) => {
+      markInitializeStarted = resolve;
+    });
+    let releaseInitialize!: () => void;
+    const initializeGate = new Promise<void>((resolve) => {
+      releaseInitialize = resolve;
+    });
+    const store = {
+      ...baseStore,
+      async initialize(
+        ...args: Parameters<typeof baseStore.initialize>
+      ): ReturnType<typeof baseStore.initialize> {
+        markInitializeStarted();
+        await initializeGate;
+        return baseStore.initialize(...args);
+      },
+    };
+    const composition = await createNodeHttpRuntimeComposition({
+      env: { ...replayEnv, ARENA90_AUTOSTART: "true" },
+      readFile: replayFiles(),
+      agents: {
+        alpha: noTradeAgent("alpha"),
+        beta: noTradeAgent("beta"),
+      },
+      store,
+    });
+
+    const listening = composition.listen({ port: 0 });
+    await initializeStarted;
+    const pendingAddress = composition.server.address();
+    if (typeof pendingAddress !== "object" || pendingAddress === null) {
+      throw new Error("Server was not listening during autostart initialization");
+    }
+    const pendingReadiness = await fetch(
+      `http://127.0.0.1:${pendingAddress.port}/ready`,
+    );
+    releaseInitialize();
+    const address = await listening;
+    const persistedReadiness = await fetch(
+      `http://${address.host}:${address.port}/ready`,
+    );
+
+    expect({
+      beforePersistence: pendingReadiness.status,
+      afterPersistence: persistedReadiness.status,
+    }).toEqual({ beforePersistence: 503, afterPersistence: 200 });
+
+    await composition.shutdown();
+  });
+
   it("autostarts a locked manifest without an HTTP create or run trigger", async () => {
     const store = testStore();
     const composition = await createNodeHttpRuntimeComposition({
@@ -347,6 +695,127 @@ describe("Node HTTP runtime composition", () => {
     });
 
     await composition.shutdown();
+  });
+
+  it("resumes a persisted LIVE checkpoint after runtime reconstruction without duplicate events", async () => {
+    const directory = await mkdtemp(join(tmpdir(), "arena90-http-restart-"));
+    onTestFinished(() => rm(directory, { recursive: true, force: true }));
+    const liveManifest = lockedLiveManifest("arena-live-http-restart-001");
+    const env = {
+      ...liveEnv,
+      ARENA90_PERSISTENCE_DIR: directory,
+    };
+    const firstProviderCalls: string[] = [];
+    let startedInvocations = 0;
+    let markBothStarted!: () => void;
+    const bothStarted = new Promise<void>((resolve) => {
+      markBothStarted = resolve;
+    });
+    const blockingAgent = (agentId: "alpha" | "beta") => ({
+      agentId,
+      invoke({ signal }: { signal: AbortSignal }) {
+        startedInvocations += 1;
+        if (startedInvocations === 2) markBothStarted();
+        return new Promise<never>((_resolve, reject) => {
+          const abort = () => reject(new Error("test invocation aborted"));
+          signal.addEventListener("abort", abort, { once: true });
+          if (signal.aborted) abort();
+        });
+      },
+    });
+    const first = await createNodeHttpRuntimeComposition({
+      env,
+      readFile: liveFiles(liveManifest),
+      agents: {
+        alpha: blockingAgent("alpha"),
+        beta: blockingAgent("beta"),
+      },
+      nowMs: () => liveBinding.startTime + 10_000,
+      txlineClientFactory: () =>
+        completingLiveClient((operation) => firstProviderCalls.push(operation)),
+    });
+
+    await first.listen({ port: 0 });
+    await bothStarted;
+    await first.shutdown();
+    const interrupted = await first.store.read(liveManifest.arenaId, 0);
+
+    const resumeTrace: string[] = [];
+    const resumed = await createNodeHttpRuntimeComposition({
+      env,
+      readFile: liveFiles(liveManifest),
+      agents: {
+        alpha: noTradeAgent("alpha"),
+        beta: noTradeAgent("beta"),
+      },
+      nowMs: () => liveBinding.startTime + 10_000,
+      observeAgentInvocation({ agentId, checkpointId }) {
+        resumeTrace.push(`agent:${agentId}:${checkpointId}`);
+      },
+      txlineClientFactory: () =>
+        completingLiveClient(
+          (operation) => resumeTrace.push(operation),
+          1,
+        ),
+    });
+
+    try {
+      await resumed.listen({ port: 0 });
+      let persisted = await resumed.store.read(liveManifest.arenaId, 0);
+      for (let attempt = 0; attempt < 100; attempt += 1) {
+        if (persisted !== "NOT_FOUND" && persisted.state.phase === "COMPLETED") {
+          break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 5));
+        persisted = await resumed.store.read(liveManifest.arenaId, 0);
+      }
+      if (persisted === "NOT_FOUND") throw new Error("Arena was not persisted");
+
+      expect({
+        interruptedPhase:
+          interrupted === "NOT_FOUND" ? interrupted : interrupted.state.phase,
+        resumedPhase: persisted.state.phase,
+        checkpoints: persisted.state.checkpoints.length,
+        checkpointSources: persisted.state.checkpoints.map(
+          ({ snapshot }) => snapshot?.source,
+        ),
+        firstProviderCalls,
+        firstResumedProviderIndex: resumeTrace.findIndex((item) =>
+          item.startsWith("provider:"),
+        ),
+        resumedKickoffCalls: resumeTrace.slice(0, 2).sort(),
+        eventSequences: persisted.events.map(({ sequence }) => sequence),
+        uniqueEventIds: new Set(
+          persisted.events.map(({ eventId }) => eventId),
+        ).size,
+        kickoffOpened: persisted.events.filter(
+          ({ checkpointId, type }) =>
+            checkpointId === "KICKOFF" && type === "CHECKPOINT_OPENED",
+        ).length,
+        completedEvents: persisted.events.filter(
+          ({ type }) => type === "COMPLETED",
+        ).length,
+      }).toEqual({
+        interruptedPhase: "RUNNING",
+        resumedPhase: "COMPLETED",
+        checkpoints: 6,
+        checkpointSources: Array.from({ length: 6 }, () => "TXLINE_LIVE"),
+        firstProviderCalls: [
+          "provider:fixture",
+          "provider:score-snapshot",
+          "provider:odds-snapshot",
+          "provider:odds-updates",
+        ],
+        firstResumedProviderIndex: 2,
+        resumedKickoffCalls: ["agent:alpha:KICKOFF", "agent:beta:KICKOFF"],
+        eventSequences: persisted.events.map((_event, index) => index + 1),
+        uniqueEventIds: persisted.events.length,
+        kickoffOpened: 1,
+        completedEvents: 1,
+      });
+    } finally {
+      await resumed.shutdown();
+    }
   });
 
   it("fails closed when LIVE autostart is explicitly disabled", async () => {

@@ -10,6 +10,7 @@ import type {
 import { createZeroClawAgentAdapter } from "../adapters/agents/zeroclaw.js";
 import { createRecordedDataAdapter } from "../adapters/data/recorded.js";
 import {
+  TxlineDataError,
   createTxlineProviderClientFromEnv,
   resolveTxlineCredentialEnvironment,
   type TxlineProviderClient,
@@ -56,6 +57,16 @@ export class NodeHttpRuntimeError extends Error {
 
 type Environment = Readonly<Record<string, string | undefined>>;
 type TextFileReader = (path: string) => Promise<string>;
+
+const MANAGED_RUN_RETRY_INTERVAL_MS = 5_000;
+
+function isRetryableManagedRunFailure(error: unknown): boolean {
+  return (
+    error instanceof TxlineDataError &&
+    (error.code === "PROVIDER_TIMEOUT" ||
+      error.code === "PROVIDER_NETWORK_FAILURE")
+  );
+}
 
 export interface CreateNodeHttpRuntimeCompositionOptions {
   readonly env?: Environment;
@@ -459,20 +470,34 @@ export async function createNodeHttpRuntimeComposition(
     const controller = new AbortController();
     await supporterSupervisor?.prepare(manifest, controller.signal);
     await lifecycle.runner.create(manifest);
-    const promise = lifecycle.runner
-      .run(manifest.arenaId, controller.signal)
-      .then(async (state) => {
-        if (state.phase === "COMPLETED" && state.finalResult !== undefined) {
-          await supporterSupervisor?.settle(
-            state.manifest,
-            state.finalResult,
+    ready = true;
+    const promise = (async () => {
+      while (!controller.signal.aborted) {
+        try {
+          const state = await lifecycle.runner.run(
+            manifest.arenaId,
             controller.signal,
           );
+          if (state.phase === "COMPLETED" && state.finalResult !== undefined) {
+            await supporterSupervisor?.settle(
+              state.manifest,
+              state.finalResult,
+              controller.signal,
+            );
+          }
+          return;
+        } catch (error) {
+          if (controller.signal.aborted) return;
+          if (!isRetryableManagedRunFailure(error)) {
+            ready = false;
+            return;
+          }
+          // Always-on supervision keeps retry count open, while each provider
+          // operation and the delay between attempts remain bounded.
+          await abortableWait(MANAGED_RUN_RETRY_INTERVAL_MS, controller.signal);
         }
-      })
-      .catch(() => {
-        if (!controller.signal.aborted) ready = false;
-      });
+      }
+    })();
     managedRun = Object.freeze({ controller, promise });
   }
 
@@ -499,6 +524,7 @@ export async function createNodeHttpRuntimeComposition(
       ) {
         throw new NodeHttpRuntimeError("LISTEN_FAILURE");
       }
+      if (autostart) ready = false;
       await new Promise<void>((resolve, reject) => {
         const onError = () => {
           server.off("listening", onListening);
