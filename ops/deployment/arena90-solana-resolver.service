@@ -1,0 +1,27 @@
+[Unit]
+Description=Arena90 Solana supporter resolver
+After=network-online.target arena90-runtime.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=derana
+Group=derana
+WorkingDirectory=/home/derana/apps/arena90-solana/current/resolver
+EnvironmentFile=/home/derana/apps/arena90-solana/shared/resolver.env
+ExecStart=/home/derana/apps/arena90/toolchains/node-v22.23.0-linux-x64/bin/node dist/src/main.js
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+KillSignal=SIGTERM
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+UMask=0077
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=arena90-solana-resolver
+
+[Install]
+WantedBy=multi-user.target

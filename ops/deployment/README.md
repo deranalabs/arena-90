@@ -16,6 +16,11 @@ Caddy read-only seam (loopback :3200, GET only)
       |
       v
 Vercel same-origin gateway --> browser
+
+VPS Solana resolver (separate process + key)
+      |-- reads canonical runtime persistence
+      |-- prepares and locks supporter arena
+      `-- TxLINE proof + canonical result --> Anchor devnet settlement
 ```
 
 The browser sees only Vercel. Vercel forwards allowlisted GET requests to the
@@ -26,6 +31,11 @@ is not: after systemd starts the configured service, the supervisor creates or
 resumes the locked arena, waits for TxLINE checkpoints, invokes both agents,
 reveals and executes decisions, and finalizes without browser traffic or
 routine operator commands.
+
+The Solana resolver is a separate systemd service. Its resolver key is never
+present in the runtime, ZeroClaw, frontend, public Action service, or immutable
+runtime release. It reads the same atomic runtime persistence and retries
+idempotent prepare, lock, proof, and settlement operations.
 
 ## Preflight
 
