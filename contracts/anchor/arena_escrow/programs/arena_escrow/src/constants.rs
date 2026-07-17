@@ -14,4 +14,5 @@ pub const VALIDATE_STAT_V2_DISCRIMINATOR: [u8; 8] = [208, 215, 194, 214, 241, 71
 
 pub const HOME_SCORE_KEY: u32 = 1;
 pub const AWAY_SCORE_KEY: u32 = 2;
-pub const FULL_TIME_PERIOD: i32 = 100;
+// TxLINE devnet game_finalised score proofs encode the terminal period as 5.
+pub const FULL_TIME_PERIOD: i32 = 5;

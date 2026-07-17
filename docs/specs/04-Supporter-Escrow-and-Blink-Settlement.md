@@ -103,8 +103,8 @@ Permissionless proof submission for a locked arena. The program:
 2. requires a TxLINE-owned `daily_scores_roots` PDA;
 3. accepts only `validate_stat_v2` terminal-score validation;
 4. requires the payload fixture ID to equal the Arena fixture ID;
-5. requires exactly score keys `1` and `2`, nonnegative values, and period
-   `100` for both final score leaves;
+5. requires exactly score keys `1` and `2`, nonnegative values, and TxLINE
+   terminal period `5` for both final score leaves;
 6. constructs equality predicates internally rather than trusting a caller's
    arbitrary strategy;
 7. invokes TxLINE and accepts only return data from TxLINE encoding `true`;
