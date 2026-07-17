@@ -293,10 +293,11 @@ button {
   background: var(--arena-raised);
   box-shadow:
     inset 0.2rem 0 var(--arena-alpha),
-    inset -0.2rem 0 var(--arena-beta);
+    inset -0.2rem 0 var(--arena-beta),
+    0 4px 12px rgba(0, 0, 0, 0.2);
   color: var(--arena-text);
   font-weight: 700;
-  transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+  transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
 }
 
 .site-header__cta span {
@@ -308,6 +309,10 @@ button {
   border-color: var(--arena-replay);
   background: var(--arena-surface);
   transform: translateY(-1px);
+  box-shadow:
+    inset 0.2rem 0 var(--arena-alpha),
+    inset -0.2rem 0 var(--arena-beta),
+    0 6px 16px rgba(0, 0, 0, 0.3);
 }
 
 .site-header__cta:hover span {
@@ -2470,10 +2475,37 @@ body:has(.arena-experience) {
   padding: var(--space-2xl) 0 0;
 }
 
+.home-broadcast-hero::before {
+  content: "";
+  position: absolute;
+  top: -20%;
+  left: 10%;
+  width: 50vw;
+  height: 50vw;
+  background: radial-gradient(circle, var(--arena-alpha) 0%, transparent 60%);
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 0;
+}
+
 .home-broadcast-hero__copy {
+  position: relative;
+  z-index: 1;
   min-width: 0;
   grid-row: 1;
   grid-column: 1;
+  animation: fadeUp var(--dur-long) var(--ease-out) both;
+}
+
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .home-broadcast-hero__copy h1,
