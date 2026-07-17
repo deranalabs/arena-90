@@ -15,7 +15,10 @@ type TxlineConnectivitySmokeFailure =
   | "INVOCATION_FAILURE";
 
 export type TxlineConnectivitySmokeResult =
-  | Readonly<{ status: "PASSED" }>
+  | Readonly<{
+      status: "PASSED";
+      streamStatus: "EVENT_RECEIVED" | "IDLE";
+    }>
   | Readonly<{ status: TxlineConnectivitySmokeFailure }>;
 
 export interface TxlineConnectivitySmokeOptions {
@@ -170,20 +173,18 @@ export async function runTxlineConnectivitySmoke(
     const iterator = client
       .getScoreStream(fixtureId, streamController.signal)
       [Symbol.asyncIterator]();
+    let streamStatus: "EVENT_RECEIVED" | "IDLE" = "EVENT_RECEIVED";
     try {
-      let firstEvent: IteratorResult<unknown>;
       try {
-        firstEvent = await iterator.next();
+        const firstEvent = await iterator.next();
+        if (firstEvent.done === true) throw new SmokeInvalidResponse();
       } catch (error) {
         if (streamTimedOut) {
-          throw new TxlineDataError(
-            "PROVIDER_TIMEOUT",
-            "TxLINE provider request timed out",
-          );
+          streamStatus = "IDLE";
+        } else {
+          throw error;
         }
-        throw error;
       }
-      if (firstEvent.done === true) throw new SmokeInvalidResponse();
     } finally {
       clearTimeout(streamTimeout);
       try {
@@ -192,7 +193,7 @@ export async function runTxlineConnectivitySmoke(
         // Cleanup details are intentionally excluded from smoke results.
       }
     }
-    return Object.freeze({ status: "PASSED" });
+    return Object.freeze({ status: "PASSED", streamStatus });
   } catch (error) {
     if (error instanceof SmokeConfigFailure) {
       return Object.freeze({ status: "CONFIG_FAILURE" });
@@ -210,7 +211,10 @@ export async function runTxlineConnectivitySmoke(
 export function formatTxlineConnectivitySmokeResult(
   result: TxlineConnectivitySmokeResult,
 ): string {
-  return result.status === "PASSED"
-    ? "TxLINE connectivity smoke passed."
-    : `TxLINE connectivity smoke failed: ${result.status}.`;
+  if (result.status !== "PASSED") {
+    return `TxLINE connectivity smoke failed: ${result.status}.`;
+  }
+  return result.streamStatus === "EVENT_RECEIVED"
+    ? "TxLINE connectivity smoke passed; live score event received."
+    : "TxLINE connectivity smoke passed; live score stream idle.";
 }

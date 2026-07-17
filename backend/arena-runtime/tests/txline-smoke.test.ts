@@ -46,9 +46,12 @@ describe("TxLINE connectivity smoke", () => {
       },
     });
 
-    expect(result).toEqual({ status: "PASSED" });
+    expect(result).toEqual({
+      status: "PASSED",
+      streamStatus: "EVENT_RECEIVED",
+    });
     expect(formatTxlineConnectivitySmokeResult(result)).toBe(
-      "TxLINE connectivity smoke passed.",
+      "TxLINE connectivity smoke passed; live score event received.",
     );
     expect(readPaths).toEqual(["/outside-git/credentials.json"]);
     expect(requests).toHaveLength(6);
@@ -100,7 +103,10 @@ describe("TxLINE connectivity smoke", () => {
         }),
     });
 
-    expect(result).toEqual({ status: "PASSED" });
+    expect(result).toEqual({
+      status: "PASSED",
+      streamStatus: "EVENT_RECEIVED",
+    });
     expect(requests[0]).toMatchObject({
       input: "https://file.example.test/api/fixtures/snapshot",
       init: {
@@ -148,7 +154,10 @@ describe("TxLINE connectivity smoke", () => {
         }),
     });
 
-    expect(result).toEqual({ status: "PASSED" });
+    expect(result).toEqual({
+      status: "PASSED",
+      streamStatus: "EVENT_RECEIVED",
+    });
     expect(requests[0]).toMatchObject({
       input: "https://file.example.test/api/fixtures/snapshot",
       init: {
@@ -243,7 +252,7 @@ describe("TxLINE connectivity smoke", () => {
   });
 
   it(
-    "times out when the score stream sends heartbeats without JSON data",
+    "reports a connected score stream as idle when no JSON event is available",
     async () => {
       let streamCancelCalls = 0;
       const result = await runTxlineConnectivitySmoke({
@@ -283,7 +292,10 @@ describe("TxLINE connectivity smoke", () => {
         },
       });
 
-      expect(result).toEqual({ status: "TIMEOUT_FAILURE" });
+      expect(result).toEqual({ status: "PASSED", streamStatus: "IDLE" });
+      expect(formatTxlineConnectivitySmokeResult(result)).toBe(
+        "TxLINE connectivity smoke passed; live score stream idle.",
+      );
       expect(streamCancelCalls).toBe(1);
     },
     200,

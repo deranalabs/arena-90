@@ -37,12 +37,12 @@
   },
   "scripts": {
     "build": "tsc --project tsconfig.json --noEmit && tsc --project tsconfig.build.json",
-    "start:http": "npm run build && node scripts/http-server.mjs",
-    "preflight:acceptance": "node scripts/acceptance-preflight.mjs",
-    "smoke:http:replay": "npm run build && node scripts/http-replay-smoke.mjs",
-    "smoke:lifecycle:replay": "npm run build && node scripts/lifecycle-replay-smoke.mjs",
-    "smoke:txline": "npm run build && node scripts/txline-smoke.mjs",
-    "smoke:zeroclaw": "npm run build && node scripts/zeroclaw-smoke.mjs",
+    "start:http": "npm run build && node --env-file-if-exists=.env scripts/http-server.mjs",
+    "preflight:acceptance": "node --env-file-if-exists=.env scripts/acceptance-preflight.mjs",
+    "smoke:http:replay": "npm run build && node --env-file-if-exists=.env scripts/http-replay-smoke.mjs",
+    "smoke:lifecycle:replay": "npm run build && node --env-file-if-exists=.env scripts/lifecycle-replay-smoke.mjs",
+    "smoke:txline": "npm run build && node --env-file-if-exists=.env scripts/txline-smoke.mjs",
+    "smoke:zeroclaw": "npm run build && node --env-file-if-exists=.env scripts/zeroclaw-smoke.mjs",
     "test": "vitest run"
   },
   "dependencies": {
