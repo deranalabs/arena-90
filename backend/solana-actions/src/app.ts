@@ -112,8 +112,13 @@ export function createApp(
   });
 
   app.get("/actions.json", (_request, response) => {
+    const arenaPagePath = new URL(config.arenaPageUrl).pathname;
     response.json({
       rules: [
+        {
+          pathPattern: arenaPagePath,
+          apiPath: `/actions/arena/${config.arenaAddress.toBase58()}`,
+        },
         {
           pathPattern: "/actions/arena/**",
           apiPath: "/actions/arena/**",

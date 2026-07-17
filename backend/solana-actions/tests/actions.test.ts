@@ -137,6 +137,10 @@ test("serves spec CORS and actions.json to every Blink client", async () => {
   const manifest = await request(app).get("/actions.json").expect(200);
   assert.equal(manifest.headers["access-control-allow-origin"], "*");
   assert.deepEqual(manifest.body.rules, [
+    {
+      pathPattern: "/arena/world-cup-final",
+      apiPath: `/actions/arena/${arena.toBase58()}`,
+    },
     { pathPattern: "/actions/arena/**", apiPath: "/actions/arena/**" },
   ]);
 });

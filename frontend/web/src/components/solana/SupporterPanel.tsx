@@ -72,6 +72,19 @@ function validTransactionAction(
   }
 }
 
+function canonicalArenaPage(metadata: ActionMetadata | undefined, origin: string) {
+  const link = metadata?.links?.actions?.find((candidate) => candidate.type === "external-link");
+  if (!link) return undefined;
+  try {
+    const href = new URL(link.href);
+    return href.origin === origin && href.pathname.startsWith("/arena/")
+      ? href.toString()
+      : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export function SupporterPanel({
   arenaAddress,
   backingDeadlineUtc,
@@ -272,7 +285,7 @@ export function SupporterPanel({
     }
   }
 
-  const blinkUrl = `https://dial.to/?action=solana-action:${encodeURIComponent(actionUrl)}&cluster=devnet`;
+  const blinkUrl = canonicalArenaPage(metadata, origin);
   const busy = status === "CONNECTING" || status === "SUBMITTING" || status === "VERIFYING";
   const backingDisabled = busy || Boolean(record) || Boolean(review) || deadlinePassed;
 
@@ -314,7 +327,9 @@ export function SupporterPanel({
         <button disabled={backingDisabled || !actions.beta} onClick={() => void prepareBack("beta")} type="button">
           Back Beta
         </button>
-        <a href={blinkUrl} rel="noreferrer" target="_blank">Open public Blink ↗</a>
+        {blinkUrl ? (
+          <a href={blinkUrl} rel="noreferrer" target="_blank">Share public Blink ↗</a>
+        ) : null}
       </div>
       {review ? (
         <div className="supporter-panel__review">

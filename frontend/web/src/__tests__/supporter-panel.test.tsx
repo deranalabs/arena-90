@@ -36,6 +36,11 @@ function actionResponse() {
           href: `https://arena90.xyz/actions/arena/${arenaAddress}/back/beta?amount={amount}`,
           label: "Back Beta",
         },
+        {
+          type: "external-link",
+          href: "https://arena90.xyz/arena/world-cup-final",
+          label: "View Arena",
+        },
       ],
     },
   };
@@ -76,9 +81,9 @@ describe("SupporterPanel", () => {
       expect(screen.getByRole("button", { name: "Back Alpha" })).toBeEnabled();
     });
     expect(screen.getByRole("button", { name: "Back Beta" })).toBeEnabled();
-    expect(screen.getByRole("link", { name: /open public blink/i })).toHaveAttribute(
+    expect(screen.getByRole("link", { name: /share public blink/i })).toHaveAttribute(
       "href",
-      expect.stringContaining(encodeURIComponent(`https://arena90.xyz/actions/arena/${arenaAddress}`)),
+      "https://arena90.xyz/arena/world-cup-final",
     );
     expect(document.body).toHaveTextContent(/wallet-free watching/i);
   });
