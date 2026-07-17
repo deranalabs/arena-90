@@ -1,0 +1,28 @@
+[Unit]
+Description=Arena90 V2 runtime
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=derana
+Group=derana
+WorkingDirectory=/home/derana/apps/arena90/current
+EnvironmentFile=/home/derana/apps/arena90/shared/runtime.env
+ExecStart=/home/derana/apps/arena90/toolchains/node-v22.23.0-linux-x64/bin/node scripts/http-server.mjs
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+KillSignal=SIGTERM
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/derana/apps/arena90/shared/persistence
+UMask=0077
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=arena90-runtime
+
+[Install]
+WantedBy=multi-user.target

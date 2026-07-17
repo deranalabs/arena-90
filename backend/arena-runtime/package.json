@@ -36,7 +36,9 @@
     }
   },
   "scripts": {
-    "build": "tsc --project tsconfig.json --noEmit && tsc --project tsconfig.build.json",
+    "clean": "node scripts/clean-build.mjs",
+    "build": "npm run clean && tsc --project tsconfig.json --noEmit && tsc --project tsconfig.build.json",
+    "release:build": "npm run build && node scripts/build-release.mjs",
     "start:http": "npm run build && node --env-file-if-exists=.env scripts/http-server.mjs",
     "preflight:acceptance": "node --env-file-if-exists=.env scripts/acceptance-preflight.mjs",
     "smoke:http:replay": "npm run build && node --env-file-if-exists=.env scripts/http-replay-smoke.mjs",

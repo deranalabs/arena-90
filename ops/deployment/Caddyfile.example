@@ -1,0 +1,15 @@
+{$ARENA90_API_HOST} {
+  encode zstd gzip
+
+  reverse_proxy 127.0.0.1:3100 {
+    flush_interval -1
+    transport http {
+      read_timeout 0
+    }
+  }
+
+  header {
+    X-Content-Type-Options nosniff
+    Referrer-Policy no-referrer
+  }
+}

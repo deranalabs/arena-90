@@ -33,6 +33,7 @@ next-env.d.ts
 dist/
 build/
 coverage/
+releases/
 
 # Runtime source must stay TypeScript-only
 backend/arena-runtime/src/**/*.js
