@@ -23,6 +23,10 @@ export {
   TxlineHttpStatusError,
 } from "./domain.js";
 export { createTxlineProviderClient } from "./client.js";
+export {
+  resolveTxlineCredentialEnvironment,
+  type TxlineEnvironment,
+} from "./credential-environment.js";
 export { createTxlineLiveDataAdapter } from "./live.js";
 export {
   createTxlineNodeTransports,

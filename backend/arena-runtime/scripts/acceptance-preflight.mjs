@@ -71,59 +71,73 @@ if (
 await readableDirectory("ZEROCLAW_CONFIG_DIR");
 await writableDirectory("ARENA90_PERSISTENCE_DIR");
 await readableFile("ARENA90_MANIFEST_FILE");
-await readableFile("ARENA90_REPLAY_RECORDING_FILE");
 positiveInteger("ARENA90_AGENT_TIMEOUT_MS");
-optionalPositiveInteger("ARENA90_REPLAY_SMOKE_TIMEOUT_MS");
 optionalPositiveInteger("ARENA90_HTTP_SMOKE_TIMEOUT_MS");
 
-if (env.ARENA90_RUNTIME_MODE !== "REPLAY") {
+const mode = env.ARENA90_RUNTIME_MODE;
+if (mode !== "REPLAY" && mode !== "LIVE") {
   blockers.add("ARENA90_RUNTIME_MODE");
 }
-if (
-  env.ARENA90_HTTP_SMOKE_MODE !== undefined &&
-  env.ARENA90_HTTP_SMOKE_MODE !== "PRODUCT_ACCEPTANCE" &&
-  env.ARENA90_HTTP_SMOKE_MODE !== "CLEAN_SHOWCASE"
-) {
-  blockers.add("ARENA90_HTTP_SMOKE_MODE");
-}
+if (env.ARENA90_AUTOSTART !== "true") blockers.add("ARENA90_AUTOSTART");
 
-const credentialFile = env.TXLINE_CREDENTIALS_FILE;
-if (credentialFile === undefined || credentialFile.trim() === "") {
-  nonblank("TXLINE_BASE_URL");
-  nonblank("TXLINE_JWT");
-  nonblank("TXLINE_API_TOKEN");
-} else {
-  await readableFile("TXLINE_CREDENTIALS_FILE");
-  try {
-    const parsed = JSON.parse(await readFile(credentialFile, "utf8"));
-    if (
-      typeof parsed !== "object" ||
-      parsed === null ||
-      Array.isArray(parsed) ||
-      !["apiOrigin", "jwt", "apiToken"].every((key) => {
-        const explicit =
-          key === "apiOrigin"
-            ? env.TXLINE_BASE_URL
-            : key === "jwt"
-              ? env.TXLINE_JWT
-              : env.TXLINE_API_TOKEN;
-        const fileValue = parsed[key];
-        return (
-          (typeof explicit === "string" && explicit.trim() !== "") ||
-          (typeof fileValue === "string" && fileValue.trim() !== "")
-        );
-      })
-    ) {
-      blockers.add("TXLINE_CREDENTIALS_FILE");
-    }
-  } catch {
-    blockers.add("TXLINE_CREDENTIALS_FILE");
+if (mode === "REPLAY") {
+  await readableFile("ARENA90_REPLAY_RECORDING_FILE");
+  optionalPositiveInteger("ARENA90_REPLAY_SMOKE_TIMEOUT_MS");
+  if (
+    env.ARENA90_HTTP_SMOKE_MODE !== undefined &&
+    env.ARENA90_HTTP_SMOKE_MODE !== "PRODUCT_ACCEPTANCE" &&
+    env.ARENA90_HTTP_SMOKE_MODE !== "CLEAN_SHOWCASE"
+  ) {
+    blockers.add("ARENA90_HTTP_SMOKE_MODE");
   }
 }
-positiveInteger("TXLINE_TIMEOUT_MS");
-positiveInteger("TXLINE_MAX_RESPONSE_BYTES");
-positiveInteger("TXLINE_MAX_SSE_EVENTS");
-positiveInteger("TXLINE_FIXTURE_ID");
+
+if (mode === "LIVE") {
+  await readableFile("ARENA90_LIVE_FIXTURE_BINDING_FILE");
+  if (
+    env.ARENA90_LIVE_DELAYED !== "true" &&
+    env.ARENA90_LIVE_DELAYED !== "false"
+  ) {
+    blockers.add("ARENA90_LIVE_DELAYED");
+  }
+
+  const credentialFile = env.TXLINE_CREDENTIALS_FILE;
+  if (credentialFile === undefined || credentialFile.trim() === "") {
+    nonblank("TXLINE_BASE_URL");
+    nonblank("TXLINE_JWT");
+    nonblank("TXLINE_API_TOKEN");
+  } else {
+    await readableFile("TXLINE_CREDENTIALS_FILE");
+    try {
+      const parsed = JSON.parse(await readFile(credentialFile, "utf8"));
+      if (
+        typeof parsed !== "object" ||
+        parsed === null ||
+        Array.isArray(parsed) ||
+        !["apiOrigin", "jwt", "apiToken"].every((key) => {
+          const explicit =
+            key === "apiOrigin"
+              ? env.TXLINE_BASE_URL
+              : key === "jwt"
+                ? env.TXLINE_JWT
+                : env.TXLINE_API_TOKEN;
+          const fileValue = parsed[key];
+          return (
+            (typeof explicit === "string" && explicit.trim() !== "") ||
+            (typeof fileValue === "string" && fileValue.trim() !== "")
+          );
+        })
+      ) {
+        blockers.add("TXLINE_CREDENTIALS_FILE");
+      }
+    } catch {
+      blockers.add("TXLINE_CREDENTIALS_FILE");
+    }
+  }
+  positiveInteger("TXLINE_TIMEOUT_MS");
+  positiveInteger("TXLINE_MAX_RESPONSE_BYTES");
+  positiveInteger("TXLINE_MAX_SSE_EVENTS");
+}
 
 if (blockers.size === 0) {
   console.log("Arena90 acceptance preflight: PASSED.");

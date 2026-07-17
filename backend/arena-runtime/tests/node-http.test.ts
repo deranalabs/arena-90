@@ -73,6 +73,25 @@ function agent(agentId: "alpha" | "beta") {
   };
 }
 
+function noTradeAgent(agentId: "alpha" | "beta") {
+  return {
+    agentId,
+    async invoke(request: {
+      snapshot: { arenaId: string; snapshotId: string; checkpointId: string };
+    }) {
+      return {
+        schemaVersion: 1,
+        arenaId: request.snapshot.arenaId,
+        snapshotId: request.snapshot.snapshotId,
+        checkpointId: request.snapshot.checkpointId,
+        agentId,
+        action: "NO_TRADE",
+        publicExplanation: "No supported edge in the supplied evidence.",
+      };
+    },
+  };
+}
+
 function testStore() {
   return createInMemoryArenaLifecycleStore({ nowMs: Date.now });
 }
@@ -184,9 +203,7 @@ describe("Node HTTP runtime composition", () => {
         ARENA90_LIVE_FIXTURE_BINDING_FILE: "binding.json",
         ARENA90_LIVE_DELAYED: "false",
         ARENA90_AGENT_TIMEOUT_MS: "1000",
-        TXLINE_BASE_URL: "https://provider.example.test",
-        TXLINE_JWT: "configured-secret",
-        TXLINE_API_TOKEN: "configured-secret",
+        TXLINE_CREDENTIALS_FILE: "txline-credentials.json",
         TXLINE_TIMEOUT_MS: "1000",
         TXLINE_MAX_RESPONSE_BYTES: "65536",
         TXLINE_MAX_SSE_EVENTS: "100",
@@ -194,6 +211,12 @@ describe("Node HTTP runtime composition", () => {
       readFile: fileReader({
         "manifest.json": liveManifest,
         "binding.json": binding,
+        "txline-credentials.json": {
+          apiOrigin: "https://provider.example.test",
+          jwt: "configured-secret",
+          apiToken: "configured-secret",
+          network: "test",
+        },
       }),
       agents: { alpha: agent("alpha"), beta: agent("beta") },
       store: testStore(),
@@ -267,6 +290,74 @@ describe("Node HTTP runtime composition", () => {
 
     await firstShutdown;
     expect(composition.isReady()).toBe(false);
+  });
+
+  it("autostarts a locked manifest without an HTTP create or run trigger", async () => {
+    const store = testStore();
+    const composition = await createNodeHttpRuntimeComposition({
+      env: { ...replayEnv, ARENA90_AUTOSTART: "true" },
+      readFile: replayFiles(),
+      agents: {
+        alpha: noTradeAgent("alpha"),
+        beta: noTradeAgent("beta"),
+      },
+      store,
+    });
+
+    const address = await composition.listen({ port: 0 });
+    const mutationResponse = await fetch(
+      `http://${address.host}:${address.port}/api/arenas/${manifest.arenaId}/run`,
+      { method: "POST" },
+    );
+    let persisted = await store.read(manifest.arenaId, 0);
+    for (let attempt = 0; attempt < 50; attempt += 1) {
+      if (persisted !== "NOT_FOUND" && persisted.state.phase === "COMPLETED") break;
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      persisted = await store.read(manifest.arenaId, 0);
+    }
+
+    expect({
+      mutationStatus: mutationResponse.status,
+      state:
+        persisted === "NOT_FOUND"
+          ? persisted
+          : {
+              phase: persisted.state.phase,
+              checkpoints: persisted.state.checkpoints.length,
+              finalResult: persisted.state.finalResult?.winningAssetId,
+              strategies: {
+                alpha: persisted.state.runtimeMetadata.agents.alpha.strategyId,
+                beta: persisted.state.runtimeMetadata.agents.beta.strategyId,
+                version:
+                  persisted.state.runtimeMetadata.agents.alpha.strategyVersion,
+              },
+            },
+    }).toEqual({
+      mutationStatus: 404,
+      state: {
+        phase: "COMPLETED",
+        checkpoints: 6,
+        finalResult: "HOME",
+        strategies: {
+          alpha: "alpha-overreaction-hunter",
+          beta: "beta-underreaction-hunter",
+          version: "3",
+        },
+      },
+    });
+
+    await composition.shutdown();
+  });
+
+  it("fails closed when LIVE autostart is explicitly disabled", async () => {
+    await expect(
+      createNodeHttpRuntimeComposition({
+        env: {
+          ARENA90_RUNTIME_MODE: "LIVE",
+          ARENA90_AUTOSTART: "false",
+        },
+      }),
+    ).rejects.toMatchObject({ category: "CONFIG_FAILURE" });
   });
 
   it("fails closed for ambiguous mode and incompatible locked Replay inputs", async () => {

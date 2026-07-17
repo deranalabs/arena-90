@@ -1,5 +1,6 @@
 import type { TxlineDataErrorCode } from "./domain.js";
 import { TxlineDataError } from "./domain.js";
+import { resolveTxlineCredentialEnvironment } from "./credential-environment.js";
 import { createTxlineProviderClientFromEnv } from "./node.js";
 
 type TxlineConnectivitySmokeFailure =
@@ -29,55 +30,6 @@ export interface TxlineConnectivitySmokeOptions {
 
 class SmokeConfigFailure extends Error {}
 class SmokeInvalidResponse extends Error {}
-
-function validExplicitPath(value: string): boolean {
-  return (
-    value !== "" &&
-    value.trim() === value &&
-    !/[\u0000-\u001f\u007f]/.test(value)
-  );
-}
-
-async function resolveSmokeEnvironment(
-  env: Readonly<Record<string, string | undefined>>,
-  readFile: (path: string) => Promise<string>,
-): Promise<Readonly<Record<string, string | undefined>>> {
-  const path = env["TXLINE_CREDENTIALS_FILE"];
-  if (path === undefined || path === "") return env;
-  if (!validExplicitPath(path)) throw new SmokeConfigFailure();
-
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(await readFile(path)) as unknown;
-  } catch {
-    throw new SmokeConfigFailure();
-  }
-  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-    throw new SmokeConfigFailure();
-  }
-
-  const record = parsed as Record<string, unknown>;
-  const mapped = [
-    ["apiOrigin", "TXLINE_BASE_URL"],
-    ["jwt", "TXLINE_JWT"],
-    ["apiToken", "TXLINE_API_TOKEN"],
-  ] as const;
-  const resolved: Record<string, string | undefined> = { ...env };
-  for (const [fileKey, environmentKey] of mapped) {
-    const value = record[fileKey];
-    if (value !== undefined && typeof value !== "string") {
-      throw new SmokeConfigFailure();
-    }
-    if (
-      (resolved[environmentKey] === undefined ||
-        resolved[environmentKey] === "") &&
-      value !== undefined
-    ) {
-      resolved[environmentKey] = value;
-    }
-  }
-  return resolved;
-}
 
 function fixtureIdFromEnvironment(
   env: Readonly<Record<string, string | undefined>>,
@@ -138,10 +90,15 @@ export async function runTxlineConnectivitySmoke(
       throw new SmokeConfigFailure();
     }
     if (typeof options.readFile !== "function") throw new SmokeConfigFailure();
-    const env = await resolveSmokeEnvironment(
-      options.env ?? process.env,
-      options.readFile,
-    );
+    let env: Readonly<Record<string, string | undefined>>;
+    try {
+      env = await resolveTxlineCredentialEnvironment(
+        options.env ?? process.env,
+        options.readFile,
+      );
+    } catch {
+      throw new SmokeConfigFailure();
+    }
     const fixtureId = fixtureIdFromEnvironment(env);
     const timeoutMs = timeoutMsFromEnvironment(env);
     const client = createTxlineProviderClientFromEnv({

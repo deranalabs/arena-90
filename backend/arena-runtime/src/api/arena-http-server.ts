@@ -86,6 +86,8 @@ export interface CreateArenaHttpServerConfig {
    */
   readonly configuredSource: ArenaHttpConfiguredSource;
   readonly isReady: () => boolean;
+  /** Disable public create/run routes when an operator supervisor owns lifecycle. */
+  readonly operatorMutationsEnabled?: boolean;
   readonly bodyLimitBytes?: number;
   /** Share this composition seam and seed persisted occupancy on restart. */
   readonly capacityCoordinator?: ArenaHttpCapacityCoordinator;
@@ -502,6 +504,7 @@ export function createArenaHttpServer(
     input?.configuredSource,
   );
   const bodyLimitBytes = input?.bodyLimitBytes ?? DEFAULT_BODY_LIMIT_BYTES;
+  const operatorMutationsEnabled = input?.operatorMutationsEnabled ?? true;
   const ssePollIntervalMs =
     input?.sse?.pollIntervalMs ?? DEFAULT_SSE_POLL_INTERVAL_MS;
   const sseHeartbeatIntervalMs =
@@ -516,6 +519,7 @@ export function createArenaHttpServer(
     typeof input.runner.run !== "function" ||
     typeof input?.store?.read !== "function" ||
     typeof input?.isReady !== "function" ||
+    typeof operatorMutationsEnabled !== "boolean" ||
     (input.capacityCoordinator !== undefined &&
       (typeof input.capacityCoordinator.claim !== "function" ||
         typeof input.capacityCoordinator.settle !== "function")) ||
@@ -921,6 +925,9 @@ export function createArenaHttpServer(
           return;
         }
         if (url.pathname === "/api/arenas") {
+          if (!operatorMutationsEnabled) {
+            throw new HttpBoundaryError(404, "INVALID_REQUEST", "Route was not found");
+          }
           if (method !== "POST") throw methodNotAllowed("POST");
           requireNoQuery(url);
           await createArena(request, response);
@@ -953,6 +960,9 @@ export function createArenaHttpServer(
         const arenaId = parseArenaId(encodedArenaId);
         const action = match[2];
         if (action === "run") {
+          if (!operatorMutationsEnabled) {
+            throw new HttpBoundaryError(404, "INVALID_REQUEST", "Route was not found");
+          }
           if (method !== "POST") throw methodNotAllowed("POST");
           requireNoQuery(url);
           await runArena(request, response, arenaId);

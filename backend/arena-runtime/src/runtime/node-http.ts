@@ -11,6 +11,7 @@ import { createZeroClawAgentAdapter } from "../adapters/agents/zeroclaw.js";
 import { createRecordedDataAdapter } from "../adapters/data/recorded.js";
 import {
   createTxlineProviderClientFromEnv,
+  resolveTxlineCredentialEnvironment,
   type TxlineProviderClient,
 } from "../adapters/data/txline/index.js";
 import {
@@ -214,6 +215,18 @@ function parseListenPort(env: Environment): number {
   return port;
 }
 
+function resolveAutostart(env: Environment, mode: NodeHttpRuntimeMode): boolean {
+  const configured = env["ARENA90_AUTOSTART"];
+  if (configured === undefined) return mode === "LIVE";
+  if (configured !== "true" && configured !== "false") {
+    throw new NodeHttpRuntimeError("CONFIG_FAILURE");
+  }
+  if (mode === "LIVE" && configured !== "true") {
+    throw new NodeHttpRuntimeError("CONFIG_FAILURE");
+  }
+  return configured === "true";
+}
+
 export async function createNodeHttpRuntimeComposition(
   options: CreateNodeHttpRuntimeCompositionOptions = {},
 ): Promise<NodeHttpRuntimeComposition> {
@@ -224,6 +237,7 @@ export async function createNodeHttpRuntimeComposition(
   const readFile =
     options.readFile ?? ((path: string) => readNodeFile(path, "utf8"));
   const mode = resolveMode(env);
+  const autostart = resolveAutostart(env, mode);
   const manifestInput = await readJson(
     readFile,
     requiredEnvironmentValue(env, "ARENA90_MANIFEST_FILE"),
@@ -300,6 +314,12 @@ export async function createNodeHttpRuntimeComposition(
       throw new NodeHttpRuntimeError("RECORDING_FAILURE");
     }
   } else {
+    let providerEnv: Environment;
+    try {
+      providerEnv = await resolveTxlineCredentialEnvironment(env, readFile);
+    } catch {
+      throw new NodeHttpRuntimeError("CONFIG_FAILURE");
+    }
     const bindingInput = await readJson(
       readFile,
       requiredEnvironmentValue(env, "ARENA90_LIVE_FIXTURE_BINDING_FILE"),
@@ -321,11 +341,11 @@ export async function createNodeHttpRuntimeComposition(
       "TXLINE_MAX_RESPONSE_BYTES",
       "TXLINE_MAX_SSE_EVENTS",
     ] as const) {
-      requiredEnvironmentValue(env, name);
+      requiredEnvironmentValue(providerEnv, name);
     }
-    positiveEnvironmentInteger(env, "TXLINE_TIMEOUT_MS");
-    positiveEnvironmentInteger(env, "TXLINE_MAX_RESPONSE_BYTES");
-    positiveEnvironmentInteger(env, "TXLINE_MAX_SSE_EVENTS");
+    positiveEnvironmentInteger(providerEnv, "TXLINE_TIMEOUT_MS");
+    positiveEnvironmentInteger(providerEnv, "TXLINE_MAX_RESPONSE_BYTES");
+    positiveEnvironmentInteger(providerEnv, "TXLINE_MAX_SSE_EVENTS");
     let boundKickoffUtc: string;
     try {
       boundKickoffUtc = new Date(bindingResult.data.startTime).toISOString();
@@ -340,8 +360,8 @@ export async function createNodeHttpRuntimeComposition(
     }
     let client: TxlineProviderClient;
     try {
-      const configuredClient = createTxlineProviderClientFromEnv({ env });
-      client = options.txlineClientFactory?.(env) ?? configuredClient;
+      const configuredClient = createTxlineProviderClientFromEnv({ env: providerEnv });
+      client = options.txlineClientFactory?.(providerEnv) ?? configuredClient;
     } catch {
       throw new NodeHttpRuntimeError("CONFIG_FAILURE");
     }
@@ -359,7 +379,7 @@ export async function createNodeHttpRuntimeComposition(
     agents,
     runtimeMetadata: {
       runtimeId: "arena90-node-http-runtime",
-      runtimeVersion: "7.4",
+      runtimeVersion: "7.5",
       executionRuleVersion: "p0-v1",
       winnerRuleVersion: "FINAL_NAV_ONLY_V1",
       agentTimeoutMs,
@@ -367,14 +387,14 @@ export async function createNodeHttpRuntimeComposition(
         alpha: {
           adapterId: options.agents === undefined ? "zeroclaw" : "injected",
           adapterVersion: "1",
-          strategyId: "alpha-momentum-repricing",
-          strategyVersion: "1",
+          strategyId: "alpha-overreaction-hunter",
+          strategyVersion: "3",
         },
         beta: {
           adapterId: options.agents === undefined ? "zeroclaw" : "injected",
           adapterVersion: "1",
-          strategyId: "beta-structure-valuation",
-          strategyVersion: "1",
+          strategyId: "beta-underreaction-hunter",
+          strategyVersion: "3",
         },
       },
     },
@@ -413,6 +433,7 @@ export async function createNodeHttpRuntimeComposition(
     store: lifecycle.store,
     capacityCoordinator,
     configuredSource,
+    operatorMutationsEnabled: !autostart,
     isReady: () => ready,
   });
   const defaultHost = env["ARENA90_HTTP_HOST"] ?? "127.0.0.1";
@@ -421,6 +442,21 @@ export async function createNodeHttpRuntimeComposition(
   }
   const defaultPort = parseListenPort(env);
   let shutdownPromise: Promise<void> | undefined;
+  let managedRun:
+    | Readonly<{ controller: AbortController; promise: Promise<void> }>
+    | undefined;
+
+  async function startManagedRun(): Promise<void> {
+    await lifecycle.runner.create(manifest);
+    const controller = new AbortController();
+    const promise = lifecycle.runner.run(manifest.arenaId, controller.signal).then(
+      () => undefined,
+      () => {
+        if (!controller.signal.aborted) ready = false;
+      },
+    );
+    managedRun = Object.freeze({ controller, promise });
+  }
 
   const composition: NodeHttpRuntimeComposition = {
     mode,
@@ -460,12 +496,22 @@ export async function createNodeHttpRuntimeComposition(
       });
       const address = server.address() as AddressInfo | null;
       if (address === null) throw new NodeHttpRuntimeError("LISTEN_FAILURE");
+      if (autostart) {
+        try {
+          await startManagedRun();
+        } catch {
+          ready = false;
+          await new Promise<void>((resolve) => server.close(() => resolve()));
+          throw new NodeHttpRuntimeError("RUNTIME_FAILURE");
+        }
+      }
       return Object.freeze({ host, port: address.port });
     },
     shutdown() {
       if (shutdownPromise !== undefined) return shutdownPromise;
       ready = false;
-      shutdownPromise = server.listening
+      managedRun?.controller.abort();
+      const closeServer = server.listening
         ? new Promise<void>((resolve, reject) => {
             server.close((error) => {
               if (error === undefined) resolve();
@@ -473,6 +519,10 @@ export async function createNodeHttpRuntimeComposition(
             });
           })
         : Promise.resolve();
+      shutdownPromise = Promise.all([
+        closeServer,
+        managedRun?.promise ?? Promise.resolve(),
+      ]).then(() => undefined);
       return shutdownPromise;
     },
   };

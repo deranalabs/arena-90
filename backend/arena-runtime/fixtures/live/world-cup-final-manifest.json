@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "arenaId": "world-cup-2026-spain-argentina-final",
+  "mode": "LIVE",
+  "competition": "World Cup 2026",
+  "fixtureId": "18257739",
+  "homeTeam": { "name": "Spain", "code": "ESP" },
+  "awayTeam": { "name": "Argentina", "code": "ARG" },
+  "kickoffUtc": "2026-07-19T19:00:00.000Z",
+  "startingBankrollMicros": "100000000",
+  "currency": "VIRTUAL_USD_MICROS",
+  "assets": [
+    { "id": "HOME", "market": "FULL_TIME_1X2", "label": "Spain win" },
+    { "id": "DRAW", "market": "FULL_TIME_1X2", "label": "Draw" },
+    { "id": "AWAY", "market": "FULL_TIME_1X2", "label": "Argentina win" }
+  ],
+  "checkpoints": ["KICKOFF", "M15", "M30", "HALFTIME", "M60", "M75", "FINAL"],
+  "createdAtUtc": "2026-07-17T09:00:00.000Z"
+}
