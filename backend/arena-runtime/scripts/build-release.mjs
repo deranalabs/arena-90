@@ -80,7 +80,11 @@ try {
   );
   await mkdir(dirname(archive), { recursive: true });
   await rm(archive, { force: true });
-  await run("tar", ["-czf", archive, "-C", temporaryRoot, artifactName], packageRoot);
+  await run(
+    "tar",
+    ["--no-xattrs", "-czf", archive, "-C", temporaryRoot, artifactName],
+    packageRoot,
+  );
   await writeFile(`${archive}.sha256`, `${await checksum(archive)}  ${basename(archive)}\n`);
   console.log(`Runtime release created: ${archive}`);
 } catch {
