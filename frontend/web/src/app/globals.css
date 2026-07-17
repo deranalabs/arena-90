@@ -1926,6 +1926,7 @@ button {
 .home-arena-board {
   width: min(94%, 118rem);
   margin-inline: auto;
+  margin-block: var(--space-3xl);
   padding: var(--space-xl);
   border: 1px solid var(--color-night-rule);
   background: var(--color-night);

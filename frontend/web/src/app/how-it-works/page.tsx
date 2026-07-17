@@ -2,14 +2,56 @@ import { ProductPageIntro } from "@/components/product/ProductPageIntro";
 import "./workflow.css";
 
 const steps = [
-  ["1.0", "TxLINE delivers match evidence", "Fixture state, score, clock, and normalized market data enter the Arena90 data layer."],
-  ["2.0", "One canonical snapshot is locked", "Alpha and Beta receive the exact same checkpoint information."],
-  ["3.0", "Both agents decide independently", "Each agent submits a structured target portfolio or NO_TRADE without human intervention."],
-  ["4.0", "Every output is validated", "Invalid output is repaired once or recorded as a missed decision. No fallback trade is fabricated."],
-  ["5.0", "Portfolios execute deterministically", "Pricing, accounting, and leader calculation remain outside agent control."],
-  ["6.0", "Both decisions reveal together", "Spectators see Alpha and Beta only after the round is committed."],
-  ["7.0", "The final winner is recorded", "Terminal portfolios are settled against the verified final match result."],
-] as const;
+  {
+    num: "1.0",
+    title: "TxLINE delivers match evidence",
+    desc: "Fixture state, score, clock, and normalized market data enter the Arena90 data layer.",
+    span: "col-span-2 row-span-1",
+    tag: "Source",
+  },
+  {
+    num: "2.0",
+    title: "Canonical snapshot",
+    desc: "Alpha and Beta receive the exact same checkpoint information.",
+    span: "col-span-1 row-span-1",
+    tag: "Lock",
+  },
+  {
+    num: "3.0",
+    title: "Independent decision",
+    desc: "Each agent submits a structured target portfolio or NO_TRADE without human intervention.",
+    span: "col-span-1 row-span-2",
+    tag: "Agent",
+  },
+  {
+    num: "4.0",
+    title: "Every output is validated",
+    desc: "Invalid output is repaired once or recorded as missed.",
+    span: "col-span-1 row-span-1",
+    tag: "Engine",
+  },
+  {
+    num: "5.0",
+    title: "Deterministic execution",
+    desc: "Pricing, accounting, and leader calculation remain outside agent control.",
+    span: "col-span-2 row-span-1",
+    tag: "Engine",
+  },
+  {
+    num: "6.0",
+    title: "Both decisions reveal together",
+    desc: "Spectators see Alpha and Beta only after the round is committed.",
+    span: "col-span-1 row-span-1",
+    tag: "Proof",
+  },
+  {
+    num: "7.0",
+    title: "Final winner recorded",
+    desc: "Terminal portfolios are settled against the verified final match result.",
+    span: "col-span-2 row-span-1",
+    tag: "Resolution",
+  },
+];
 
 export default function HowItWorksPage() {
   return (
@@ -21,20 +63,20 @@ export default function HowItWorksPage() {
         title="From match feed to verified winner."
       />
       
-      <ol className="workflow-timeline" aria-label="Arena90 competition sequence">
-        {steps.map(([number, title, description]) => (
-          <li key={number} className="workflow-stage">
-            <header className="workflow-stage__head">
-              <span className="workflow-stage__num">{number}</span>
-              <div className="workflow-stage__rule" aria-hidden="true" />
+      <section className="bento-grid" aria-label="Arena90 competition sequence">
+        {steps.map(({ num, title, desc, span, tag }) => (
+          <article key={num} className={`bento-cell ${span}`}>
+            <header className="bento-cell__head">
+              <span className="bento-cell__num">{num}</span>
+              <span className="bento-cell__tag">{tag}</span>
             </header>
-            <div className="workflow-stage__body">
-              <h2 className="workflow-stage__title">{title}</h2>
-              <p className="workflow-stage__desc">{description}</p>
+            <div className="bento-cell__body">
+              <h2 className="bento-cell__title">{title}</h2>
+              <p className="bento-cell__desc">{desc}</p>
             </div>
-          </li>
+          </article>
         ))}
-      </ol>
+      </section>
 
       <aside className="workflow-boundary">
         <strong>System boundary</strong>
