@@ -5,5 +5,6 @@ export * from "./manifest.js";
 export * from "./portfolio.js";
 export * from "./primitives.js";
 export * from "./snapshot.js";
+export * from "./solana-settlement.js";
 export * from "./strategy-evidence.js";
 export * from "./terminal-evidence.js";
