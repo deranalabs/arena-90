@@ -13,9 +13,9 @@ import {
 
 const liveManifest: ArenaManifest = {
   schemaVersion: 1,
-  arenaId: "world-cup-final-18257739",
+  arenaId: "world-cup-2026-spain-argentina-final",
   mode: "LIVE",
-  competition: "World Cup Hackathon 2026",
+  competition: "World Cup 2026",
   fixtureId: "18257739",
   homeTeam: { name: "Spain", code: "ESP" },
   awayTeam: { name: "Argentina", code: "ARG" },
@@ -28,7 +28,7 @@ const liveManifest: ArenaManifest = {
     { id: "AWAY", market: "FULL_TIME_1X2", label: "Argentina win" },
   ],
   checkpoints: [...CHECKPOINT_IDS],
-  createdAtUtc: "2026-07-17T10:00:00.000Z",
+  createdAtUtc: "2026-07-17T09:00:00.000Z",
 };
 
 function finalResult() {

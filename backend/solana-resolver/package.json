@@ -5,6 +5,7 @@
   "type": "module",
   "main": "./dist/worker.js",
   "scripts": {
+    "prebuild": "npm --prefix ../arena-runtime run build",
     "build": "tsc --project tsconfig.json",
     "start": "node --env-file-if-exists=.env dist/main.js",
     "test": "npm run build && node --test dist/tests/*.test.js"

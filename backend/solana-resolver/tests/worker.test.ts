@@ -21,9 +21,9 @@ import { createSupporterResolutionWorker } from "../src/worker.js";
 function manifest(mode: "LIVE" | "REPLAY" = "LIVE"): ArenaManifest {
   return {
     schemaVersion: 1,
-    arenaId: "world-cup-final-18257739",
+    arenaId: "world-cup-2026-spain-argentina-final",
     fixtureId: "18257739",
-    competition: "World Cup Hackathon 2026",
+    competition: "World Cup 2026",
     homeTeam: { name: "Spain", code: "ESP" },
     awayTeam: { name: "Argentina", code: "ARG" },
     mode,
@@ -36,7 +36,7 @@ function manifest(mode: "LIVE" | "REPLAY" = "LIVE"): ArenaManifest {
       { id: "AWAY", market: "FULL_TIME_1X2", label: "Argentina win" },
     ],
     checkpoints: [...CHECKPOINT_IDS],
-    createdAtUtc: "2026-07-17T10:00:00.000Z",
+    createdAtUtc: "2026-07-17T09:00:00.000Z",
   };
 }
 
@@ -44,7 +44,7 @@ function finalResult(): ArenaFinalResultV2 {
   const evidenceInput = {
     schemaVersion: 1 as const,
     providerSequence: 880,
-    arenaId: "world-cup-final-18257739",
+    arenaId: "world-cup-2026-spain-argentina-final",
     fixtureId: "18257739",
     observedAtUtc: "2026-07-19T21:00:00.000Z",
     sourceEventId: "txline-live:18257739:880",
@@ -60,7 +60,7 @@ function finalResult(): ArenaFinalResultV2 {
   };
   const input = {
     schemaVersion: 2 as const,
-    arenaId: "world-cup-final-18257739",
+    arenaId: "world-cup-2026-spain-argentina-final",
     winnerRule: "FINAL_NAV_ONLY_V1" as const,
     winningAssetId: "HOME" as const,
     winner: "alpha" as const,
@@ -120,7 +120,7 @@ function chain(
 test("waits until the runtime has persisted the configured arena", async () => {
   const calls: string[] = [];
   const worker = createSupporterResolutionWorker({
-    arenaId: "world-cup-final-18257739",
+    arenaId: "world-cup-2026-spain-argentina-final",
     store: { async read() { return "NOT_FOUND"; } },
     chain: chain(calls),
   });
@@ -134,7 +134,7 @@ test("waits until the runtime has persisted the configured arena", async () => {
 test("prepares and checks the permissionless lock on every Live tick", async () => {
   const calls: string[] = [];
   const worker = createSupporterResolutionWorker({
-    arenaId: "world-cup-final-18257739",
+    arenaId: "world-cup-2026-spain-argentina-final",
     store: { async read() { return persisted(); } },
     chain: chain(calls),
   });
@@ -150,7 +150,7 @@ test("prepares and checks the permissionless lock on every Live tick", async () 
 test("never touches Solana for Replay", async () => {
   const calls: string[] = [];
   const worker = createSupporterResolutionWorker({
-    arenaId: "world-cup-final-18257739",
+    arenaId: "world-cup-2026-spain-argentina-final",
     store: { async read() { return persisted("REPLAY"); } },
     chain: chain(calls),
   });
@@ -164,7 +164,7 @@ test("never touches Solana for Replay", async () => {
 test("settles a completed Live arena and tolerates idempotent chain results", async () => {
   const calls: string[] = [];
   const worker = createSupporterResolutionWorker({
-    arenaId: "world-cup-final-18257739",
+    arenaId: "world-cup-2026-spain-argentina-final",
     store: { async read() { return completed(); } },
     chain: chain(calls, "ALREADY_LOCKED"),
   });
@@ -181,7 +181,7 @@ test("settles a completed Live arena and tolerates idempotent chain results", as
 test("does not settle until the chain clock allows locking", async () => {
   const calls: string[] = [];
   const worker = createSupporterResolutionWorker({
-    arenaId: "world-cup-final-18257739",
+    arenaId: "world-cup-2026-spain-argentina-final",
     store: { async read() { return completed(); } },
     chain: chain(calls),
   });

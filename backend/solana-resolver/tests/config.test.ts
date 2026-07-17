@@ -30,7 +30,7 @@ async function fixture(mode = 0o600) {
 
 function env(input: Awaited<ReturnType<typeof fixture>>): NodeJS.ProcessEnv {
   return {
-    ARENA90_ARENA_ID: "world-cup-final-18257739",
+    ARENA90_ARENA_ID: "world-cup-2026-spain-argentina-final",
     ARENA90_PERSISTENCE_DIR: "/tmp/arena90-persistence",
     ARENA90_IDL_PATH: "/tmp/arena_escrow.json",
     ARENA90_PROGRAM_ID: "3eaE8RrpNK3Fo9YNj8bSK8VKZ49uWNVceGntzUSgDLsZ",

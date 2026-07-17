@@ -32,7 +32,7 @@ const [vault] = PublicKey.findProgramAddressSync(
 );
 
 const config: ResolverConfig = {
-  arenaId: "world-cup-final-18257739",
+  arenaId: "world-cup-2026-spain-argentina-final",
   persistenceDirectory: "/tmp/persistence",
   idlPath: "/tmp/arena_escrow.json",
   programId,
