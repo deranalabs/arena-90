@@ -280,13 +280,11 @@ Acceptance evidence:
 **Goal:** A supporter backs one agent through a Blink and receives a verifiable
 devnet outcome derived from the canonical arena result.
 
-Before implementation, approve the missing Supporter Escrow and Blink
-Settlement specification. At minimum it must own the accepted devnet token,
-supporter-position account model, backing deadline and lock authority, payout
-and fee mathematics, draw/void refunds, canonical final-result binding,
-settlement authority, and replay exclusion. Product documents intentionally do
-not define these implementation-critical decisions; legacy code is not a
-default.
+The approved `04-Supporter-Escrow-and-Blink-Settlement.md` specification owns
+the accepted devnet token, supporter-position account model, backing deadline,
+lock authority, TxLINE proof receipt, payout and fee mathematics, draw/void
+refunds, canonical final-result binding, settlement authority, and Replay
+exclusion. Legacy code is not a default.
 
 Required:
 

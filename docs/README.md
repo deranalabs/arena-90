@@ -69,6 +69,10 @@ requirements.
   - fixture, score, market, sequence, and canonical identity rules;
   - deterministic price normalization and freshness policy;
   - live-data retry, suspension, failure, and acceptance behavior.
+- `specs/04-Supporter-Escrow-and-Blink-Settlement.md`
+  - native devnet SOL supporter positions and lifecycle;
+  - TxLINE terminal-proof receipts and runtime-result binding;
+  - settlement, payout, claim, refund, fee, and Action interfaces.
 
 Technical specifications translate approved product decisions into
 implementation contracts. They must not override approved product decisions.
