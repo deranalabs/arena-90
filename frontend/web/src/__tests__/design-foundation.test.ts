@@ -7,20 +7,20 @@ const stylesheet = readFileSync(
 );
 
 describe("Arena90 design foundation", () => {
-  it("uses the Arena90 dark broadcast, rivalry, data, and Replay palette", () => {
+  it("uses one semantic Arena90 palette with compatibility role aliases", () => {
     const tokens = [
-      "--arena-paper: #f2efe6;",
-      "--arena-night: #080b10;",
-      "--arena-surface: #121822;",
-      "--arena-raised: #18212d;",
-      "--arena-line: #303b49;",
-      "--arena-text: #f3efe6;",
-      "--arena-muted: #9ba3ae;",
-      "--arena-alpha: #ff4255;",
-      "--arena-beta: #4a6dff;",
-      "--arena-data: #51d6c0;",
-      "--arena-signal: #d7f541;",
-      "--arena-replay: #a78bfa;",
+      "--color-paper: oklch(95% 0.018 91);",
+      "--color-night: oklch(13% 0.022 265);",
+      "--color-night-2: oklch(18% 0.028 265);",
+      "--color-night-3: oklch(23% 0.032 265);",
+      "--color-night-rule: oklch(34% 0.03 265);",
+      "--color-night-ink: oklch(93% 0.015 88);",
+      "--color-alpha-hot: oklch(65% 0.23 20);",
+      "--color-beta-hot: oklch(63% 0.18 272);",
+      "--color-data: oklch(80% 0.13 180);",
+      "--color-tournament: oklch(92% 0.17 100);",
+      "--arena-night: var(--color-night);",
+      "--arena-text: var(--color-night-ink);",
     ];
 
     for (const token of tokens) expect(stylesheet).toContain(token);
@@ -30,7 +30,7 @@ describe("Arena90 design foundation", () => {
     expect(stylesheet).toMatch(
       /\.site-header\s*{[^}]*background:\s*var\(--arena-night\)/,
     );
-    expect(stylesheet).not.toMatch(/#d5eadb|#dfdaec/i);
+    expect(stylesheet).not.toMatch(/#d5eadb|#dfdaec|font-weight:\s*900/i);
   });
 
   it("preserves the neutral canvas and accessibility foundation", () => {
@@ -62,6 +62,8 @@ describe("Arena90 design foundation", () => {
       /body\s*{[^}]*font-family:\s*var\(--font-ui\)/,
     );
     expect(stylesheet).not.toMatch(/fonts\.googleapis\.com|@import\s+url\(/i);
+    expect(stylesheet).toContain("font-synthesis: none;");
+    expect(stylesheet).toContain("overflow-x: clip;");
   });
 
   it("keeps the desktop header framed instead of nearly full-width", () => {

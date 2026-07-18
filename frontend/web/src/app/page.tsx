@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { AgentPortrait } from "@/components/agents/AgentPortrait";
 import { FEATURED_ARENA, resolveFeaturedArena } from "@/lib/featured-arena";
+import { listRecordedReplayArtifacts } from "@/lib/arena-api/recorded-replay-artifacts";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,7 @@ export default function LandingPage() {
   const featured = FEATURED_ARENA;
   const thirdPlace = resolveFeaturedArena("WORLD_CUP_THIRD_PLACE");
   const final = resolveFeaturedArena("WORLD_CUP_FINAL");
+  const semifinalReplays = listRecordedReplayArtifacts();
   const arenaCatalog = [
     {
       arena: thirdPlace,
@@ -29,9 +31,25 @@ export default function LandingPage() {
     {
       arena: resolveFeaturedArena("FOUNDATION_REPLAY"),
       status: "REPLAY",
-      detail: "Recorded TxLINE feed through the same autonomous competition engine.",
+      detail: "Baseline replay used to verify the public event and spectator surfaces.",
       available: true,
     },
+    ...semifinalReplays.map((replay) => ({
+      arena: {
+        ...resolveFeaturedArena("FOUNDATION_REPLAY"),
+        arenaId: replay.arenaId,
+        competition: replay.competition,
+        homeTeam: replay.homeTeam,
+        awayTeam: replay.awayTeam,
+        kickoffUtc: replay.matchDateUtc,
+        sourceLabel: replay.sourceLabel,
+        watchHref: replay.watchHref,
+        proofHref: replay.proofHref,
+      },
+      status: "ARCHIVED" as const,
+      detail: `Completed autonomous replay · ${replay.winner === "DRAW" ? "draw" : `Agent ${replay.winner === "alpha" ? "Alpha" : "Beta"} winner`}.`,
+      available: true,
+    })),
   ] as const;
 
   return (
@@ -160,11 +178,11 @@ export default function LandingPage() {
             <p className="product-eyebrow">ARENA PROGRAM</p>
             <h2 id="home-arenas-title">World Cup arenas</h2>
           </div>
-          <p>Fixture eligibility is distinct from an activated Arena90 run. Replay remains the accelerated proof path.</p>
+          <p>Live arenas follow verified runtime state. Archived semifinals show the same engine on recorded TxLINE evidence.</p>
         </header>
         <div className="home-arena-board__grid">
           {arenaCatalog.map(({ arena, status, detail, available }) => (
-            <article aria-label={`${arena.homeTeam} vs ${arena.awayTeam}`} key={arena.preset}>
+            <article aria-label={`${arena.homeTeam} vs ${arena.awayTeam}`} key={arena.arenaId}>
               <div className="home-arena-board__status">
                 <span>{arena.competition}</span>
                 <strong>{status}</strong>

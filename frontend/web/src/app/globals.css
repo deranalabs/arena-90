@@ -15,34 +15,7 @@
   --weight-display: 700;
   --weight-label: 600;
 
-  /* Legacy Arena90 palette used by existing arena surfaces. */
-  --arena-paper: #f2efe6;
-  --arena-paper-raised: #fbf8f1;
-  --arena-night: #080b10;
-  --arena-surface: #121822;
-  --arena-raised: #18212d;
-  --arena-pitch: #102a24;
-  --arena-line: #303b49;
-  --arena-text: #f3efe6;
-  --arena-muted: #9ba3ae;
-  --arena-alpha: #ff4255;
-  --arena-beta: #4a6dff;
-  --arena-data: #51d6c0;
-  --arena-signal: #d7f541;
-  --arena-replay: #a78bfa;
-  --arena-campaign: #7a43c7;
-  --arena-alpha-field: #ab2747;
-  --arena-beta-field: #49518b;
-  --arena-agent-ink: #2c1833;
-  --arena-tournament: #ffed4c;
-  --arena-paper-line: #c9c2b5;
-  --arena-paper-muted: #625f67;
-  --canvas: var(--arena-night);
-  --ink: var(--arena-text);
-  --signal: var(--arena-signal);
-  --focus-light: var(--arena-text);
-  --focus-dark: var(--arena-night);
-  /* Semantic design tokens used by global product surfaces. */
+  /* Semantic design tokens. Every surface consumes these roles. */
   --color-paper: oklch(95% 0.018 91);
   --color-paper-2: oklch(90% 0.025 88);
   --color-ink: oklch(17% 0.018 284);
@@ -65,6 +38,34 @@
   --color-night-muted: oklch(72% 0.018 88);
   --color-alpha-panel: oklch(24% 0.075 18);
   --color-beta-panel: oklch(24% 0.065 275);
+
+  /* Compatibility aliases for legacy arena selectors. Keep literals above. */
+  --arena-paper: var(--color-paper);
+  --arena-paper-raised: var(--color-paper-2);
+  --arena-night: var(--color-night);
+  --arena-surface: var(--color-night-2);
+  --arena-raised: var(--color-night-3);
+  --arena-pitch: var(--color-night-2);
+  --arena-line: var(--color-night-rule);
+  --arena-text: var(--color-night-ink);
+  --arena-muted: var(--color-night-muted);
+  --arena-alpha: var(--color-alpha-hot);
+  --arena-beta: var(--color-beta-hot);
+  --arena-data: var(--color-data);
+  --arena-signal: var(--color-tournament);
+  --arena-replay: var(--color-replay);
+  --arena-campaign: var(--color-replay);
+  --arena-alpha-field: var(--color-alpha-panel);
+  --arena-beta-field: var(--color-beta-panel);
+  --arena-agent-ink: var(--color-ink);
+  --arena-tournament: var(--color-tournament);
+  --arena-paper-line: var(--color-rule);
+  --arena-paper-muted: var(--color-muted);
+  --canvas: var(--color-night);
+  --ink: var(--color-night-ink);
+  --signal: var(--color-tournament);
+  --focus-light: var(--color-night-ink);
+  --focus-dark: var(--color-night);
 
   /* 4-point spacing scale. */
   --space-2xs: 0.5rem;
@@ -104,6 +105,7 @@ body {
   min-width: 20rem;
   min-height: 100%;
   margin: 0;
+  overflow-x: clip;
 }
 
 body {
@@ -114,6 +116,7 @@ body {
   color: var(--arena-text);
   font-family: var(--font-ui);
   font-weight: var(--weight-body);
+  font-synthesis: none;
 }
 
 h1,
@@ -794,6 +797,8 @@ button {
   margin: 0.4rem 0 1.5rem;
   color: var(--arena-text);
   font-size: clamp(1.8rem, 3vw, 3.4rem);
+  font-weight: var(--weight-heading);
+  line-height: 1.08;
   letter-spacing: -0.05em;
 }
 
@@ -2430,7 +2435,7 @@ body:has(.arena-experience) {
 .site-brand-lockup__wordmark {
   font-family: var(--font-display);
   font-size: clamp(2rem, 5vw, 4.75rem);
-  font-weight: 900;
+  font-weight: var(--weight-display);
   line-height: 0.9;
   letter-spacing: 0;
   text-transform: uppercase;
@@ -2705,6 +2710,17 @@ body:has(.arena-experience) {
   gap: var(--space-sm);
 }
 
+.replay-index__copy h2 {
+  margin: 0;
+  color: var(--color-ink);
+  font-size: clamp(var(--text-xl), 3vw, var(--text-2xl));
+  font-weight: var(--weight-heading);
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
 .replay-index__row {
   display: grid;
   grid-template-columns: 4rem minmax(0, 1fr) auto;
@@ -2816,7 +2832,7 @@ body:has(.arena-experience) {
 .arena-scoreboard__team-name {
   margin: 0;
   font-size: clamp(1.55rem, 4vw, 4.4rem);
-  font-weight: 900;
+  font-weight: var(--weight-display);
   line-height: 1.02;
   text-transform: uppercase;
   overflow-wrap: anywhere;
@@ -2835,7 +2851,7 @@ body:has(.arena-experience) {
   background: var(--color-tournament);
   font-family: var(--font-outlier);
   font-size: clamp(2rem, 5vw, 5.6rem);
-  font-weight: 900;
+  font-weight: var(--weight-display);
   line-height: 0.95;
 }
 
@@ -2878,7 +2894,7 @@ body:has(.arena-experience) {
   color: var(--color-tournament);
   font-family: var(--font-display);
   font-size: clamp(2rem, 4vw, 4rem);
-  font-weight: 900;
+  font-weight: var(--weight-display);
   line-height: 1.02;
   text-transform: uppercase;
 }
@@ -3047,7 +3063,7 @@ body:has(.arena-experience) {
   color: var(--color-tournament);
   font-family: var(--font-outlier);
   font-size: var(--text-xl);
-  font-weight: 900;
+  font-weight: var(--weight-display);
 }
 
 .arena-result {
@@ -3209,7 +3225,7 @@ body:has(.arena-experience) {
   color: var(--color-tournament);
   font-family: var(--font-display);
   font-size: clamp(2.4rem, 5vw, 5rem);
-  font-weight: 900;
+  font-weight: var(--weight-display);
   line-height: 1.02;
   text-transform: uppercase;
 }
@@ -3375,7 +3391,9 @@ body:has(.arena-experience) {
 
 .home-page :where(h1, h2) {
   min-width: 0;
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  word-break: normal;
+  hyphens: none;
 }
 
 .home-page h2 {
@@ -3967,7 +3985,7 @@ body:has(.arena-experience) {
 
   .home-broadcast-hero__copy h1 {
     max-width: 11ch;
-    font-size: clamp(2.5rem, 12vw, 3.3rem);
+    font-size: clamp(2.5rem, 10.5vw, 3.3rem);
     line-height: 0.98;
   }
 
@@ -4041,6 +4059,16 @@ body:has(.arena-experience) {
   .home-rivalry-heading {
     gap: var(--space-md);
     padding-block: var(--space-xl) var(--space-lg);
+  }
+
+  .home-rivalry-heading h2 {
+    font-size: clamp(2.4rem, 10vw, 4rem);
+    line-height: 1.02;
+  }
+
+  .home-system-heading h2 {
+    font-size: clamp(2.3rem, 9.5vw, 4rem);
+    line-height: 1.02;
   }
 
   .home-agent-pair {
