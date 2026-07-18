@@ -55,9 +55,15 @@ function rateLimiter(limit: number) {
 async function requireArena(
   chain: ChainReader,
   arena: PublicKey,
-  config: Pick<ActionsConfig, "arenaAddress" | "programId">,
+  config: Pick<
+    ActionsConfig,
+    "arenaAddress" | "refundArenaAddress" | "programId"
+  >,
 ): Promise<ArenaLifecycle> {
-  if (!arena.equals(config.arenaAddress)) {
+  if (
+    !arena.equals(config.arenaAddress) &&
+    !arena.equals(config.refundArenaAddress ?? PublicKey.default)
+  ) {
     throw new PublicError("Arena is not the configured canonical Arena90 arena", 404);
   }
   const account = await chain.getAccountInfo(arena);
@@ -69,6 +75,22 @@ async function requireArena(
   } catch {
     throw new PublicError("Arena account data is invalid", 502);
   }
+}
+
+function pageUrlForArena(config: ActionsConfig, arena: PublicKey): string {
+  if (arena.equals(config.arenaAddress)) return config.arenaPageUrl;
+  if (
+    config.refundArenaAddress !== undefined &&
+    config.refundArenaPageUrl !== undefined &&
+    arena.equals(config.refundArenaAddress)
+  ) {
+    return config.refundArenaPageUrl;
+  }
+  throw new PublicError("Arena is not the configured canonical Arena90 arena", 404);
+}
+
+function isRefundOnlyArena(config: ActionsConfig, arena: PublicKey): boolean {
+  return config.refundArenaAddress?.equals(arena) === true;
 }
 
 export function createApp(
@@ -112,13 +134,21 @@ export function createApp(
   });
 
   app.get("/actions.json", (_request, response) => {
-    const arenaPagePath = new URL(config.arenaPageUrl).pathname;
+    const arenaRules = [
+      {
+        pathPattern: new URL(config.arenaPageUrl).pathname,
+        apiPath: `/actions/arena/${config.arenaAddress.toBase58()}`,
+      },
+      ...(config.refundArenaAddress === undefined || config.refundArenaPageUrl === undefined
+        ? []
+        : [{
+            pathPattern: new URL(config.refundArenaPageUrl).pathname,
+            apiPath: `/actions/arena/${config.refundArenaAddress.toBase58()}`,
+          }]),
+    ];
     response.json({
       rules: [
-        {
-          pathPattern: arenaPagePath,
-          apiPath: `/actions/arena/${config.arenaAddress.toBase58()}`,
-        },
+        ...arenaRules,
         {
           pathPattern: "/actions/arena/**",
           apiPath: "/actions/arena/**",
@@ -131,8 +161,11 @@ export function createApp(
     try {
       const arena = publicKey(request.params.arena, "arena");
       const lifecycle = await requireArena(chain, arena, config);
+      const arenaPageUrl = pageUrlForArena(config, arena);
+      const refundOnly = isRefundOnlyArena(config, arena);
       const base = `${config.publicBaseUrl}/actions/arena/${arena.toBase58()}`;
       const backingOpen =
+        !refundOnly &&
         lifecycle.state === "OPEN" &&
         BigInt(Math.floor(now() / 1_000)) < lifecycle.backingDeadlineUnix;
       const claimOpen =
@@ -183,7 +216,7 @@ export function createApp(
         ...lifecycleActions,
         {
           type: "external-link",
-          href: config.arenaPageUrl,
+          href: arenaPageUrl,
           label: "View Arena",
         },
       ];
@@ -219,6 +252,9 @@ export function createApp(
       }
       if (typeof request.query.amount !== "string") {
         throw new PublicError("amount is required", 400);
+      }
+      if (isRefundOnlyArena(config, arena)) {
+        throw new PublicError("Backing is permanently disabled for this refund-only arena", 409);
       }
       let lamports: bigint;
       try {

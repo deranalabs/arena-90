@@ -29,12 +29,22 @@ export interface ArenaAccount {
   readonly vault: PublicKey;
   readonly backingDeadline: bigint;
   readonly state: ArenaState;
+  readonly alphaPool: bigint;
+  readonly betaPool: bigint;
   readonly feeBps: number;
   readonly terminalProof: PublicKey;
   readonly finalResultHash: Uint8Array;
   readonly alphaNav: bigint;
   readonly betaNav: bigint;
   readonly result?: "alpha" | "beta" | "DRAW";
+}
+
+export interface SupporterPositionAccount {
+  readonly arena: PublicKey;
+  readonly owner: PublicKey;
+  readonly side: "alpha" | "beta";
+  readonly amount: bigint;
+  readonly claimed: boolean;
 }
 
 interface ReceiptAccount {
@@ -147,12 +157,29 @@ export function parseArenaAccount(value: unknown): ArenaAccount {
     vault: key(input["vault"], "Arena vault"),
     backingDeadline: integer(input["backingDeadline"], "Arena backing deadline"),
     state: state.toUpperCase() as ArenaState,
+    alphaPool: integer(input["alphaPool"], "Arena Alpha pool"),
+    betaPool: integer(input["betaPool"], "Arena Beta pool"),
     feeBps: smallInteger(input["feeBps"], "Arena fee bps"),
     terminalProof: key(input["terminalProof"], "Arena terminal proof"),
     finalResultHash: bytes(input["finalResultHash"], "Arena final result hash"),
     alphaNav: integer(input["alphaNav"], "Arena Alpha NAV"),
     betaNav: integer(input["betaNav"], "Arena Beta NAV"),
     ...(result === undefined ? {} : { result }),
+  };
+}
+
+export function parseSupporterPositionAccount(value: unknown): SupporterPositionAccount {
+  const input = object(value, "Supporter position account");
+  if (typeof input["claimed"] !== "boolean") {
+    throw new Error("Supporter position claimed state is invalid");
+  }
+  const side = variant(input["side"], ["alpha", "beta"], "Supporter position side");
+  return {
+    arena: key(input["arena"], "Supporter position arena"),
+    owner: key(input["owner"], "Supporter position owner"),
+    side: side as "alpha" | "beta",
+    amount: integer(input["amount"], "Supporter position amount"),
+    claimed: input["claimed"],
   };
 }
 

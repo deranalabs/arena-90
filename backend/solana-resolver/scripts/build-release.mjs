@@ -71,7 +71,10 @@ try {
     await readFile(join(stagedResolver, "package.json"), "utf8"),
   );
   delete releasePackage.devDependencies;
-  releasePackage.scripts = { start: "node --env-file-if-exists=.env dist/src/main.js" };
+  releasePackage.scripts = {
+    start: "node --env-file-if-exists=.env dist/src/main.js",
+    "operator:void": "node --env-file-if-exists=.env dist/src/operator-void.js",
+  };
   await writeFile(
     join(stagedResolver, "package.json"),
     `${JSON.stringify(releasePackage, null, 2)}\n`,

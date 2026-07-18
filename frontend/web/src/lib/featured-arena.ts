@@ -30,7 +30,7 @@ const presets = {
     sourceLabel: "TxLINE recorded",
   },
   WORLD_CUP_THIRD_PLACE: {
-    arenaId: "world-cup-2026-france-england-third-place-rehearsal-v2",
+    arenaId: "world-cup-2026-france-england-third-place-v4",
     mode: "LIVE",
     competition: "World Cup 2026 · Third place",
     homeTeam: "France",

@@ -77,10 +77,10 @@ fallback evidence, not a substitute for the required live integration.
 
 | Gate | Status | Next acceptance evidence |
 | --- | --- | --- |
-| 1. Strategy Integrity | Complete locally | Deploy strategy v4 and preserve smoke evidence |
-| 2. Always-On World Cup Live | In progress | Supervisor clean-boot and restart proof |
-| 3. Spectator & Technical Proof | In progress | World Cup API/SSE through browser |
-| 4. Solana Supporter Slice | In progress | Runtime resolver seam, public Blink, and frontend proof |
+| 1. Strategy Integrity | Complete deployed | Capture first Live v4 checkpoint evidence |
+| 2. Always-On World Cup Live | In progress | Complete one valid autonomous Live checkpoint |
+| 3. Spectator & Technical Proof | In progress | Match browser ledger to Live checkpoint sequence/hash |
+| 4. Solana Supporter Slice | In progress | Sign legacy refund and new backing; prove final settlement |
 | 5. Release & Demo | Not started | Rehearsal, security audit, deploy, and recording |
 
 Update this table only from captured acceptance evidence. Local implementation
@@ -110,9 +110,11 @@ or an isolated unit test does not close a gate.
 - Real ZeroClaw acceptance smoke passes Alpha overreaction allocation, Beta
   underreaction allocation, and Alpha/Beta no-edge `NO_TRADE` scenarios. The
   smoke also rejects unsupported historical/baseline claims in public output.
-- A replacement immutable runtime artifact,
-  `arena90-runtime-20260717-strategy-v3.tar.gz`, builds locally and its SHA-256
-  checksum verifies. It has not been uploaded or activated on the VPS.
+- Immutable runtime release `arena90-runtime-20260718-live-v10-3099700` is
+  active on the VPS against fresh arena identity
+  `world-cup-2026-france-england-third-place-v4`. Its public state reports both
+  strategies at version `4`. A controlled restart changed the process ID while
+  preserving byte-identical state and event hashes with sequence `1`.
 - Local runtime now has an operator-owned autostart supervisor. LIVE fails
   closed if autostart is disabled; supervised runtimes hide public create/run
   mutations; graceful shutdown aborts the managed run. Build and all 401 tests
@@ -128,20 +130,20 @@ or an isolated unit test does not close a gate.
   or timed-out streams retry the same checkpoint without durable events;
   verified passed windows create one explicit global miss. Runtime build and
   all 422 tests pass serially.
-- TxLINE credentials may now be loaded from one owner-only JSON file outside
-  Git and immutable releases. The VPS release artifact and credential file are
-  staged, but the active Replay service has not been switched to Live.
-- Frontend now resolves one approved catalog preset across home, header,
-  footer, agent CTA, and proof links. Replay and World Cup Live builds pass;
-  Replay-default code is deployed to `arena-90.vercel.app`.
+- TxLINE credentials load from one owner-only JSON file outside Git and
+  immutable releases. The active supervisor is `READY` in Live mode and waits
+  for the first valid TxLINE checkpoint without browser traffic.
+- Frontend resolves one approved catalog preset across home, header, footer,
+  agent CTA, and proof links. `arena90.xyz` now features the v4 third-place
+  Live arena through the same-origin runtime and Action gateways.
 - Frontend now includes a read-only public Event Ledger derived from the same
   SSE event stream as the arena view. It supports agent/type filtering,
   display pause, recorded-event playback, and copying public proof identity
   without exposing prompts, private reasoning, raw model output, or
   infrastructure logs. Frontend lint, all 117 tests, and production build pass
   locally.
-- Replay runtime is deployed on the agentic VPS; frontend is deployed on
-  Vercel through a same-origin read-only gateway.
+- Live runtime is deployed on the agentic VPS; frontend is deployed on Vercel
+  through a same-origin read-only runtime gateway.
 - Replay spectator flow and public proof are available as fallback evidence.
 - The legacy Isagi/Aiku USDC and Kamino-mock contract has been replaced by the
   approved native-SOL V2 supporter program. Rust tests pass and the SBF binary
@@ -151,14 +153,20 @@ or an isolated unit test does not close a gate.
   initialize, Alpha backing, permissionless deadline lock, resolver void, and
   user-signed refund claim for arena
   `8vn2j5AzDHmz8LgEfkfYxTFno9a8jb8mwBVQeiQpg2SU`.
-- The Solana Action service now returns only unsigned Back Alpha, Back Beta,
+- The Solana Action service returns only unsigned Back Alpha, Back Beta,
   and Claim transactions after program-owner, origin, wallet, amount, and rate
-  validation. Build and all seven HTTP/encoding tests pass; production
-  dependency audit reports zero known vulnerabilities.
+  validation. Build and all nine HTTP/encoding tests pass. Production Actions
+  expose the new v4 arena plus the old void arena as refund-only.
 - A separate Solana resolver release is deployed on the VPS with isolated
-  owner-only credentials. Its systemd service is active and idempotently waits
-  for canonical final Live runtime persistence; it has not created the World
-  Cup final arena or submitted a settlement.
+  owner-only credentials. It initialized v4 PDA
+  `7LHP2afdUPTJErHEy9QNRTusVA7TUyy47agyHsUfFz6y` in `OPEN` state with the exact
+  kickoff deadline. Initialization transaction:
+  `2qWVZAdjMPwTn7w1uAEJv2u8gU2mou7KsJphpeKwi7JyFygXzNhgWrQEBTtXc2mcpVDWvCs5W85PtrG2zFT2YWNC`.
+- Superseded strategy-v3 PDA
+  `4Fch1s6fV1QTbBzLFxd5VUPq82oMdnE1SSpx28Md1Vz2` was voided before kickoff
+  with reason `4`. Its single Alpha position of `0.05` devnet SOL is publicly
+  refundable. Void transaction:
+  `TFGxJzyCT28gLwyJ3Hi4CyzcNkU82G26eZEU6Lqz8N19GX5AxyxWmEqzia4Uv8nP1JjujRNiwTY7aifZotMZp4W`.
 - A second real devnet smoke used TxLINE fixture `17926686`, provider sequence
   `880`, and HOME/AWAY terminal leaves `1-1`. Two wallets backed opposite
   agents, the deadline locked, TxLINE returned true through CPI, the receipt
@@ -169,33 +177,19 @@ or an isolated unit test does not close a gate.
 
 ### 3.2 Not Proven
 
-- The deployed smoke fixture is not the World Cup fixture used by the demo.
-- No World Cup arena has completed TxLINE/TxODDS input through autonomous
-  decisions, deterministic execution, API/SSE, and frontend end to end.
-- The first third-place Live activation incorrectly converted pre-kickoff idle
-  score-stream timeouts into six `DATA_FAILURE` rounds. Service was stopped and
-  that immutable persistence was preserved. The local pending-window fix has
-  not yet been released or re-smoked against a fresh rehearsal arena identity.
-- The VPS runtime service is currently stopped after the invalid third-place
-  activation. A fresh rehearsal activation, restart-resume proof, deliberate
-  Replay fallback decision, and frontend consumer switch remain pending.
-- The VPS runtime release symlink now targets the supervisor and strategy-v3
-  build, but stopped service and invalid rehearsal persistence are not
-  acceptance evidence.
-- Production Replay evidence shows Alpha allocating once in six rounds and
-  Beta returning `NO_TRADE` in all six. Alpha's allocating explanation also
-  cites historical probability absent from its invocation.
-- Current public navigation and featured arena are Replay-first.
-- The latest external same-origin API smoke did not finish before the local
-  tool network/usage limit. Gateway health remains unproven despite successful
-  Vercel build and homepage response.
-- The Event Ledger changes have not yet been deployed or matched against a
-  persisted production World Cup SSE sequence in a browser.
+- No World Cup arena has yet completed TxLINE/TxODDS input through autonomous
+  decisions, deterministic execution, API/SSE, frontend, and canonical Solana
+  settlement end to end.
+- The v4 third-place arena has clean-boot and restart-resume evidence only at
+  pre-kickoff sequence `1`; no valid Live checkpoint has opened yet.
+- Event Ledger deployment is public, but its browser sequence/hash has not yet
+  been matched against a persisted v4 Live checkpoint.
+- New v4 backing and old-arena refund transactions are correctly constructed
+  unsigned, but still require the supporter wallet to sign. The old `0.05 SOL`
+  position remains unclaimed until that signature confirms.
 - The successful winner-settlement smoke used an isolated deterministic test
   result hash. The deployed runtime has not yet submitted its persisted
   canonical `finalResultHash` through the restricted resolver seam.
-- The Action service has not been deployed publicly or exercised through a
-  Blink client. Frontend wallet signing and transaction proof remain absent.
 - Demo-critical frontend routes still contain competing CSS foundations and
   inconsistent information hierarchy.
 

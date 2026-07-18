@@ -5,11 +5,12 @@ import type { AccountInfo, BlockhashWithExpiryBlockHeight } from "@solana/web3.j
 import { PublicKey, Transaction } from "@solana/web3.js";
 import request from "supertest";
 import { createApp, type ChainReader } from "../src/app.js";
-import { solToLamports, type ActionsConfig } from "../src/config.js";
+import { loadConfig, solToLamports, type ActionsConfig } from "../src/config.js";
 import { backAgentInstruction, claimInstruction, derivePosition, deriveVault } from "../src/program.js";
 
 const programId = new PublicKey("3eaE8RrpNK3Fo9YNj8bSK8VKZ49uWNVceGntzUSgDLsZ");
 const arena = new PublicKey("7eFCWjKnPVs5ovXhgnEkckby93oEPzbYXM9e6raSoi7b");
+const refundArena = new PublicKey("4Fch1s6fV1QTbBzLFxd5VUPq82oMdnE1SSpx28Md1Vz2");
 const supporter = new PublicKey("6pW64gN1s2uqjHkn1unFeEjAwJkPGHoppGvS715wyP2J");
 
 const config: ActionsConfig = {
@@ -20,6 +21,8 @@ const config: ActionsConfig = {
   frontendOrigin: "https://arena-90.vercel.app",
   arenaPageUrl: "https://arena-90.vercel.app/arena/world-cup-final",
   arenaAddress: arena,
+  refundArenaPageUrl: "https://arena-90.vercel.app/arena/retired-arena",
+  refundArenaAddress: refundArena,
   allowedOrigins: new Set(["https://arena-90.vercel.app", "https://dial.to"]),
   minBackLamports: 1_000_000n,
   maxBackLamports: 1_000_000_000n,
@@ -68,6 +71,28 @@ test("parses SOL without floating-point rounding", () => {
   assert.equal(solToLamports("1.000000001"), 1_000_000_001n);
   assert.throws(() => solToLamports("1.0000000001"));
   assert.throws(() => solToLamports("1e3"));
+});
+
+test("requires legacy refund address and page URL as one constrained pair", () => {
+  const env = {
+    SOLANA_RPC_URL: "https://api.devnet.solana.com",
+    ARENA90_PROGRAM_ID: programId.toBase58(),
+    PUBLIC_BASE_URL: "https://arena90.xyz",
+    FRONTEND_ORIGIN: "https://arena90.xyz",
+    ARENA_PAGE_URL: "https://arena90.xyz/arena/current",
+    ARENA_ADDRESS: arena.toBase58(),
+    ALLOWED_ORIGINS: "https://arena90.xyz",
+  };
+  assert.throws(
+    () => loadConfig({ ...env, REFUND_ARENA_ADDRESS: refundArena.toBase58() }),
+    /must be configured together/,
+  );
+  const loaded = loadConfig({
+    ...env,
+    REFUND_ARENA_ADDRESS: refundArena.toBase58(),
+    REFUND_ARENA_PAGE_URL: "https://arena90.xyz/arena/retired",
+  });
+  assert.equal(loaded.refundArenaAddress?.toBase58(), refundArena.toBase58());
 });
 
 test("encodes only supporter-signed Back and Claim instructions", () => {
@@ -123,6 +148,36 @@ test("GET exposes only actions valid for the on-chain lifecycle", async () => {
   await request(createApp(config, new FakeChain(null)))
     .get(`/actions/arena/${arena.toBase58()}`)
     .expect(404);
+
+  const refundable = await request(
+    createApp(config, new FakeChain(arenaAccount(3)), () => 1_000_000),
+  )
+    .get(`/actions/arena/${refundArena.toBase58()}`)
+    .expect(200);
+  assert.deepEqual(
+    refundable.body.links.actions.map((action: { label: string }) => action.label),
+    ["Claim or refund", "View Arena"],
+  );
+  assert.equal(
+    refundable.body.links.actions[1].href,
+    "https://arena-90.vercel.app/arena/retired-arena",
+  );
+
+  const refundRouteStillOpenOnChain = await request(
+    createApp(config, new FakeChain(arenaAccount(0)), () => 1_000_000),
+  )
+    .get(`/actions/arena/${refundArena.toBase58()}`)
+    .expect(200);
+  assert.deepEqual(
+    refundRouteStillOpenOnChain.body.links.actions.map(
+      (action: { label: string }) => action.label,
+    ),
+    ["View Arena"],
+  );
+  await request(createApp(config, new FakeChain(arenaAccount(0)), () => 1_000_000))
+    .post(`/actions/arena/${refundArena.toBase58()}/back/alpha?amount=0.01`)
+    .send({ account: supporter.toBase58() })
+    .expect(409);
 });
 
 test("serves spec CORS and actions.json to every Blink client", async () => {
@@ -140,6 +195,10 @@ test("serves spec CORS and actions.json to every Blink client", async () => {
     {
       pathPattern: "/arena/world-cup-final",
       apiPath: `/actions/arena/${arena.toBase58()}`,
+    },
+    {
+      pathPattern: "/arena/retired-arena",
+      apiPath: `/actions/arena/${refundArena.toBase58()}`,
     },
     { pathPattern: "/actions/arena/**", apiPath: "/actions/arena/**" },
   ]);

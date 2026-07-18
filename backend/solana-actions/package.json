@@ -6,6 +6,7 @@
   "main": "./dist/server.js",
   "scripts": {
     "build": "tsc --project tsconfig.json",
+    "release:build": "npm test && node scripts/build-release.mjs",
     "start": "node --env-file-if-exists=.env dist/server.js",
     "test": "npm run build && node --test dist/tests/*.test.js"
   },

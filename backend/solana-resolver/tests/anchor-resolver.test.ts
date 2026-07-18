@@ -90,6 +90,8 @@ function decodedArena(state: "open" | "locked" | "settled" = "open") {
     vault,
     backingDeadline: new anchor.BN(Date.parse(preparation.backingDeadlineUtc) / 1000),
     state: { [state]: {} },
+    alphaPool: new anchor.BN(50_000_000),
+    betaPool: new anchor.BN(25_000_000),
     feeBps: 0,
     terminalProof: PublicKey.default,
     finalResultHash: [...Buffer.from(finalResultHash, "hex")],

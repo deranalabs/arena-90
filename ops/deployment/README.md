@@ -40,6 +40,39 @@ present in the runtime, ZeroClaw, frontend, public Action service, or immutable
 runtime release. It reads the same atomic runtime persistence and retries
 idempotent prepare, lock, proof, and settlement operations.
 
+Operator void reason `4` means an open pre-kickoff arena was superseded by a
+new immutable strategy-version arena. Run the constrained resolver operator
+command only after checking the exact PDA, identity hash, fixture ID, and all
+supporter positions. A void makes positions refundable; each supporter wallet
+must still sign its own one-time refund transaction.
+
+### Strategy-version arena replacement
+
+This path is exceptional and irreversible after step 3:
+
+1. Stage and checksum runtime, resolver, Actions, manifest, binding, and
+   frontend artifacts without moving active release links.
+2. Read the old arena from devnet. Record exact state, deadline, Alpha/Beta
+   pools, position count, owners, amounts, and claimed flags. Continue only
+   while state is `OPEN` and chain time is before kickoff.
+3. Run `operator:void` with exact PDA, identity hash, fixture ID, reason `4`,
+   expected pools, and expected position count. Verify confirmed `VOID` state.
+   The old arena can never be reopened or used as rollback.
+4. Verify the old Action offers only `Claim or refund`; retain this route until
+   every position is claimed.
+5. Activate the new runtime identity and perform clean-boot plus restart hash
+   proof before changing public consumers.
+6. Activate the resolver for the new identity. Verify new PDA owner, immutable
+   deadline, zero starting pools, and initialization transaction.
+7. Activate Actions with the new PDA as current and the old PDA explicitly as
+   refund-only. Refund-only routes must reject backing regardless of RPC state.
+8. Deploy frontend last. Smoke new state/SSE/unsigned backing and old unsigned
+   refund through the public same-origin gateway.
+
+After step 3, rollback means Replay fallback or repair of the new identity.
+Never point users back to the void arena, delete either persistence record, or
+rewrite on-chain evidence.
+
 The Solana Actions service has no wallet or resolver key. Caddy exposes only
 its GET, POST, and OPTIONS Action routes; all transactions remain unsigned for
 the supporter wallet to approve. Its Origin allowlist is a browser/CORS

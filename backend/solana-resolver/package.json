@@ -8,6 +8,7 @@
     "prebuild": "npm --prefix ../arena-runtime run build",
     "build": "tsc --project tsconfig.json",
     "release:build": "npm test && node scripts/build-release.mjs",
+    "operator:void": "node --env-file-if-exists=.env dist/src/operator-void.js",
     "start": "node --env-file-if-exists=.env dist/main.js",
     "test": "npm run build && node --test dist/tests/*.test.js"
   },

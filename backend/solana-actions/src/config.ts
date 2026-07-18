@@ -8,6 +8,8 @@ export interface ActionsConfig {
   frontendOrigin: string;
   arenaPageUrl: string;
   arenaAddress: PublicKey;
+  refundArenaPageUrl?: string;
+  refundArenaAddress?: PublicKey;
   allowedOrigins: ReadonlySet<string>;
   minBackLamports: bigint;
   maxBackLamports: bigint;
@@ -31,6 +33,22 @@ function required(name: string, value: string | undefined): string {
   return value;
 }
 
+function arenaPageUrl(name: string, value: string | undefined, frontendOrigin: string): string {
+  const parsed = new URL(required(name, value));
+  if (
+    (parsed.protocol !== "https:" && parsed.hostname !== "localhost") ||
+    parsed.origin !== frontendOrigin ||
+    parsed.username ||
+    parsed.password ||
+    parsed.search ||
+    parsed.hash ||
+    !parsed.pathname.startsWith("/arena/")
+  ) {
+    throw new Error(`${name} must be a canonical arena path on the frontend origin`);
+  }
+  return parsed.toString();
+}
+
 export function solToLamports(value: string): bigint {
   if (!/^(0|[1-9]\d*)(\.\d{1,9})?$/.test(value)) {
     throw new Error("SOL amount must be a positive decimal with at most 9 decimals");
@@ -42,21 +60,26 @@ export function solToLamports(value: string): bigint {
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): ActionsConfig {
   const publicBaseUrl = requiredUrl("PUBLIC_BASE_URL", env.PUBLIC_BASE_URL);
   const frontendOrigin = requiredUrl("FRONTEND_ORIGIN", env.FRONTEND_ORIGIN);
-  const arenaPageUrl = new URL(
-    required("ARENA_PAGE_URL", env.ARENA_PAGE_URL),
+  const currentArenaPageUrl = arenaPageUrl(
+    "ARENA_PAGE_URL",
+    env.ARENA_PAGE_URL,
+    frontendOrigin,
   );
-  if (
-    (arenaPageUrl.protocol !== "https:" && arenaPageUrl.hostname !== "localhost") ||
-    arenaPageUrl.origin !== frontendOrigin ||
-    arenaPageUrl.username ||
-    arenaPageUrl.password ||
-    arenaPageUrl.search ||
-    arenaPageUrl.hash ||
-    !arenaPageUrl.pathname.startsWith("/arena/")
-  ) {
-    throw new Error("ARENA_PAGE_URL must be a canonical arena path on the frontend origin");
-  }
   const arenaAddress = new PublicKey(required("ARENA_ADDRESS", env.ARENA_ADDRESS));
+  const hasRefundAddress = env.REFUND_ARENA_ADDRESS !== undefined;
+  const hasRefundPage = env.REFUND_ARENA_PAGE_URL !== undefined;
+  if (hasRefundAddress !== hasRefundPage) {
+    throw new Error("REFUND_ARENA_ADDRESS and REFUND_ARENA_PAGE_URL must be configured together");
+  }
+  const refundArenaAddress = hasRefundAddress
+    ? new PublicKey(required("REFUND_ARENA_ADDRESS", env.REFUND_ARENA_ADDRESS))
+    : undefined;
+  const refundArenaPageUrl = hasRefundPage
+    ? arenaPageUrl("REFUND_ARENA_PAGE_URL", env.REFUND_ARENA_PAGE_URL, frontendOrigin)
+    : undefined;
+  if (refundArenaAddress?.equals(arenaAddress)) {
+    throw new Error("REFUND_ARENA_ADDRESS must differ from ARENA_ADDRESS");
+  }
   const allowedOrigins = new Set(
     required("ALLOWED_ORIGINS", env.ALLOWED_ORIGINS)
       .split(",")
@@ -82,8 +105,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ActionsConfig 
     programId,
     publicBaseUrl,
     frontendOrigin,
-    arenaPageUrl: arenaPageUrl.toString(),
+    arenaPageUrl: currentArenaPageUrl,
     arenaAddress,
+    ...(refundArenaAddress === undefined || refundArenaPageUrl === undefined
+      ? {}
+      : { refundArenaAddress, refundArenaPageUrl }),
     allowedOrigins,
     minBackLamports,
     maxBackLamports,
