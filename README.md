@@ -1,213 +1,219 @@
 # Arena90
 
-**Autonomous AI agents competing on football strategy, powered by TxLINE and
-TxODDS, with supporter participation and devnet settlement proofs on Solana.**
+**Two autonomous football strategy agents. One verified evidence set. A
+deterministic arena with supporter participation on Solana devnet.**
 
-[Live MVP](https://arena90.xyz) · [Technical documentation](docs/README.md) ·
-[Product roadmap](docs/specs/02-V2-Delivery-Roadmap.md) ·
-[Arena90 on X](https://x.com/arena90ai)
+[Live MVP](https://arena90.xyz) · [X profile](https://x.com/arena90ai) ·
+[Technical docs](docs/README.md) · [Demo runbook](docs/demo/00-Demo-and-Submission-Runbook.md) ·
+[Submission sheet](SUBMISSION.md)
 
-Arena90 turns one football fixture into a competition between two autonomous
-strategy agents.
+## What Arena90 does
 
-Agent Alpha and Agent Beta receive the same canonical snapshot, begin with equal
-virtual bankrolls, independently choose target portfolio allocations, and
-compete under deterministic execution and winner rules.
+Arena90 turns one football fixture into a strategy competition. Alpha and Beta
+receive the same canonical TxLINE/TxODDS snapshot, start with equal virtual
+bankrolls, and independently manage portfolios at approved checkpoints. Arena90
+validates their structured decisions, executes and accounts for them
+deterministically, reveals the result, and records a final winner.
 
-Supporters may back the strategy they trust through Solana. Supporter funds are
-separate from agent virtual capital and never influence agent decisions.
+Supporters can back Alpha or Beta with a user-signed Solana devnet transaction.
+Supporter funds remain separate from agent capital and never become a strategy
+input. Watching an arena is wallet-free.
 
-## Product Model
+Arena90 is not a sportsbook, a user-facing trading terminal, copy trading, an
+AI-controlled wallet, or a scripted battle.
+
+## Product loop
 
 ```text
-Football and market data
-→ Shared canonical snapshot
-→ Independent autonomous decisions
-→ Deterministic portfolio execution
-→ Visible competition result
-→ Solana supporter settlement
+TxLINE / TxODDS evidence
+        ↓
+Canonical fixture + market snapshot
+        ↓
+Alpha and Beta decide independently
+        ↓
+Fail-closed validation and deterministic execution
+        ↓
+Accounting, simultaneous reveal, and winner calculation
+        ↓
+Public state, SSE event ledger, and proof views
+        ↓
+Solana devnet supporter lifecycle
 ```
 
-Arena90 is not a conventional sportsbook, user-facing trading terminal,
-copy-trading product, AI-controlled wallet, or scripted agent battle.
+The Arena Runtime is the deep module. Its public state, ordered events, and
+terminal result are the interface consumed by the frontend and settlement
+modules. Provider payloads, prompts, raw model output, private reasoning, and
+wallet authority stay behind their seams.
 
-Watching an arena does not require authentication or a wallet.
+## Strategy agents
 
-## Strategy Agents
+| Agent | Product name | Policy identity | Question |
+| --- | --- | --- | --- |
+| Alpha | Reversion | Overreaction | Did price move faster than verified match evidence? |
+| Beta | Continuation | Underreaction | Did verified match evidence move faster than price? |
 
-- **Agent Alpha — Reversion (overreaction policy)**
-  Tests whether market price moved faster than verified match evidence.
+Neither agent is assigned HOME, DRAW, or AWAY. Each checkpoint returns a
+structured target allocation or intentional `NO_TRADE`; invalid output fails
+closed and is never converted into a fabricated trade.
 
-- **Agent Beta — Continuation (underreaction policy)**
-  Tests whether verified match evidence moved faster than market price.
+Decision checkpoints are kickoff, 15', 30', halftime, 60', and 75'. Final
+settlement is a terminal event, not another agent decision.
 
-These are strategy identities, not fixed football outcomes. Both agents may
-select similar allocations, hold cash, reduce exposure, or return `NO_TRADE`.
+## TxLINE / TxODDS integration
 
-## Competition Model
+The live adapter uses credentials supplied through environment variables. No
+provider credential is committed to the repository.
 
-Decision rounds occur at:
+| Provider surface | Arena90 use |
+| --- | --- |
+| `GET /api/fixtures/snapshot` | Fixture identity, participants, home/away mapping, start time |
+| `GET /api/odds/snapshot/{fixtureId}` | Initial approved full-match `1X2` market |
+| `GET /api/odds/updates/{fixtureId}` | Newest market envelope and freshness selection |
+| `GET /api/scores/snapshot/{fixtureId}` | Score, phase, clock, and initial sequence |
+| `GET /api/scores/stream?fixtureId={fixtureId}` | Live score events and resumable sequence updates |
+| `GET /api/scores/historical/{fixtureId}` | Recorded score stream used for Replay evidence |
 
-- Kickoff
-- 15 minutes
-- 30 minutes
-- Halftime
-- 60 minutes
-- 75 minutes
+Before a checkpoint is admitted, the adapter verifies fixture identity,
+participant mapping, score and clock validity, sequence monotonicity, market
+identity, odds completeness, freshness, and suspension state. Stale, malformed,
+or mismatched data produces a failed or missed checkpoint; Arena90 does not
+fall back to an older market or invent a decision.
 
-Final Settlement is a deterministic terminal event, not another agent decision
-round.
+Implementation: [`client.ts`](backend/arena-runtime/src/adapters/data/txline/client.ts),
+[`live.ts`](backend/arena-runtime/src/adapters/data/txline/live.ts), and the
+[TxLINE adapter specification](docs/specs/03-TxLINE-Live-Data-Adapter.md).
 
-Live and Replay use the same competition rules. Replay uses recorded football
-data while generating new autonomous agent decisions.
+## Solana supporter layer
 
-## Repository Structure
+The supporter layer is deliberately separate from agent execution:
 
-### `frontend/web/`
+```text
+Frontend → constrained unsigned Action transaction
+         → supporter wallet signs
+         → Anchor escrow on Solana devnet
+         → lock → terminal proof → settle → claim/refund
+```
 
-Next.js 15, React 19, TypeScript, and Tailwind CSS v4.
+- Action API: [`backend/solana-actions`](backend/solana-actions/)
+- Restricted resolver: [`backend/solana-resolver`](backend/solana-resolver/)
+- Rust/Anchor program: [`contracts/anchor/arena_escrow`](contracts/anchor/arena_escrow/)
+- Network: Solana devnet
+- Arena90 program: `3eaE8RrpNK3Fo9YNj8bSK8VKZ49uWNVceGntzUSgDLsZ`
+- Current Action: [Back an Arena90 agent](https://arena90.xyz/actions/arena/7LHP2afdUPTJErHEy9QNRTusVA7TUyy47agyHsUfFz6y)
+- Verified devnet transaction: [Explorer proof](https://explorer.solana.com/tx/3t9sqcxu853QwELQ6Nfb3Uf5HbMKjEtp75GZ4vE7hxZQw9NwxLvZdzdDpKZYNKRENJnZvz59BurAz1zRH7K1gF6F?cluster=devnet)
 
-Public spectator, arena, replay, proof, agent, and participation experiences.
+The backend only constructs constrained unsigned transactions. It never holds
+supporter private keys or controls supporter wallets.
 
-### `backend/arena-runtime/`
+## Live and Replay
 
-Always-on TxLINE/TxODDS ingestion, canonical snapshots, isolated Alpha/Beta
-invocations, deterministic validation, execution, accounting, persistence,
-HTTP state, and resumable SSE events.
+Live and Replay share the same competition rules and engine. Live consumes
+current TxLINE/TxODDS evidence. Replay consumes recorded TxLINE evidence and
+generates fresh autonomous Alpha/Beta decisions through the same engine; it is
+not presented as live data.
 
-### `backend/solana-actions/`
+- [Live MVP](https://arena90.xyz)
+- [Replay archive](https://arena90.xyz/replays)
+- [France–Spain semifinal Replay](https://arena90.xyz/arena/world-cup-2026-france-spain-semifinal-replay/archive)
+- [England–Argentina semifinal Replay](https://arena90.xyz/arena/world-cup-2026-england-argentina-semifinal-replay/archive)
 
-Node.js and Express API using `@solana/actions` and `@solana/web3.js`.
+## Technology
 
-Provides Solana Action and Blink-compatible surfaces.
+- Next.js 15, React 19, TypeScript, CSS Modules, and shared global design tokens
+- Node.js TypeScript runtime with Zod contracts and SSE public events
+- ZeroClaw-compatible autonomous agent adapter with structured decision output
+- Solana Actions and `@solana/web3.js`
+- Rust/Anchor escrow and TxLINE terminal-proof validation
+- Vercel frontend with separately deployed runtime, Actions, and resolver
 
-### `backend/solana-resolver/`
+## Repository map
 
-Restricted resolver that binds the runtime final result to the supporter
-program settlement path.
+| Path | Responsibility |
+| --- | --- |
+| `frontend/web/` | Spectator, arena, Replay, proof, agents, and supporter UX |
+| `backend/arena-runtime/` | Ingestion, canonical snapshots, agents, validation, execution, accounting, persistence, HTTP, SSE |
+| `backend/solana-actions/` | Wallet-signed Action/Blink transaction surfaces |
+| `backend/solana-resolver/` | Restricted runtime-result to terminal-proof settlement adapter |
+| `contracts/anchor/arena_escrow/` | Devnet SOL escrow, lifecycle, proof receipt, settlement, claim, refund |
+| `docs/` | Approved product, technical specifications, deployment, and demo documentation |
+| `ops/deployment/` | Service units, reverse proxy example, env examples, activation and rollback notes |
 
-### `contracts/anchor/arena_escrow/`
+## Run locally
 
-Rust and Anchor program for native devnet SOL supporter escrow, deadline lock,
-settlement, claim, and refund.
-
-### `agents/zeroclaw/`
-
-ZeroClaw autonomous-agent runtime and supporting tools.
-
-The existing `run_clash.sh` still contains legacy machine-specific paths and
-must be inspected before use.
-
-### `docs/`
-
-Product decisions, technical specifications, plans, and references.
-
-## Authoritative Documents
-
-Only documents marked `Approved` are implementation-authoritative.
-
-- `docs/product/01-Autonomous-Game-Loop-Decision.md`
-  defines checkpoints, decisions, failures, deterministic execution, winner
-  rules, and Live/Replay equivalence.
-
-- `docs/product/02-Product-Definition-V2.md`
-  defines the product, users, agent identities, principles, scope, and
-  boundaries.
-
-- `docs/product/03-User-Experience-and-Routes.md`
-  defines routes, page responsibilities, Live and Replay UX, Solana
-  participation, identity, and cross-route behavior.
-
-AI coding tools must also follow `AGENTS.md` and the nearest subsystem
-`AGENTS.md` when one exists.
-
-Existing V1 code, mocks, filenames, or comments do not override approved V2
-decisions.
-
-## Development
-
-### Frontend
+Copy the relevant `.env.example` to a local ignored `.env`; never commit it.
 
 ```bash
+# Frontend
 cd frontend/web
 npm ci
 npm run dev
+
+# Runtime HTTP API
+cd backend/arena-runtime
+npm ci
+npm run start:http
+
+# Solana Actions
+cd backend/solana-actions
+npm ci
+npm run build && npm start
+
+# Resolver and Anchor require configured devnet credentials/tooling.
+cd backend/solana-resolver && npm ci && npm test
+cd contracts/anchor/arena_escrow && npm ci && anchor build && cargo test
 ```
 
-Validation:
+Frontend checks:
 
 ```bash
+cd frontend/web
 npm run lint
 npm test -- --runInBand
 npm run build
 ```
 
-### Solana Actions Backend
+Runtime, Actions, resolver, and Anchor commands are documented in the
+[documentation index](docs/README.md) and deployment guide.
 
-```bash
-cd backend/solana-actions
-npm ci
-npm run dev
-```
+## Evidence and current status
 
-Validation:
+Proven:
 
-```bash
-npm run build
-npm test -- --runInBand
-```
+- Two semifinal Replay artifacts run fresh autonomous decisions through the
+  canonical competition engine.
+- An always-on World Cup Live runtime is deployed and resumes from persisted
+  state without a public start trigger.
+- Public arena state, SSE events, Replay archives, proof routes, and frontend
+  pages are deployed at `arena90.xyz`.
+- Solana devnet backing, locking, terminal-proof validation, settlement, claim,
+  and void/refund smokes pass in isolation.
 
-### Anchor Contracts
+Still open:
 
-```bash
-cd contracts/anchor/arena_escrow
-npm ci
-anchor build
-npm test
-cargo test
-```
+- A real World Cup Live checkpoint has not yet been evidenced through the full
+  TxLINE/TxODDS → both agents → deterministic execution → browser ledger →
+  canonical Solana settlement path.
 
-Solana and Anchor tooling must be installed before contract validation.
+Replay is valid demo evidence for autonomous decision behavior, but it is not a
+substitute for the required live-input acceptance. See the [V2 delivery
+roadmap](docs/specs/02-V2-Delivery-Roadmap.md) and [demo runbook](docs/demo/00-Demo-and-Submission-Runbook.md)
+for the evidence-owned status.
 
-### ZeroClaw Agents
+## Security
 
-Inspect `agents/zeroclaw/` before executing the legacy runner.
+Secrets come from environment variables. Do not commit `.env` files, API
+credentials, private keys, seed phrases, wallet files, RPC credentials, build
+output, or local validator ledgers. Watching is wallet-free; supporter
+transactions are user-signed; private reasoning and raw provider payloads are
+not public product output.
 
-Do not treat `run_clash.sh` as portable until its absolute-path assumptions are
-removed.
+## Documentation
 
-## Security and Honesty
-
-Secrets must come from environment variables.
-
-Never commit `.env` files, API credentials, private keys, seed phrases, wallet
-files, RPC credentials, build output, or local validator ledgers.
-
-Mocks, trusted components, simulations, and incomplete integrations must be
-identified honestly. They must not be described as live, verified,
-decentralized, autonomous, or production-ready unless that claim has been
-validated.
-
-## Current Submission Status
-
-Proven today:
-
-- immutable semifinal Replay artifacts run through the canonical competition
-  engine with fresh autonomous Alpha and Beta decisions;
-- an always-on World Cup Live runtime is deployed, resumes after restart, and
-  waits for valid approved checkpoint evidence without a public start trigger;
-- public state, ordered SSE events, arena views, replay archives, and proof
-  routes are deployed at `arena90.xyz`;
-- the V2 supporter program and Action endpoints are deployed on Solana devnet;
-- real devnet smokes prove backing, lock, TxLINE terminal-proof validation,
-  settlement, winning claim, and void/refund behavior.
-
-Not yet proven:
-
-- a World Cup Live checkpoint has not yet crossed TxLINE/TxODDS → both agents →
-  deterministic execution → browser ledger → canonical Solana settlement end
-  to end.
-
-Replay is demo fallback evidence, not a substitute for the required live-input
-integration. The detailed, evidence-owned status is maintained in
-[`docs/specs/02-V2-Delivery-Roadmap.md`](docs/specs/02-V2-Delivery-Roadmap.md).
+- [Documentation index](docs/README.md)
+- [Autonomous game loop](docs/product/01-Autonomous-Game-Loop-Decision.md)
+- [Product definition](docs/product/02-Product-Definition-V2.md)
+- [UX and routes](docs/product/03-User-Experience-and-Routes.md)
+- [Runtime specification](docs/specs/01-P0-Arena-Runtime.md)
+- [TxLINE adapter specification](docs/specs/03-TxLINE-Live-Data-Adapter.md)
+- [Solana escrow and settlement specification](docs/specs/04-Supporter-Escrow-and-Blink-Settlement.md)
+- [Demo and submission runbook](docs/demo/00-Demo-and-Submission-Runbook.md)
