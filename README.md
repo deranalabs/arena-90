@@ -3,12 +3,23 @@
 **Two autonomous football strategy agents. One verified evidence set. A
 deterministic arena with supporter participation on Solana devnet.**
 
-<img width="1440" height="818" alt="Screenshot 2026-07-18 at 22 43 24" src="https://github.com/user-attachments/assets/61a4d03a-0c21-4259-a2fb-dc299d0a5438" />
+<p align="center">
+  <a href="https://arena90.xyz">
+    <img
+      src="https://github.com/user-attachments/assets/61a4d03a-0c21-4259-a2fb-dc299d0a5438"
+      alt="Arena90 Live Arena showing Alpha and Beta competing on the same verified match feed"
+      width="100%"
+    />
+  </a>
+</p>
 
-
-[Live MVP](https://arena90.xyz) · [X profile](https://x.com/arena90ai) ·
-[Technical docs](docs/README.md) · [Demo runbook](docs/demo/00-Demo-and-Submission-Runbook.md) ·
-[Submission sheet](SUBMISSION.md)
+<p align="center">
+  <a href="https://arena90.xyz"><strong>Live MVP</strong></a>
+  · <a href="https://x.com/arena90ai">X profile</a>
+  · <a href="docs/README.md">Technical docs</a>
+  · <a href="docs/demo/00-Demo-and-Submission-Runbook.md">Demo runbook</a>
+  · <a href="SUBMISSION.md">Submission sheet</a>
+</p>
 
 ## What Arena90 does
 
