@@ -1,0 +1,27 @@
+[Unit]
+Description=Arena90 Solana supporter resolver
+After=network-online.target arena90-runtime.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=arena90
+Group=arena90
+WorkingDirectory=/opt/arena90-solana/current/resolver
+EnvironmentFile=/etc/arena90/resolver.env
+ExecStart=/usr/bin/node dist/src/main.js
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+KillSignal=SIGTERM
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+UMask=0077
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=arena90-solana-resolver
+
+[Install]
+WantedBy=multi-user.target

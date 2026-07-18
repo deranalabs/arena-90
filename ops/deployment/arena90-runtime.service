@@ -1,0 +1,28 @@
+[Unit]
+Description=Arena90 V2 runtime
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=arena90
+Group=arena90
+WorkingDirectory=/opt/arena90/current
+EnvironmentFile=/etc/arena90/runtime.env
+ExecStart=/usr/bin/node scripts/http-server.mjs
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=20
+KillSignal=SIGTERM
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/lib/arena90/persistence /var/lib/arena90/zeroclaw
+UMask=0077
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=arena90-runtime
+
+[Install]
+WantedBy=multi-user.target

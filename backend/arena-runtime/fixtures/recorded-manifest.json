@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "arenaId": "arena-replay-001",
+  "mode": "REPLAY",
+  "competition": "Premier League",
+  "fixtureId": "fixture-recorded-001",
+  "homeTeam": { "name": "Home FC", "code": "HOM" },
+  "awayTeam": { "name": "Away FC", "code": "AWY" },
+  "kickoffUtc": "2026-07-13T12:00:00.000Z",
+  "startingBankrollMicros": "100000000",
+  "currency": "VIRTUAL_USD_MICROS",
+  "assets": [
+    { "id": "HOME", "market": "FULL_TIME_1X2", "label": "Home win" },
+    { "id": "DRAW", "market": "FULL_TIME_1X2", "label": "Draw" },
+    { "id": "AWAY", "market": "FULL_TIME_1X2", "label": "Away win" }
+  ],
+  "checkpoints": [
+    "KICKOFF",
+    "M15",
+    "M30",
+    "HALFTIME",
+    "M60",
+    "M75",
+    "FINAL"
+  ],
+  "createdAtUtc": "2026-07-13T10:00:00.000Z"
+}

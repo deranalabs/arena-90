@@ -1,0 +1,15 @@
+.git/
+.vercel/
+.env
+.env.*
+**/.secret_key
+**/node_modules/
+**/.next/
+**/dist/
+**/build/
+**/coverage/
+.anchor/
+.surfpool/
+target/
+test-ledger/
+backend/arena-runtime/.arena_persistence/

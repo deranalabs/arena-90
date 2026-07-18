@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "arenaId": "world-cup-2026-france-england-third-place-v4",
+  "mode": "LIVE",
+  "competition": "World Cup 2026",
+  "fixtureId": "18257865",
+  "homeTeam": { "name": "France", "code": "FRA" },
+  "awayTeam": { "name": "England", "code": "ENG" },
+  "kickoffUtc": "2026-07-18T21:00:00.000Z",
+  "startingBankrollMicros": "100000000",
+  "currency": "VIRTUAL_USD_MICROS",
+  "assets": [
+    { "id": "HOME", "market": "FULL_TIME_1X2", "label": "France win" },
+    { "id": "DRAW", "market": "FULL_TIME_1X2", "label": "Draw" },
+    { "id": "AWAY", "market": "FULL_TIME_1X2", "label": "England win" }
+  ],
+  "checkpoints": ["KICKOFF", "M15", "M30", "HALFTIME", "M60", "M75", "FINAL"],
+  "createdAtUtc": "2026-07-18T07:45:00.000Z"
+}

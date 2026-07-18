@@ -1,0 +1,65 @@
+{
+  "name": "@arena90/arena-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./adapters/agents": {
+      "types": "./dist/adapters/agents/index.d.ts",
+      "import": "./dist/adapters/agents/index.js"
+    },
+    "./adapters/data": {
+      "types": "./dist/adapters/data/index.d.ts",
+      "import": "./dist/adapters/data/index.js"
+    },
+    "./contracts": {
+      "types": "./dist/contracts/index.d.ts",
+      "import": "./dist/contracts/index.js"
+    },
+    "./engine": {
+      "types": "./dist/engine/index.d.ts",
+      "import": "./dist/engine/index.js"
+    },
+    "./fixed-point": {
+      "types": "./dist/fixed-point.d.ts",
+      "import": "./dist/fixed-point.js"
+    },
+    "./services": {
+      "types": "./dist/services/index.d.ts",
+      "import": "./dist/services/index.js"
+    }
+  },
+  "scripts": {
+    "clean": "node scripts/clean-build.mjs",
+    "build": "npm run clean && tsc --project tsconfig.json --noEmit && tsc --project tsconfig.build.json",
+    "release:build": "npm run build && node scripts/build-release.mjs",
+    "start:http": "npm run build && node --env-file-if-exists=.env scripts/http-server.mjs",
+    "preflight:acceptance": "node --env-file-if-exists=.env scripts/acceptance-preflight.mjs",
+    "smoke:http:replay": "npm run build && node --env-file-if-exists=.env scripts/http-replay-smoke.mjs",
+    "smoke:lifecycle:replay": "npm run build && node --env-file-if-exists=.env scripts/lifecycle-replay-smoke.mjs",
+    "smoke:txline": "npm run build && node --env-file-if-exists=.env scripts/txline-smoke.mjs",
+    "inspect:txline:fixtures": "npm run build && node --env-file-if-exists=.env scripts/txline-fixture-inspect.mjs",
+    "smoke:zeroclaw": "npm run build && node --env-file-if-exists=.env scripts/zeroclaw-smoke.mjs",
+    "smoke:zeroclaw:strategy": "npm run build && node --env-file-if-exists=.env scripts/zeroclaw-strategy-smoke.mjs",
+    "record:txline:semifinals": "npm run build && node --env-file-if-exists=.env scripts/record-txline-semifinals.mjs",
+    "export:replay": "npm run build && node --env-file-if-exists=.env scripts/export-replay-artifact.mjs",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

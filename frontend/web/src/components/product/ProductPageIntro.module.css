@@ -1,0 +1,224 @@
+/* Hallmark · component: product page masthead · genre: editorial
+ * states: static content · responsive split-to-stack
+ */
+
+.intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(15rem, 0.65fr);
+  gap: clamp(var(--space-xl), 7vw, var(--space-3xl));
+  align-items: end;
+  padding: var(--space-2xl) 0 var(--space-xl);
+  border-top: 1px solid var(--color-rule);
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.copy {
+  min-width: 0;
+}
+
+.title {
+  max-width: 15ch;
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 5.2vw, 5.75rem);
+  font-weight: var(--weight-display);
+  letter-spacing: -0.045em;
+  line-height: 0.96;
+  overflow-wrap: anywhere;
+}
+
+.lede {
+  max-width: 58ch;
+  margin: var(--space-lg) 0 0;
+  color: var(--color-muted);
+  font-size: var(--text-md);
+  line-height: 1.5;
+}
+
+.aside {
+  display: flex;
+  min-width: 0;
+  min-height: 9rem;
+  align-items: flex-end;
+  padding: var(--space-md) 0 var(--space-xs) var(--space-lg);
+  border-left: 1px solid var(--color-rule);
+}
+
+.aside > * {
+  width: 100%;
+}
+
+.aside :global(.product-intro__count) {
+  display: grid;
+  gap: var(--space-xs);
+  margin: 0;
+}
+
+.aside :global(.product-intro__count strong) {
+  display: block;
+  color: var(--color-alpha);
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 5vw, 5rem);
+  font-weight: var(--weight-display);
+  line-height: 0.85;
+}
+
+.aside :global(.product-intro__count span) {
+  display: block;
+  max-width: 18ch;
+  color: var(--color-muted);
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+.aside :global(.product-intro__facts) {
+  gap: var(--space-xs);
+  margin: 0;
+}
+
+.frontPage {
+  padding: var(--space-2xl) 0 var(--space-xl);
+  border-top: 1px solid var(--color-rule);
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.frontPageTopline {
+  display: flex;
+  gap: var(--space-lg);
+  align-items: baseline;
+  justify-content: space-between;
+  padding-bottom: var(--space-md);
+  border-bottom: 1px solid var(--color-rule);
+}
+
+.frontPageTopline :global(.product-eyebrow),
+.meta {
+  margin: 0;
+}
+
+.meta {
+  color: var(--color-muted);
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.frontPageGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.12fr) minmax(18rem, 0.88fr);
+  gap: clamp(var(--space-xl), 8vw, var(--space-3xl));
+  align-items: start;
+  padding-top: var(--space-xl);
+}
+
+.frontPageTitle {
+  max-width: 13ch;
+  margin: 0;
+  color: var(--color-ink);
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 5.2vw, 5.75rem);
+  font-weight: var(--weight-display);
+  letter-spacing: -0.045em;
+  line-height: 0.96;
+  overflow-wrap: anywhere;
+}
+
+.frontPageDetail {
+  display: grid;
+  gap: var(--space-xl);
+  min-width: 0;
+  padding-top: var(--space-xs);
+}
+
+.frontPageLede {
+  max-width: 52ch;
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--text-md);
+  line-height: 1.5;
+}
+
+.frontPageAside {
+  min-width: 0;
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--color-rule);
+}
+
+.frontPageAside :global(.product-intro__count) {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-sm);
+  align-items: end;
+  margin: 0;
+}
+
+.frontPageAside :global(.product-intro__count strong) {
+  color: var(--color-alpha);
+  font-family: var(--font-display);
+  font-size: clamp(2.75rem, 5vw, 5rem);
+  font-weight: var(--weight-display);
+  line-height: 0.8;
+}
+
+.frontPageAside :global(.product-intro__count span) {
+  max-width: 18ch;
+  color: var(--color-muted);
+  font-family: var(--font-outlier);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  line-height: 1.45;
+  text-transform: uppercase;
+}
+
+@media (max-width: 48rem) {
+  .intro {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-lg);
+    padding-top: var(--space-xl);
+  }
+
+  .title {
+    font-size: clamp(2.5rem, 12vw, 4.5rem);
+  }
+
+  .lede {
+    margin-top: var(--space-md);
+    font-size: var(--text-base);
+  }
+
+  .aside {
+    min-height: 0;
+    padding: var(--space-md) 0 0;
+    border-top: 1px solid var(--color-rule);
+    border-left: 0;
+  }
+
+  .frontPage {
+    padding-top: var(--space-xl);
+  }
+
+  .frontPageGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-lg);
+    padding-top: var(--space-lg);
+  }
+
+  .frontPageTitle {
+    font-size: clamp(2.5rem, 12vw, 4.5rem);
+  }
+
+  .frontPageDetail {
+    gap: var(--space-lg);
+    padding-top: 0;
+  }
+
+  .frontPageLede {
+    font-size: var(--text-base);
+  }
+}

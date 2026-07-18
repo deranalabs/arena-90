@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+  "mode": "REPLAY",
+  "competition": "FIFA World Cup 2026",
+  "fixtureId": "18241006",
+  "homeTeam": {
+    "name": "England",
+    "code": "ENG"
+  },
+  "awayTeam": {
+    "name": "Argentina",
+    "code": "ARG"
+  },
+  "kickoffUtc": "2026-07-15T19:00:00.000Z",
+  "startingBankrollMicros": "100000000",
+  "currency": "VIRTUAL_USD_MICROS",
+  "assets": [
+    {
+      "id": "HOME",
+      "market": "FULL_TIME_1X2",
+      "label": "England win"
+    },
+    {
+      "id": "DRAW",
+      "market": "FULL_TIME_1X2",
+      "label": "Draw"
+    },
+    {
+      "id": "AWAY",
+      "market": "FULL_TIME_1X2",
+      "label": "Argentina win"
+    }
+  ],
+  "checkpoints": [
+    "KICKOFF",
+    "M15",
+    "M30",
+    "HALFTIME",
+    "M60",
+    "M75",
+    "FINAL"
+  ],
+  "createdAtUtc": "2026-07-17T20:18:30.067Z"
+}

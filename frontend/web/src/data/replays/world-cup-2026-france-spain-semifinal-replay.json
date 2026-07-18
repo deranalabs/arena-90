@@ -1,0 +1,2069 @@
+{
+  "schemaVersion": 1,
+  "recordedSource": {
+    "label": "RECORDED TxLINE DATA",
+    "fixtureId": "18237038",
+    "matchDateUtc": "2026-07-14T19:00:00.000Z",
+    "capturedAtUtc": "2026-07-17T20:18:30.067Z",
+    "scoreEventCount": 1027,
+    "oddsUpdateCount": 68240,
+    "inputHash": "a936be36fd12387f724e036e7b6894726090188e1692b1d9e6ba15c79efce1d8"
+  },
+  "state": {
+    "schemaVersion": 1,
+    "manifest": {
+      "schemaVersion": 1,
+      "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+      "mode": "REPLAY",
+      "competition": "FIFA World Cup 2026",
+      "fixtureId": "18237038",
+      "homeTeam": {
+        "name": "France",
+        "code": "FRA"
+      },
+      "awayTeam": {
+        "name": "Spain",
+        "code": "ESP"
+      },
+      "kickoffUtc": "2026-07-14T19:00:00.000Z",
+      "startingBankrollMicros": "100000000",
+      "currency": "VIRTUAL_USD_MICROS",
+      "assets": [
+        {
+          "id": "HOME",
+          "market": "FULL_TIME_1X2",
+          "label": "France win"
+        },
+        {
+          "id": "DRAW",
+          "market": "FULL_TIME_1X2",
+          "label": "Draw"
+        },
+        {
+          "id": "AWAY",
+          "market": "FULL_TIME_1X2",
+          "label": "Spain win"
+        }
+      ],
+      "checkpoints": [
+        "KICKOFF",
+        "M15",
+        "M30",
+        "HALFTIME",
+        "M60",
+        "M75",
+        "FINAL"
+      ],
+      "createdAtUtc": "2026-07-17T20:18:30.067Z"
+    },
+    "phase": "COMPLETED",
+    "runtimeVersions": {
+      "runtimeVersion": "7.5",
+      "executionRuleVersion": "p0-v1",
+      "winnerRuleVersion": "FINAL_NAV_ONLY_V1",
+      "agents": {
+        "alpha": {
+          "strategyId": "alpha-overreaction-hunter",
+          "strategyVersion": "4"
+        },
+        "beta": {
+          "strategyId": "beta-underreaction-hunter",
+          "strategyVersion": "4"
+        }
+      }
+    },
+    "portfolios": {
+      "alpha": {
+        "agentId": "alpha",
+        "cashMicros": "15000003",
+        "unitMicros": {
+          "HOME": "1098321764",
+          "DRAW": "347511815",
+          "AWAY": "11655731"
+        },
+        "navMicros": "26655734",
+        "returnBps": -7334,
+        "updatedAtCheckpoint": "FINAL"
+      },
+      "beta": {
+        "agentId": "beta",
+        "cashMicros": "20000003",
+        "unitMicros": {
+          "HOME": "49843988",
+          "DRAW": "35792261",
+          "AWAY": "115388165"
+        },
+        "navMicros": "135388168",
+        "returnBps": 3538,
+        "updatedAtCheckpoint": "FINAL"
+      }
+    },
+    "checkpoints": [
+      {
+        "checkpointId": "KICKOFF",
+        "outcome": "REVEALED",
+        "snapshot": {
+          "schemaVersion": 1,
+          "snapshotId": "20e195d85c2169b5e912bc3e615545e8a73fa8258969487baa9c1f6b252412c5",
+          "snapshotHash": "dcea691ae17c7a7ca9740125adcb8cba4b18f3bcc771cb817fb7d182a959f68b",
+          "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+          "fixtureId": "18237038",
+          "checkpointId": "KICKOFF",
+          "observedAtUtc": "2026-07-14T19:05:45.805Z",
+          "source": "TXLINE_RECORDED",
+          "match": {
+            "status": "LIVE",
+            "minute": 5,
+            "addedTime": 0,
+            "homeScore": 0,
+            "awayScore": 0
+          },
+          "priceMicros": {
+            "HOME": 369941,
+            "DRAW": 326674,
+            "AWAY": 303385
+          },
+          "freshness": {
+            "marketUpdatedAtUtc": "2026-07-14T19:05:45.785Z",
+            "delayed": true,
+            "suspended": false
+          }
+        },
+        "revealedDecisions": {
+          "alpha": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+            "snapshotId": "20e195d85c2169b5e912bc3e615545e8a73fa8258969487baa9c1f6b252412c5",
+            "checkpointId": "KICKOFF",
+            "agentId": "alpha",
+            "publicExplanation": "The policySignal requiredAction is NO_TRADE because no approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          },
+          "beta": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+            "snapshotId": "20e195d85c2169b5e912bc3e615545e8a73fa8258969487baa9c1f6b252412c5",
+            "checkpointId": "KICKOFF",
+            "agentId": "beta",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          }
+        },
+        "failures": [],
+        "portfoliosBefore": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "KICKOFF"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "KICKOFF"
+          }
+        },
+        "portfoliosAfter": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "KICKOFF"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "KICKOFF"
+          }
+        },
+        "firstEventSequence": 2,
+        "lastEventSequence": 7
+      },
+      {
+        "checkpointId": "M15",
+        "outcome": "REVEALED",
+        "snapshot": {
+          "schemaVersion": 1,
+          "snapshotId": "fdcb42c24306af2943e0c141af5622aed57a4ba950418951751011e37200002c",
+          "snapshotHash": "8bd616dbe0839a12ef0937be8ae385ab5eb311b3f7526fabd17338516cee9ac8",
+          "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+          "fixtureId": "18237038",
+          "checkpointId": "M15",
+          "observedAtUtc": "2026-07-14T19:15:10.458Z",
+          "source": "TXLINE_RECORDED",
+          "match": {
+            "status": "LIVE",
+            "minute": 15,
+            "addedTime": 0,
+            "homeScore": 0,
+            "awayScore": 0
+          },
+          "priceMicros": {
+            "HOME": 359204,
+            "DRAW": 336933,
+            "AWAY": 303863
+          },
+          "freshness": {
+            "marketUpdatedAtUtc": "2026-07-14T19:15:09.431Z",
+            "delayed": true,
+            "suspended": false
+          }
+        },
+        "revealedDecisions": {
+          "alpha": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+            "snapshotId": "fdcb42c24306af2943e0c141af5622aed57a4ba950418951751011e37200002c",
+            "checkpointId": "M15",
+            "agentId": "alpha",
+            "publicExplanation": "The policy signal required action is NO_TRADE because no approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          },
+          "beta": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+            "snapshotId": "fdcb42c24306af2943e0c141af5622aed57a4ba950418951751011e37200002c",
+            "checkpointId": "M15",
+            "agentId": "beta",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          }
+        },
+        "failures": [],
+        "portfoliosBefore": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "KICKOFF"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "KICKOFF"
+          }
+        },
+        "portfoliosAfter": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M15"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M15"
+          }
+        },
+        "firstEventSequence": 8,
+        "lastEventSequence": 13
+      },
+      {
+        "checkpointId": "M30",
+        "outcome": "REVEALED",
+        "snapshot": {
+          "schemaVersion": 1,
+          "snapshotId": "afa293e2cd6627b11db540646ac9885175238f7f4dfd69ac289766b9b0c3cc79",
+          "snapshotHash": "737fdfda41af13b5e0f5df593f42c3668be44109889128181ad9283f558e155d",
+          "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+          "fixtureId": "18237038",
+          "checkpointId": "M30",
+          "observedAtUtc": "2026-07-14T19:30:18.941Z",
+          "source": "TXLINE_RECORDED",
+          "match": {
+            "status": "LIVE",
+            "minute": 30,
+            "addedTime": 0,
+            "homeScore": 0,
+            "awayScore": 1
+          },
+          "priceMicros": {
+            "HOME": 200626,
+            "DRAW": 279390,
+            "AWAY": 519984
+          },
+          "freshness": {
+            "marketUpdatedAtUtc": "2026-07-14T19:30:17.429Z",
+            "delayed": true,
+            "suspended": false
+          }
+        },
+        "revealedDecisions": {
+          "alpha": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+            "snapshotId": "afa293e2cd6627b11db540646ac9885175238f7f4dfd69ac289766b9b0c3cc79",
+            "checkpointId": "M30",
+            "agentId": "alpha",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          },
+          "beta": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+            "snapshotId": "afa293e2cd6627b11db540646ac9885175238f7f4dfd69ac289766b9b0c3cc79",
+            "checkpointId": "M30",
+            "agentId": "beta",
+            "publicExplanation": "AWAY scored to lead 0-1 at minute 30, but remains priced at 519984 micros, indicating an underreaction.",
+            "action": "TARGET_ALLOCATION",
+            "targetAllocationBps": {
+              "cash": 2000,
+              "HOME": 1000,
+              "DRAW": 1000,
+              "AWAY": 6000
+            }
+          }
+        },
+        "failures": [],
+        "portfoliosBefore": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M15"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M15"
+          }
+        },
+        "portfoliosAfter": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M30"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "20000003",
+            "unitMicros": {
+              "HOME": "49843988",
+              "DRAW": "35792261",
+              "AWAY": "115388165"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M30"
+          }
+        },
+        "firstEventSequence": 14,
+        "lastEventSequence": 19
+      },
+      {
+        "checkpointId": "HALFTIME",
+        "outcome": "REVEALED",
+        "snapshot": {
+          "schemaVersion": 1,
+          "snapshotId": "96566760bd8931475203e2c037ad438b0a36f7021da0b71769eae90a829b5414",
+          "snapshotHash": "ff8ff35980e847cb33ce5446d0c3de4de6a8d0559d40d71c57aba1d32721b042",
+          "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+          "fixtureId": "18237038",
+          "checkpointId": "HALFTIME",
+          "observedAtUtc": "2026-07-14T19:54:36.702Z",
+          "source": "TXLINE_RECORDED",
+          "match": {
+            "status": "HALFTIME",
+            "minute": 45,
+            "addedTime": 6,
+            "homeScore": 0,
+            "awayScore": 1
+          },
+          "priceMicros": {
+            "HOME": 176302,
+            "DRAW": 277243,
+            "AWAY": 546455
+          },
+          "freshness": {
+            "marketUpdatedAtUtc": "2026-07-14T19:54:28.798Z",
+            "delayed": true,
+            "suspended": false
+          }
+        },
+        "revealedDecisions": {
+          "alpha": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+            "snapshotId": "96566760bd8931475203e2c037ad438b0a36f7021da0b71769eae90a829b5414",
+            "checkpointId": "HALFTIME",
+            "agentId": "alpha",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          },
+          "beta": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+            "snapshotId": "96566760bd8931475203e2c037ad438b0a36f7021da0b71769eae90a829b5414",
+            "checkpointId": "HALFTIME",
+            "agentId": "beta",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          }
+        },
+        "failures": [],
+        "portfoliosBefore": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M30"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "20000003",
+            "unitMicros": {
+              "HOME": "49843988",
+              "DRAW": "35792261",
+              "AWAY": "115388165"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M30"
+          }
+        },
+        "portfoliosAfter": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "HALFTIME"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "20000003",
+            "unitMicros": {
+              "HOME": "49843988",
+              "DRAW": "35792261",
+              "AWAY": "115388165"
+            },
+            "navMicros": "101765189",
+            "returnBps": 176,
+            "updatedAtCheckpoint": "HALFTIME"
+          }
+        },
+        "firstEventSequence": 20,
+        "lastEventSequence": 25
+      },
+      {
+        "checkpointId": "M60",
+        "outcome": "REVEALED",
+        "snapshot": {
+          "schemaVersion": 1,
+          "snapshotId": "8422923837b5f805ffbae42e3aee9392f32e462339111dae0f60449b2ae8e772",
+          "snapshotHash": "28828fa71c40401ea194d1981854012439d544b66789855554eee9bdf3a7100b",
+          "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+          "fixtureId": "18237038",
+          "checkpointId": "M60",
+          "observedAtUtc": "2026-07-14T20:22:03.280Z",
+          "source": "TXLINE_RECORDED",
+          "match": {
+            "status": "LIVE",
+            "minute": 60,
+            "addedTime": 0,
+            "homeScore": 0,
+            "awayScore": 2
+          },
+          "priceMicros": {
+            "HOME": 34143,
+            "DRAW": 107910,
+            "AWAY": 857947
+          },
+          "freshness": {
+            "marketUpdatedAtUtc": "2026-07-14T20:22:01.479Z",
+            "delayed": true,
+            "suspended": false
+          }
+        },
+        "revealedDecisions": {
+          "alpha": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+            "snapshotId": "8422923837b5f805ffbae42e3aee9392f32e462339111dae0f60449b2ae8e772",
+            "checkpointId": "M60",
+            "agentId": "alpha",
+            "publicExplanation": "Deterministic policy indicates an overreaction after AWAY scored once and its price rose 311492 micros within 15 minutes, so we target 1000 bps for AWAY and retain 1500 bps cash.",
+            "action": "TARGET_ALLOCATION",
+            "targetAllocationBps": {
+              "cash": 1500,
+              "HOME": 3750,
+              "DRAW": 3750,
+              "AWAY": 1000
+            }
+          },
+          "beta": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+            "snapshotId": "8422923837b5f805ffbae42e3aee9392f32e462339111dae0f60449b2ae8e772",
+            "checkpointId": "M60",
+            "agentId": "beta",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          }
+        },
+        "failures": [],
+        "portfoliosBefore": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "HALFTIME"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "20000003",
+            "unitMicros": {
+              "HOME": "49843988",
+              "DRAW": "35792261",
+              "AWAY": "115388165"
+            },
+            "navMicros": "101765189",
+            "returnBps": 176,
+            "updatedAtCheckpoint": "HALFTIME"
+          }
+        },
+        "portfoliosAfter": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "15000003",
+            "unitMicros": {
+              "HOME": "1098321764",
+              "DRAW": "347511815",
+              "AWAY": "11655731"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M60"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "20000003",
+            "unitMicros": {
+              "HOME": "49843988",
+              "DRAW": "35792261",
+              "AWAY": "115388165"
+            },
+            "navMicros": "124561097",
+            "returnBps": 2456,
+            "updatedAtCheckpoint": "M60"
+          }
+        },
+        "firstEventSequence": 26,
+        "lastEventSequence": 31
+      },
+      {
+        "checkpointId": "M75",
+        "outcome": "REVEALED",
+        "snapshot": {
+          "schemaVersion": 1,
+          "snapshotId": "6f0f122e5995d998a3cdc81591a3fc3211862ed46283bdc440704b9a6f9c3cb2",
+          "snapshotHash": "8e5076cef0cdf8669a4f21406b2bb5d421ab9da58c62b660133f321e016e5ea3",
+          "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+          "fixtureId": "18237038",
+          "checkpointId": "M75",
+          "observedAtUtc": "2026-07-14T20:37:03.762Z",
+          "source": "TXLINE_RECORDED",
+          "match": {
+            "status": "LIVE",
+            "minute": 75,
+            "addedTime": 0,
+            "homeScore": 0,
+            "awayScore": 2
+          },
+          "priceMicros": {
+            "HOME": 21380,
+            "DRAW": 81338,
+            "AWAY": 897282
+          },
+          "freshness": {
+            "marketUpdatedAtUtc": "2026-07-14T20:37:02.353Z",
+            "delayed": true,
+            "suspended": false
+          }
+        },
+        "revealedDecisions": {
+          "alpha": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+            "snapshotId": "6f0f122e5995d998a3cdc81591a3fc3211862ed46283bdc440704b9a6f9c3cb2",
+            "checkpointId": "M75",
+            "agentId": "alpha",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          },
+          "beta": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+            "snapshotId": "6f0f122e5995d998a3cdc81591a3fc3211862ed46283bdc440704b9a6f9c3cb2",
+            "checkpointId": "M75",
+            "agentId": "beta",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          }
+        },
+        "failures": [],
+        "portfoliosBefore": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "15000003",
+            "unitMicros": {
+              "HOME": "1098321764",
+              "DRAW": "347511815",
+              "AWAY": "11655731"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M60"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "20000003",
+            "unitMicros": {
+              "HOME": "49843988",
+              "DRAW": "35792261",
+              "AWAY": "115388165"
+            },
+            "navMicros": "124561097",
+            "returnBps": 2456,
+            "updatedAtCheckpoint": "M60"
+          }
+        },
+        "portfoliosAfter": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "15000003",
+            "unitMicros": {
+              "HOME": "1098321764",
+              "DRAW": "347511815",
+              "AWAY": "11655731"
+            },
+            "navMicros": "77206515",
+            "returnBps": -2279,
+            "updatedAtCheckpoint": "M75"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "20000003",
+            "unitMicros": {
+              "HOME": "49843988",
+              "DRAW": "35792261",
+              "AWAY": "115388165"
+            },
+            "navMicros": "127512660",
+            "returnBps": 2751,
+            "updatedAtCheckpoint": "M75"
+          }
+        },
+        "firstEventSequence": 32,
+        "lastEventSequence": 37
+      }
+    ],
+    "leader": {
+      "result": "beta",
+      "provisional": false
+    },
+    "finalResult": {
+      "schemaVersion": 2,
+      "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+      "winnerRule": "FINAL_NAV_ONLY_V1",
+      "winningAssetId": "AWAY",
+      "winner": "beta",
+      "alphaFinalNavMicros": "26655734",
+      "betaFinalNavMicros": "135388168",
+      "terminalEvidence": {
+        "schemaVersion": 1,
+        "providerSequence": 1027,
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "fixtureId": "18237038",
+        "observedAtUtc": "2026-07-14T21:04:14.751Z",
+        "sourceEventId": "txline-score:18237038:1026",
+        "source": "TXLINE_RECORDED",
+        "match": {
+          "status": "FINISHED",
+          "minute": 90,
+          "addedTime": 7,
+          "homeScore": 0,
+          "awayScore": 2
+        },
+        "winningAssetId": "AWAY",
+        "terminalEvidenceHash": "8100675f78c9fe50a43595c9629a7f3824e8aa65c154bf1336206be4aa27c34b"
+      },
+      "completedEventSequence": 39,
+      "preSettlementEventLogHash": "bc879a5411a29401d27c1843cb7c5bbf605f9560b72f9489fba5b1fb411d52be",
+      "finalResultHash": "30579cee734eb2b5b2b4523a24ff040794e3e675a52bf859b99f6a145b12f79b"
+    },
+    "lastEventSequence": 39
+  },
+  "history": {
+    "schemaVersion": 1,
+    "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+    "afterSequence": 0,
+    "lastEventSequence": 39,
+    "events": [
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:1",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 1,
+        "occurredAtUtc": "2026-07-17T20:18:30.067Z",
+        "type": "ARENA_READY",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:2",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 2,
+        "occurredAtUtc": "2026-07-14T19:05:45.805Z",
+        "type": "CHECKPOINT_OPENED",
+        "checkpointId": "KICKOFF",
+        "payload": {
+          "snapshot": {
+            "schemaVersion": 1,
+            "snapshotId": "20e195d85c2169b5e912bc3e615545e8a73fa8258969487baa9c1f6b252412c5",
+            "snapshotHash": "dcea691ae17c7a7ca9740125adcb8cba4b18f3bcc771cb817fb7d182a959f68b",
+            "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+            "fixtureId": "18237038",
+            "checkpointId": "KICKOFF",
+            "observedAtUtc": "2026-07-14T19:05:45.805Z",
+            "source": "TXLINE_RECORDED",
+            "match": {
+              "status": "LIVE",
+              "minute": 5,
+              "addedTime": 0,
+              "homeScore": 0,
+              "awayScore": 0
+            },
+            "priceMicros": {
+              "HOME": 369941,
+              "DRAW": 326674,
+              "AWAY": 303385
+            },
+            "freshness": {
+              "marketUpdatedAtUtc": "2026-07-14T19:05:45.785Z",
+              "delayed": true,
+              "suspended": false
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:3",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 3,
+        "occurredAtUtc": "2026-07-14T19:05:45.805Z",
+        "type": "AGENTS_ANALYZING",
+        "checkpointId": "KICKOFF",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:4",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 4,
+        "occurredAtUtc": "2026-07-14T19:05:45.805Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "KICKOFF",
+        "agentId": "alpha",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:5",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 5,
+        "occurredAtUtc": "2026-07-14T19:05:45.805Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "KICKOFF",
+        "agentId": "beta",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:6",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 6,
+        "occurredAtUtc": "2026-07-14T19:05:45.805Z",
+        "type": "ROUND_REVEALED",
+        "checkpointId": "KICKOFF",
+        "payload": {
+          "decisions": {
+            "alpha": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+              "snapshotId": "20e195d85c2169b5e912bc3e615545e8a73fa8258969487baa9c1f6b252412c5",
+              "checkpointId": "KICKOFF",
+              "agentId": "alpha",
+              "publicExplanation": "The policySignal requiredAction is NO_TRADE because no approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            },
+            "beta": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+              "snapshotId": "20e195d85c2169b5e912bc3e615545e8a73fa8258969487baa9c1f6b252412c5",
+              "checkpointId": "KICKOFF",
+              "agentId": "beta",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            }
+          },
+          "failures": [],
+          "portfoliosBefore": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            }
+          },
+          "portfoliosAfter": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:7",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 7,
+        "occurredAtUtc": "2026-07-14T19:05:45.805Z",
+        "type": "ROUND_COMPLETE",
+        "checkpointId": "KICKOFF",
+        "payload": {
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            }
+          },
+          "nextCheckpointId": "M15"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:8",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 8,
+        "occurredAtUtc": "2026-07-14T19:15:10.458Z",
+        "type": "CHECKPOINT_OPENED",
+        "checkpointId": "M15",
+        "payload": {
+          "snapshot": {
+            "schemaVersion": 1,
+            "snapshotId": "fdcb42c24306af2943e0c141af5622aed57a4ba950418951751011e37200002c",
+            "snapshotHash": "8bd616dbe0839a12ef0937be8ae385ab5eb311b3f7526fabd17338516cee9ac8",
+            "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+            "fixtureId": "18237038",
+            "checkpointId": "M15",
+            "observedAtUtc": "2026-07-14T19:15:10.458Z",
+            "source": "TXLINE_RECORDED",
+            "match": {
+              "status": "LIVE",
+              "minute": 15,
+              "addedTime": 0,
+              "homeScore": 0,
+              "awayScore": 0
+            },
+            "priceMicros": {
+              "HOME": 359204,
+              "DRAW": 336933,
+              "AWAY": 303863
+            },
+            "freshness": {
+              "marketUpdatedAtUtc": "2026-07-14T19:15:09.431Z",
+              "delayed": true,
+              "suspended": false
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:9",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 9,
+        "occurredAtUtc": "2026-07-14T19:15:10.458Z",
+        "type": "AGENTS_ANALYZING",
+        "checkpointId": "M15",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:10",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 10,
+        "occurredAtUtc": "2026-07-14T19:15:10.458Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M15",
+        "agentId": "alpha",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:11",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 11,
+        "occurredAtUtc": "2026-07-14T19:15:10.458Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M15",
+        "agentId": "beta",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:12",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 12,
+        "occurredAtUtc": "2026-07-14T19:15:10.458Z",
+        "type": "ROUND_REVEALED",
+        "checkpointId": "M15",
+        "payload": {
+          "decisions": {
+            "alpha": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+              "snapshotId": "fdcb42c24306af2943e0c141af5622aed57a4ba950418951751011e37200002c",
+              "checkpointId": "M15",
+              "agentId": "alpha",
+              "publicExplanation": "The policy signal required action is NO_TRADE because no approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            },
+            "beta": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+              "snapshotId": "fdcb42c24306af2943e0c141af5622aed57a4ba950418951751011e37200002c",
+              "checkpointId": "M15",
+              "agentId": "beta",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            }
+          },
+          "failures": [],
+          "portfoliosBefore": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            }
+          },
+          "portfoliosAfter": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M15"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M15"
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:13",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 13,
+        "occurredAtUtc": "2026-07-14T19:15:10.458Z",
+        "type": "ROUND_COMPLETE",
+        "checkpointId": "M15",
+        "payload": {
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M15"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M15"
+            }
+          },
+          "nextCheckpointId": "M30"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:14",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 14,
+        "occurredAtUtc": "2026-07-14T19:30:18.941Z",
+        "type": "CHECKPOINT_OPENED",
+        "checkpointId": "M30",
+        "payload": {
+          "snapshot": {
+            "schemaVersion": 1,
+            "snapshotId": "afa293e2cd6627b11db540646ac9885175238f7f4dfd69ac289766b9b0c3cc79",
+            "snapshotHash": "737fdfda41af13b5e0f5df593f42c3668be44109889128181ad9283f558e155d",
+            "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+            "fixtureId": "18237038",
+            "checkpointId": "M30",
+            "observedAtUtc": "2026-07-14T19:30:18.941Z",
+            "source": "TXLINE_RECORDED",
+            "match": {
+              "status": "LIVE",
+              "minute": 30,
+              "addedTime": 0,
+              "homeScore": 0,
+              "awayScore": 1
+            },
+            "priceMicros": {
+              "HOME": 200626,
+              "DRAW": 279390,
+              "AWAY": 519984
+            },
+            "freshness": {
+              "marketUpdatedAtUtc": "2026-07-14T19:30:17.429Z",
+              "delayed": true,
+              "suspended": false
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:15",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 15,
+        "occurredAtUtc": "2026-07-14T19:30:18.941Z",
+        "type": "AGENTS_ANALYZING",
+        "checkpointId": "M30",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:16",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 16,
+        "occurredAtUtc": "2026-07-14T19:30:18.941Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M30",
+        "agentId": "alpha",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:17",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 17,
+        "occurredAtUtc": "2026-07-14T19:30:18.941Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M30",
+        "agentId": "beta",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:18",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 18,
+        "occurredAtUtc": "2026-07-14T19:30:18.941Z",
+        "type": "ROUND_REVEALED",
+        "checkpointId": "M30",
+        "payload": {
+          "decisions": {
+            "alpha": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+              "snapshotId": "afa293e2cd6627b11db540646ac9885175238f7f4dfd69ac289766b9b0c3cc79",
+              "checkpointId": "M30",
+              "agentId": "alpha",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            },
+            "beta": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+              "snapshotId": "afa293e2cd6627b11db540646ac9885175238f7f4dfd69ac289766b9b0c3cc79",
+              "checkpointId": "M30",
+              "agentId": "beta",
+              "publicExplanation": "AWAY scored to lead 0-1 at minute 30, but remains priced at 519984 micros, indicating an underreaction.",
+              "action": "TARGET_ALLOCATION",
+              "targetAllocationBps": {
+                "cash": 2000,
+                "HOME": 1000,
+                "DRAW": 1000,
+                "AWAY": 6000
+              }
+            }
+          },
+          "failures": [],
+          "portfoliosBefore": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M15"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M15"
+            }
+          },
+          "portfoliosAfter": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M30"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "49843988",
+                "DRAW": "35792261",
+                "AWAY": "115388165"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M30"
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:19",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 19,
+        "occurredAtUtc": "2026-07-14T19:30:18.941Z",
+        "type": "ROUND_COMPLETE",
+        "checkpointId": "M30",
+        "payload": {
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M30"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "49843988",
+                "DRAW": "35792261",
+                "AWAY": "115388165"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M30"
+            }
+          },
+          "nextCheckpointId": "HALFTIME"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:20",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 20,
+        "occurredAtUtc": "2026-07-14T19:54:36.702Z",
+        "type": "CHECKPOINT_OPENED",
+        "checkpointId": "HALFTIME",
+        "payload": {
+          "snapshot": {
+            "schemaVersion": 1,
+            "snapshotId": "96566760bd8931475203e2c037ad438b0a36f7021da0b71769eae90a829b5414",
+            "snapshotHash": "ff8ff35980e847cb33ce5446d0c3de4de6a8d0559d40d71c57aba1d32721b042",
+            "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+            "fixtureId": "18237038",
+            "checkpointId": "HALFTIME",
+            "observedAtUtc": "2026-07-14T19:54:36.702Z",
+            "source": "TXLINE_RECORDED",
+            "match": {
+              "status": "HALFTIME",
+              "minute": 45,
+              "addedTime": 6,
+              "homeScore": 0,
+              "awayScore": 1
+            },
+            "priceMicros": {
+              "HOME": 176302,
+              "DRAW": 277243,
+              "AWAY": 546455
+            },
+            "freshness": {
+              "marketUpdatedAtUtc": "2026-07-14T19:54:28.798Z",
+              "delayed": true,
+              "suspended": false
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:21",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 21,
+        "occurredAtUtc": "2026-07-14T19:54:36.702Z",
+        "type": "AGENTS_ANALYZING",
+        "checkpointId": "HALFTIME",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:22",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 22,
+        "occurredAtUtc": "2026-07-14T19:54:36.702Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "HALFTIME",
+        "agentId": "alpha",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:23",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 23,
+        "occurredAtUtc": "2026-07-14T19:54:36.702Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "HALFTIME",
+        "agentId": "beta",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:24",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 24,
+        "occurredAtUtc": "2026-07-14T19:54:36.702Z",
+        "type": "ROUND_REVEALED",
+        "checkpointId": "HALFTIME",
+        "payload": {
+          "decisions": {
+            "alpha": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+              "snapshotId": "96566760bd8931475203e2c037ad438b0a36f7021da0b71769eae90a829b5414",
+              "checkpointId": "HALFTIME",
+              "agentId": "alpha",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            },
+            "beta": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+              "snapshotId": "96566760bd8931475203e2c037ad438b0a36f7021da0b71769eae90a829b5414",
+              "checkpointId": "HALFTIME",
+              "agentId": "beta",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            }
+          },
+          "failures": [],
+          "portfoliosBefore": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M30"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "49843988",
+                "DRAW": "35792261",
+                "AWAY": "115388165"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M30"
+            }
+          },
+          "portfoliosAfter": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "HALFTIME"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "49843988",
+                "DRAW": "35792261",
+                "AWAY": "115388165"
+              },
+              "navMicros": "101765189",
+              "returnBps": 176,
+              "updatedAtCheckpoint": "HALFTIME"
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:25",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 25,
+        "occurredAtUtc": "2026-07-14T19:54:36.702Z",
+        "type": "ROUND_COMPLETE",
+        "checkpointId": "HALFTIME",
+        "payload": {
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "HALFTIME"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "49843988",
+                "DRAW": "35792261",
+                "AWAY": "115388165"
+              },
+              "navMicros": "101765189",
+              "returnBps": 176,
+              "updatedAtCheckpoint": "HALFTIME"
+            }
+          },
+          "nextCheckpointId": "M60"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:26",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 26,
+        "occurredAtUtc": "2026-07-14T20:22:03.280Z",
+        "type": "CHECKPOINT_OPENED",
+        "checkpointId": "M60",
+        "payload": {
+          "snapshot": {
+            "schemaVersion": 1,
+            "snapshotId": "8422923837b5f805ffbae42e3aee9392f32e462339111dae0f60449b2ae8e772",
+            "snapshotHash": "28828fa71c40401ea194d1981854012439d544b66789855554eee9bdf3a7100b",
+            "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+            "fixtureId": "18237038",
+            "checkpointId": "M60",
+            "observedAtUtc": "2026-07-14T20:22:03.280Z",
+            "source": "TXLINE_RECORDED",
+            "match": {
+              "status": "LIVE",
+              "minute": 60,
+              "addedTime": 0,
+              "homeScore": 0,
+              "awayScore": 2
+            },
+            "priceMicros": {
+              "HOME": 34143,
+              "DRAW": 107910,
+              "AWAY": 857947
+            },
+            "freshness": {
+              "marketUpdatedAtUtc": "2026-07-14T20:22:01.479Z",
+              "delayed": true,
+              "suspended": false
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:27",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 27,
+        "occurredAtUtc": "2026-07-14T20:22:03.280Z",
+        "type": "AGENTS_ANALYZING",
+        "checkpointId": "M60",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:28",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 28,
+        "occurredAtUtc": "2026-07-14T20:22:03.280Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M60",
+        "agentId": "alpha",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:29",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 29,
+        "occurredAtUtc": "2026-07-14T20:22:03.280Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M60",
+        "agentId": "beta",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:30",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 30,
+        "occurredAtUtc": "2026-07-14T20:22:03.280Z",
+        "type": "ROUND_REVEALED",
+        "checkpointId": "M60",
+        "payload": {
+          "decisions": {
+            "alpha": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+              "snapshotId": "8422923837b5f805ffbae42e3aee9392f32e462339111dae0f60449b2ae8e772",
+              "checkpointId": "M60",
+              "agentId": "alpha",
+              "publicExplanation": "Deterministic policy indicates an overreaction after AWAY scored once and its price rose 311492 micros within 15 minutes, so we target 1000 bps for AWAY and retain 1500 bps cash.",
+              "action": "TARGET_ALLOCATION",
+              "targetAllocationBps": {
+                "cash": 1500,
+                "HOME": 3750,
+                "DRAW": 3750,
+                "AWAY": 1000
+              }
+            },
+            "beta": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+              "snapshotId": "8422923837b5f805ffbae42e3aee9392f32e462339111dae0f60449b2ae8e772",
+              "checkpointId": "M60",
+              "agentId": "beta",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            }
+          },
+          "failures": [],
+          "portfoliosBefore": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "HALFTIME"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "49843988",
+                "DRAW": "35792261",
+                "AWAY": "115388165"
+              },
+              "navMicros": "101765189",
+              "returnBps": 176,
+              "updatedAtCheckpoint": "HALFTIME"
+            }
+          },
+          "portfoliosAfter": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "15000003",
+              "unitMicros": {
+                "HOME": "1098321764",
+                "DRAW": "347511815",
+                "AWAY": "11655731"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M60"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "49843988",
+                "DRAW": "35792261",
+                "AWAY": "115388165"
+              },
+              "navMicros": "124561097",
+              "returnBps": 2456,
+              "updatedAtCheckpoint": "M60"
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:31",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 31,
+        "occurredAtUtc": "2026-07-14T20:22:03.280Z",
+        "type": "ROUND_COMPLETE",
+        "checkpointId": "M60",
+        "payload": {
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "15000003",
+              "unitMicros": {
+                "HOME": "1098321764",
+                "DRAW": "347511815",
+                "AWAY": "11655731"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M60"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "49843988",
+                "DRAW": "35792261",
+                "AWAY": "115388165"
+              },
+              "navMicros": "124561097",
+              "returnBps": 2456,
+              "updatedAtCheckpoint": "M60"
+            }
+          },
+          "nextCheckpointId": "M75"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:32",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 32,
+        "occurredAtUtc": "2026-07-14T20:37:03.762Z",
+        "type": "CHECKPOINT_OPENED",
+        "checkpointId": "M75",
+        "payload": {
+          "snapshot": {
+            "schemaVersion": 1,
+            "snapshotId": "6f0f122e5995d998a3cdc81591a3fc3211862ed46283bdc440704b9a6f9c3cb2",
+            "snapshotHash": "8e5076cef0cdf8669a4f21406b2bb5d421ab9da58c62b660133f321e016e5ea3",
+            "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+            "fixtureId": "18237038",
+            "checkpointId": "M75",
+            "observedAtUtc": "2026-07-14T20:37:03.762Z",
+            "source": "TXLINE_RECORDED",
+            "match": {
+              "status": "LIVE",
+              "minute": 75,
+              "addedTime": 0,
+              "homeScore": 0,
+              "awayScore": 2
+            },
+            "priceMicros": {
+              "HOME": 21380,
+              "DRAW": 81338,
+              "AWAY": 897282
+            },
+            "freshness": {
+              "marketUpdatedAtUtc": "2026-07-14T20:37:02.353Z",
+              "delayed": true,
+              "suspended": false
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:33",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 33,
+        "occurredAtUtc": "2026-07-14T20:37:03.762Z",
+        "type": "AGENTS_ANALYZING",
+        "checkpointId": "M75",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:34",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 34,
+        "occurredAtUtc": "2026-07-14T20:37:03.762Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M75",
+        "agentId": "alpha",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:35",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 35,
+        "occurredAtUtc": "2026-07-14T20:37:03.762Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M75",
+        "agentId": "beta",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:36",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 36,
+        "occurredAtUtc": "2026-07-14T20:37:03.762Z",
+        "type": "ROUND_REVEALED",
+        "checkpointId": "M75",
+        "payload": {
+          "decisions": {
+            "alpha": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+              "snapshotId": "6f0f122e5995d998a3cdc81591a3fc3211862ed46283bdc440704b9a6f9c3cb2",
+              "checkpointId": "M75",
+              "agentId": "alpha",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            },
+            "beta": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+              "snapshotId": "6f0f122e5995d998a3cdc81591a3fc3211862ed46283bdc440704b9a6f9c3cb2",
+              "checkpointId": "M75",
+              "agentId": "beta",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            }
+          },
+          "failures": [],
+          "portfoliosBefore": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "15000003",
+              "unitMicros": {
+                "HOME": "1098321764",
+                "DRAW": "347511815",
+                "AWAY": "11655731"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M60"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "49843988",
+                "DRAW": "35792261",
+                "AWAY": "115388165"
+              },
+              "navMicros": "124561097",
+              "returnBps": 2456,
+              "updatedAtCheckpoint": "M60"
+            }
+          },
+          "portfoliosAfter": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "15000003",
+              "unitMicros": {
+                "HOME": "1098321764",
+                "DRAW": "347511815",
+                "AWAY": "11655731"
+              },
+              "navMicros": "77206515",
+              "returnBps": -2279,
+              "updatedAtCheckpoint": "M75"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "49843988",
+                "DRAW": "35792261",
+                "AWAY": "115388165"
+              },
+              "navMicros": "127512660",
+              "returnBps": 2751,
+              "updatedAtCheckpoint": "M75"
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:37",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 37,
+        "occurredAtUtc": "2026-07-14T20:37:03.762Z",
+        "type": "ROUND_COMPLETE",
+        "checkpointId": "M75",
+        "payload": {
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "15000003",
+              "unitMicros": {
+                "HOME": "1098321764",
+                "DRAW": "347511815",
+                "AWAY": "11655731"
+              },
+              "navMicros": "77206515",
+              "returnBps": -2279,
+              "updatedAtCheckpoint": "M75"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "49843988",
+                "DRAW": "35792261",
+                "AWAY": "115388165"
+              },
+              "navMicros": "127512660",
+              "returnBps": 2751,
+              "updatedAtCheckpoint": "M75"
+            }
+          },
+          "nextCheckpointId": "FINAL"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:38",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 38,
+        "occurredAtUtc": "2026-07-14T20:37:03.762Z",
+        "type": "FINALIZING",
+        "checkpointId": "FINAL",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-spain-semifinal-replay:39",
+        "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+        "sequence": 39,
+        "occurredAtUtc": "2026-07-18T06:45:58.016Z",
+        "type": "COMPLETED",
+        "checkpointId": "FINAL",
+        "payload": {
+          "result": {
+            "schemaVersion": 2,
+            "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+            "winnerRule": "FINAL_NAV_ONLY_V1",
+            "winningAssetId": "AWAY",
+            "winner": "beta",
+            "alphaFinalNavMicros": "26655734",
+            "betaFinalNavMicros": "135388168",
+            "terminalEvidence": {
+              "schemaVersion": 1,
+              "providerSequence": 1027,
+              "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+              "fixtureId": "18237038",
+              "observedAtUtc": "2026-07-14T21:04:14.751Z",
+              "sourceEventId": "txline-score:18237038:1026",
+              "source": "TXLINE_RECORDED",
+              "match": {
+                "status": "FINISHED",
+                "minute": 90,
+                "addedTime": 7,
+                "homeScore": 0,
+                "awayScore": 2
+              },
+              "winningAssetId": "AWAY",
+              "terminalEvidenceHash": "8100675f78c9fe50a43595c9629a7f3824e8aa65c154bf1336206be4aa27c34b"
+            },
+            "completedEventSequence": 39,
+            "preSettlementEventLogHash": "bc879a5411a29401d27c1843cb7c5bbf605f9560b72f9489fba5b1fb411d52be",
+            "finalResultHash": "30579cee734eb2b5b2b4523a24ff040794e3e675a52bf859b99f6a145b12f79b"
+          },
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "15000003",
+              "unitMicros": {
+                "HOME": "1098321764",
+                "DRAW": "347511815",
+                "AWAY": "11655731"
+              },
+              "navMicros": "26655734",
+              "returnBps": -7334,
+              "updatedAtCheckpoint": "FINAL"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "49843988",
+                "DRAW": "35792261",
+                "AWAY": "115388165"
+              },
+              "navMicros": "135388168",
+              "returnBps": 3538,
+              "updatedAtCheckpoint": "FINAL"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

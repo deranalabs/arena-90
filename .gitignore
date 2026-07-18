@@ -7,6 +7,7 @@ node_modules/
 .env
 .env.*
 !.env.example
+**/.secret_key
 
 # Logs
 *.log
@@ -27,11 +28,20 @@ pnpm-debug.log*
 .next/
 out/
 next-env.d.ts
+.vercel/
 
 # Build outputs
 dist/
 build/
 coverage/
+releases/
+
+# Runtime source must stay TypeScript-only
+backend/arena-runtime/src/**/*.js
+
+# Runtime-local state and agent credentials
+backend/arena-runtime/.arena_persistence/
+backend/arena-runtime/agents/
 
 # Anchor/Solana
 .anchor/
@@ -39,3 +49,6 @@ target/
 test-ledger/
 .surfpool/
 **/*.rs.bk
+
+# Repository-local agent tooling must not enter the public submission.
+.agents/

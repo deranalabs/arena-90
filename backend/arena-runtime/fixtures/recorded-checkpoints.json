@@ -1,0 +1,78 @@
+{
+  "provider": "TXLINE_RECORDED",
+  "arenaId": "arena-replay-001",
+  "fixtureId": "fixture-recorded-001",
+  "records": [
+    {
+      "providerSequence": 1,
+      "checkpointId": "KICKOFF",
+      "snapshotId": "snapshot-kickoff",
+      "sourceEventId": "txline-event-001",
+      "observedAtUtc": "2026-07-13T12:00:00.000Z",
+      "match": { "status": "LIVE", "minute": 0, "addedTime": 0, "homeScore": 0, "awayScore": 0 },
+      "priceMicros": { "HOME": 500000, "DRAW": 300000, "AWAY": 200000 },
+      "freshness": { "marketUpdatedAtUtc": "2026-07-13T11:59:58.000Z", "delayed": false, "suspended": false }
+    },
+    {
+      "providerSequence": 2,
+      "checkpointId": "M15",
+      "snapshotId": "snapshot-m15",
+      "sourceEventId": "txline-event-002",
+      "observedAtUtc": "2026-07-13T12:15:00.000Z",
+      "match": { "status": "LIVE", "minute": 15, "addedTime": 0, "homeScore": 0, "awayScore": 0 },
+      "priceMicros": { "HOME": 520000, "DRAW": 290000, "AWAY": 190000 },
+      "freshness": { "marketUpdatedAtUtc": "2026-07-13T12:14:58.000Z", "delayed": false, "suspended": false }
+    },
+    {
+      "providerSequence": 3,
+      "checkpointId": "M30",
+      "snapshotId": "snapshot-m30",
+      "sourceEventId": "txline-event-003",
+      "observedAtUtc": "2026-07-13T12:30:00.000Z",
+      "match": { "status": "LIVE", "minute": 30, "addedTime": 0, "homeScore": 1, "awayScore": 0 },
+      "priceMicros": { "HOME": 650000, "DRAW": 220000, "AWAY": 130000 },
+      "freshness": { "marketUpdatedAtUtc": "2026-07-13T12:29:58.000Z", "delayed": false, "suspended": false }
+    },
+    {
+      "providerSequence": 4,
+      "checkpointId": "HALFTIME",
+      "snapshotId": "snapshot-halftime",
+      "sourceEventId": "txline-event-004",
+      "observedAtUtc": "2026-07-13T12:48:00.000Z",
+      "match": { "status": "HALFTIME", "minute": 45, "addedTime": 3, "homeScore": 1, "awayScore": 0 },
+      "priceMicros": { "HOME": 670000, "DRAW": 210000, "AWAY": 120000 },
+      "freshness": { "marketUpdatedAtUtc": "2026-07-13T12:47:58.000Z", "delayed": false, "suspended": false }
+    },
+    {
+      "providerSequence": 5,
+      "checkpointId": "M60",
+      "snapshotId": "snapshot-m60",
+      "sourceEventId": "txline-event-005",
+      "observedAtUtc": "2026-07-13T13:18:00.000Z",
+      "match": { "status": "LIVE", "minute": 60, "addedTime": 0, "homeScore": 1, "awayScore": 1 },
+      "priceMicros": { "HOME": 430000, "DRAW": 360000, "AWAY": 210000 },
+      "freshness": { "marketUpdatedAtUtc": "2026-07-13T13:17:58.000Z", "delayed": false, "suspended": false }
+    },
+    {
+      "providerSequence": 6,
+      "checkpointId": "M75",
+      "snapshotId": "snapshot-m75",
+      "sourceEventId": "txline-event-006",
+      "observedAtUtc": "2026-07-13T13:33:00.000Z",
+      "match": { "status": "LIVE", "minute": 75, "addedTime": 0, "homeScore": 2, "awayScore": 1 },
+      "priceMicros": { "HOME": 720000, "DRAW": 190000, "AWAY": 90000 },
+      "freshness": { "marketUpdatedAtUtc": "2026-07-13T13:32:58.000Z", "delayed": false, "suspended": false }
+    },
+    {
+      "providerSequence": 7,
+      "checkpointId": "FINAL",
+      "snapshotId": "snapshot-final",
+      "sourceEventId": "txline-event-007",
+      "observedAtUtc": "2026-07-13T13:52:00.000Z",
+      "match": { "status": "FINISHED", "minute": 90, "addedTime": 4, "homeScore": 2, "awayScore": 1 },
+      "priceMicros": { "HOME": 720000, "DRAW": 190000, "AWAY": 90000 },
+      "freshness": { "marketUpdatedAtUtc": "2026-07-13T13:32:58.000Z", "delayed": false, "suspended": false },
+      "finalResult": "HOME"
+    }
+  ]
+}

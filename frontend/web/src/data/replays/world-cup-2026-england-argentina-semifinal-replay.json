@@ -1,0 +1,2069 @@
+{
+  "schemaVersion": 1,
+  "recordedSource": {
+    "label": "RECORDED TxLINE DATA",
+    "fixtureId": "18241006",
+    "matchDateUtc": "2026-07-15T19:00:00.000Z",
+    "capturedAtUtc": "2026-07-17T20:18:30.067Z",
+    "scoreEventCount": 964,
+    "oddsUpdateCount": 60103,
+    "inputHash": "f09ded567cb29e70217063bb385a157aafa9441faa0521cae8884a8b0064036b"
+  },
+  "state": {
+    "schemaVersion": 1,
+    "manifest": {
+      "schemaVersion": 1,
+      "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+      "mode": "REPLAY",
+      "competition": "FIFA World Cup 2026",
+      "fixtureId": "18241006",
+      "homeTeam": {
+        "name": "England",
+        "code": "ENG"
+      },
+      "awayTeam": {
+        "name": "Argentina",
+        "code": "ARG"
+      },
+      "kickoffUtc": "2026-07-15T19:00:00.000Z",
+      "startingBankrollMicros": "100000000",
+      "currency": "VIRTUAL_USD_MICROS",
+      "assets": [
+        {
+          "id": "HOME",
+          "market": "FULL_TIME_1X2",
+          "label": "England win"
+        },
+        {
+          "id": "DRAW",
+          "market": "FULL_TIME_1X2",
+          "label": "Draw"
+        },
+        {
+          "id": "AWAY",
+          "market": "FULL_TIME_1X2",
+          "label": "Argentina win"
+        }
+      ],
+      "checkpoints": [
+        "KICKOFF",
+        "M15",
+        "M30",
+        "HALFTIME",
+        "M60",
+        "M75",
+        "FINAL"
+      ],
+      "createdAtUtc": "2026-07-17T20:18:30.067Z"
+    },
+    "phase": "COMPLETED",
+    "runtimeVersions": {
+      "runtimeVersion": "7.5",
+      "executionRuleVersion": "p0-v1",
+      "winnerRuleVersion": "FINAL_NAV_ONLY_V1",
+      "agents": {
+        "alpha": {
+          "strategyId": "alpha-overreaction-hunter",
+          "strategyVersion": "4"
+        },
+        "beta": {
+          "strategyId": "beta-underreaction-hunter",
+          "strategyVersion": "4"
+        }
+      }
+    },
+    "portfolios": {
+      "alpha": {
+        "agentId": "alpha",
+        "cashMicros": "20000003",
+        "unitMicros": {
+          "HOME": "15697823",
+          "DRAW": "129425903",
+          "AWAY": "378198478"
+        },
+        "navMicros": "398198481",
+        "returnBps": 29819,
+        "updatedAtCheckpoint": "FINAL"
+      },
+      "beta": {
+        "agentId": "beta",
+        "cashMicros": "15000003",
+        "unitMicros": {
+          "HOME": "94186939",
+          "DRAW": "55468244",
+          "AWAY": "108056708"
+        },
+        "navMicros": "123056711",
+        "returnBps": 2305,
+        "updatedAtCheckpoint": "FINAL"
+      }
+    },
+    "checkpoints": [
+      {
+        "checkpointId": "KICKOFF",
+        "outcome": "REVEALED",
+        "snapshot": {
+          "schemaVersion": 1,
+          "snapshotId": "f76d31b71c3fbbb9a156279144916e438f927e788ee0e371a7a15fa0d8af5020",
+          "snapshotHash": "90280ef68dd04f77c99c5d40d5c8ca7223ccc7fa67c841d3715b26bdbdd95190",
+          "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+          "fixtureId": "18241006",
+          "checkpointId": "KICKOFF",
+          "observedAtUtc": "2026-07-15T19:07:06.349Z",
+          "source": "TXLINE_RECORDED",
+          "match": {
+            "status": "LIVE",
+            "minute": 6,
+            "addedTime": 0,
+            "homeScore": 0,
+            "awayScore": 0
+          },
+          "priceMicros": {
+            "HOME": 359746,
+            "DRAW": 349445,
+            "AWAY": 290809
+          },
+          "freshness": {
+            "marketUpdatedAtUtc": "2026-07-15T19:07:06.309Z",
+            "delayed": true,
+            "suspended": false
+          }
+        },
+        "revealedDecisions": {
+          "alpha": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+            "snapshotId": "f76d31b71c3fbbb9a156279144916e438f927e788ee0e371a7a15fa0d8af5020",
+            "checkpointId": "KICKOFF",
+            "agentId": "alpha",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          },
+          "beta": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+            "snapshotId": "f76d31b71c3fbbb9a156279144916e438f927e788ee0e371a7a15fa0d8af5020",
+            "checkpointId": "KICKOFF",
+            "agentId": "beta",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          }
+        },
+        "failures": [],
+        "portfoliosBefore": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "KICKOFF"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "KICKOFF"
+          }
+        },
+        "portfoliosAfter": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "KICKOFF"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "KICKOFF"
+          }
+        },
+        "firstEventSequence": 2,
+        "lastEventSequence": 7
+      },
+      {
+        "checkpointId": "M15",
+        "outcome": "REVEALED",
+        "snapshot": {
+          "schemaVersion": 1,
+          "snapshotId": "5ab987c5681f40c79a910f520b90071fb9d4bef106c69bd78c9578ffaca948b8",
+          "snapshotHash": "5ede04877b96949581c078555f0388d9ecbd8ad21feee36caf2853489dee9816",
+          "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+          "fixtureId": "18241006",
+          "checkpointId": "M15",
+          "observedAtUtc": "2026-07-15T19:15:24.705Z",
+          "source": "TXLINE_RECORDED",
+          "match": {
+            "status": "LIVE",
+            "minute": 15,
+            "addedTime": 0,
+            "homeScore": 0,
+            "awayScore": 0
+          },
+          "priceMicros": {
+            "HOME": 361028,
+            "DRAW": 360638,
+            "AWAY": 278334
+          },
+          "freshness": {
+            "marketUpdatedAtUtc": "2026-07-15T19:15:22.097Z",
+            "delayed": true,
+            "suspended": false
+          }
+        },
+        "revealedDecisions": {
+          "alpha": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+            "snapshotId": "5ab987c5681f40c79a910f520b90071fb9d4bef106c69bd78c9578ffaca948b8",
+            "checkpointId": "M15",
+            "agentId": "alpha",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          },
+          "beta": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+            "snapshotId": "5ab987c5681f40c79a910f520b90071fb9d4bef106c69bd78c9578ffaca948b8",
+            "checkpointId": "M15",
+            "agentId": "beta",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          }
+        },
+        "failures": [],
+        "portfoliosBefore": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "KICKOFF"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "KICKOFF"
+          }
+        },
+        "portfoliosAfter": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M15"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M15"
+          }
+        },
+        "firstEventSequence": 8,
+        "lastEventSequence": 13
+      },
+      {
+        "checkpointId": "M30",
+        "outcome": "REVEALED",
+        "snapshot": {
+          "schemaVersion": 1,
+          "snapshotId": "3e4176c72e14ced4a5504bf361777fe882e6fded911addc009225006304de0f8",
+          "snapshotHash": "a5819ea9f1928c3d317bad7a832c47c56735643edf59cd88cc35beec0f2534ab",
+          "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+          "fixtureId": "18241006",
+          "checkpointId": "M30",
+          "observedAtUtc": "2026-07-15T19:30:30.980Z",
+          "source": "TXLINE_RECORDED",
+          "match": {
+            "status": "LIVE",
+            "minute": 30,
+            "addedTime": 0,
+            "homeScore": 0,
+            "awayScore": 0
+          },
+          "priceMicros": {
+            "HOME": 350588,
+            "DRAW": 374345,
+            "AWAY": 275067
+          },
+          "freshness": {
+            "marketUpdatedAtUtc": "2026-07-15T19:30:29.220Z",
+            "delayed": true,
+            "suspended": false
+          }
+        },
+        "revealedDecisions": {
+          "alpha": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+            "snapshotId": "3e4176c72e14ced4a5504bf361777fe882e6fded911addc009225006304de0f8",
+            "checkpointId": "M30",
+            "agentId": "alpha",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          },
+          "beta": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+            "snapshotId": "3e4176c72e14ced4a5504bf361777fe882e6fded911addc009225006304de0f8",
+            "checkpointId": "M30",
+            "agentId": "beta",
+            "publicExplanation": "No approved strategy signal is active at checkpoint M30.",
+            "action": "NO_TRADE"
+          }
+        },
+        "failures": [],
+        "portfoliosBefore": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M15"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M15"
+          }
+        },
+        "portfoliosAfter": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M30"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M30"
+          }
+        },
+        "firstEventSequence": 14,
+        "lastEventSequence": 19
+      },
+      {
+        "checkpointId": "HALFTIME",
+        "outcome": "REVEALED",
+        "snapshot": {
+          "schemaVersion": 1,
+          "snapshotId": "cefc2029bd5801c1649023a00b545e9cd2e7442ce1375953c2de2831f713564a",
+          "snapshotHash": "ced02a62c6d787ac9ed6a4e0f241db39c22c282f2523ef9df0d9bd126fd71371",
+          "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+          "fixtureId": "18241006",
+          "checkpointId": "HALFTIME",
+          "observedAtUtc": "2026-07-15T19:50:44.821Z",
+          "source": "TXLINE_RECORDED",
+          "match": {
+            "status": "HALFTIME",
+            "minute": 45,
+            "addedTime": 3,
+            "homeScore": 0,
+            "awayScore": 0
+          },
+          "priceMicros": {
+            "HOME": 321424,
+            "DRAW": 430638,
+            "AWAY": 247938
+          },
+          "freshness": {
+            "marketUpdatedAtUtc": "2026-07-15T19:50:01.681Z",
+            "delayed": true,
+            "suspended": false
+          }
+        },
+        "revealedDecisions": {
+          "alpha": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+            "snapshotId": "cefc2029bd5801c1649023a00b545e9cd2e7442ce1375953c2de2831f713564a",
+            "checkpointId": "HALFTIME",
+            "agentId": "alpha",
+            "publicExplanation": "No trade is executed because the deterministic policy signal required action is NO_TRADE as no approved strategy signal is active.",
+            "action": "NO_TRADE"
+          },
+          "beta": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+            "snapshotId": "cefc2029bd5801c1649023a00b545e9cd2e7442ce1375953c2de2831f713564a",
+            "checkpointId": "HALFTIME",
+            "agentId": "beta",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          }
+        },
+        "failures": [],
+        "portfoliosBefore": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M30"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M30"
+          }
+        },
+        "portfoliosAfter": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "HALFTIME"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "HALFTIME"
+          }
+        },
+        "firstEventSequence": 20,
+        "lastEventSequence": 25
+      },
+      {
+        "checkpointId": "M60",
+        "outcome": "REVEALED",
+        "snapshot": {
+          "schemaVersion": 1,
+          "snapshotId": "e6a210511f74b865da3556a5329fdfa491c69378cb85b1eb613f5d9ff23f1e53",
+          "snapshotHash": "b2490d1167e134755b063ad9e454e771f706b54a97658abe815329d7ed0e95b4",
+          "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+          "fixtureId": "18241006",
+          "checkpointId": "M60",
+          "observedAtUtc": "2026-07-15T20:21:11.977Z",
+          "source": "TXLINE_RECORDED",
+          "match": {
+            "status": "LIVE",
+            "minute": 60,
+            "addedTime": 0,
+            "homeScore": 1,
+            "awayScore": 0
+          },
+          "priceMicros": {
+            "HOME": 637031,
+            "DRAW": 270425,
+            "AWAY": 92544
+          },
+          "freshness": {
+            "marketUpdatedAtUtc": "2026-07-15T20:21:11.288Z",
+            "delayed": true,
+            "suspended": false
+          }
+        },
+        "revealedDecisions": {
+          "alpha": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+            "snapshotId": "e6a210511f74b865da3556a5329fdfa491c69378cb85b1eb613f5d9ff23f1e53",
+            "checkpointId": "M60",
+            "agentId": "alpha",
+            "publicExplanation": "Countering the price overreaction on HOME after it scored and rose 315607 micros within 15 minutes.",
+            "action": "TARGET_ALLOCATION",
+            "targetAllocationBps": {
+              "cash": 2000,
+              "HOME": 1000,
+              "DRAW": 3500,
+              "AWAY": 3500
+            }
+          },
+          "beta": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+            "snapshotId": "e6a210511f74b865da3556a5329fdfa491c69378cb85b1eb613f5d9ff23f1e53",
+            "checkpointId": "M60",
+            "agentId": "beta",
+            "publicExplanation": "The policy signal indicates a TOWARD allocation to HOME after HOME scored once to make it 1-0 at minute 60 while remaining priced at 637031 micros.",
+            "action": "TARGET_ALLOCATION",
+            "targetAllocationBps": {
+              "cash": 1500,
+              "HOME": 6000,
+              "DRAW": 1500,
+              "AWAY": 1000
+            }
+          }
+        },
+        "failures": [],
+        "portfoliosBefore": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "HALFTIME"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "HALFTIME"
+          }
+        },
+        "portfoliosAfter": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "20000003",
+            "unitMicros": {
+              "HOME": "15697823",
+              "DRAW": "129425903",
+              "AWAY": "378198478"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M60"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "15000003",
+            "unitMicros": {
+              "HOME": "94186939",
+              "DRAW": "55468244",
+              "AWAY": "108056708"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M60"
+          }
+        },
+        "firstEventSequence": 26,
+        "lastEventSequence": 31
+      },
+      {
+        "checkpointId": "M75",
+        "outcome": "REVEALED",
+        "snapshot": {
+          "schemaVersion": 1,
+          "snapshotId": "6ceade8a968e56d986a7795ae62fc6433480aa649e557c8e3a7918b28867bbc5",
+          "snapshotHash": "3c38c64abe6162647dbc82db7946b95326b79cce6e201415f2e3777743e149a8",
+          "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+          "fixtureId": "18241006",
+          "checkpointId": "M75",
+          "observedAtUtc": "2026-07-15T20:36:11.771Z",
+          "source": "TXLINE_RECORDED",
+          "match": {
+            "status": "LIVE",
+            "minute": 75,
+            "addedTime": 0,
+            "homeScore": 1,
+            "awayScore": 0
+          },
+          "priceMicros": {
+            "HOME": 657743,
+            "DRAW": 262853,
+            "AWAY": 79404
+          },
+          "freshness": {
+            "marketUpdatedAtUtc": "2026-07-15T20:36:10.426Z",
+            "delayed": true,
+            "suspended": false
+          }
+        },
+        "revealedDecisions": {
+          "alpha": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+            "snapshotId": "6ceade8a968e56d986a7795ae62fc6433480aa649e557c8e3a7918b28867bbc5",
+            "checkpointId": "M75",
+            "agentId": "alpha",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          },
+          "beta": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+            "snapshotId": "6ceade8a968e56d986a7795ae62fc6433480aa649e557c8e3a7918b28867bbc5",
+            "checkpointId": "M75",
+            "agentId": "beta",
+            "publicExplanation": "The policySignal required action is NO_TRADE because no approved strategy signal is active at checkpoint M75.",
+            "action": "NO_TRADE"
+          }
+        },
+        "failures": [],
+        "portfoliosBefore": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "20000003",
+            "unitMicros": {
+              "HOME": "15697823",
+              "DRAW": "129425903",
+              "AWAY": "378198478"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M60"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "15000003",
+            "unitMicros": {
+              "HOME": "94186939",
+              "DRAW": "55468244",
+              "AWAY": "108056708"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M60"
+          }
+        },
+        "portfoliosAfter": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "20000003",
+            "unitMicros": {
+              "HOME": "15697823",
+              "DRAW": "129425903",
+              "AWAY": "378198478"
+            },
+            "navMicros": "94375593",
+            "returnBps": -562,
+            "updatedAtCheckpoint": "M75"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "15000003",
+            "unitMicros": {
+              "HOME": "94186939",
+              "DRAW": "55468244",
+              "AWAY": "108056708"
+            },
+            "navMicros": "100110930",
+            "returnBps": 11,
+            "updatedAtCheckpoint": "M75"
+          }
+        },
+        "firstEventSequence": 32,
+        "lastEventSequence": 37
+      }
+    ],
+    "leader": {
+      "result": "alpha",
+      "provisional": false
+    },
+    "finalResult": {
+      "schemaVersion": 2,
+      "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+      "winnerRule": "FINAL_NAV_ONLY_V1",
+      "winningAssetId": "AWAY",
+      "winner": "alpha",
+      "alphaFinalNavMicros": "398198481",
+      "betaFinalNavMicros": "123056711",
+      "terminalEvidence": {
+        "schemaVersion": 1,
+        "providerSequence": 963,
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "fixtureId": "18241006",
+        "observedAtUtc": "2026-07-15T21:14:24.772Z",
+        "sourceEventId": "txline-score:18241006:962",
+        "source": "TXLINE_RECORDED",
+        "match": {
+          "status": "FINISHED",
+          "minute": 90,
+          "addedTime": 9,
+          "homeScore": 1,
+          "awayScore": 2
+        },
+        "winningAssetId": "AWAY",
+        "terminalEvidenceHash": "51cd243680d43b04ecc0b380eedc75501105fb467fb4ac2d7920612fedda2b7b"
+      },
+      "completedEventSequence": 39,
+      "preSettlementEventLogHash": "4df3775a398352d9b5f0a5359e89aa391ec3d02424447de3e069633dd8081a94",
+      "finalResultHash": "3edaf6b6b7f598f2e9b9a76e8a75428e994546a22516c875a1911e1f996cb71d"
+    },
+    "lastEventSequence": 39
+  },
+  "history": {
+    "schemaVersion": 1,
+    "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+    "afterSequence": 0,
+    "lastEventSequence": 39,
+    "events": [
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:1",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 1,
+        "occurredAtUtc": "2026-07-17T20:18:30.067Z",
+        "type": "ARENA_READY",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:2",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 2,
+        "occurredAtUtc": "2026-07-15T19:07:06.349Z",
+        "type": "CHECKPOINT_OPENED",
+        "checkpointId": "KICKOFF",
+        "payload": {
+          "snapshot": {
+            "schemaVersion": 1,
+            "snapshotId": "f76d31b71c3fbbb9a156279144916e438f927e788ee0e371a7a15fa0d8af5020",
+            "snapshotHash": "90280ef68dd04f77c99c5d40d5c8ca7223ccc7fa67c841d3715b26bdbdd95190",
+            "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+            "fixtureId": "18241006",
+            "checkpointId": "KICKOFF",
+            "observedAtUtc": "2026-07-15T19:07:06.349Z",
+            "source": "TXLINE_RECORDED",
+            "match": {
+              "status": "LIVE",
+              "minute": 6,
+              "addedTime": 0,
+              "homeScore": 0,
+              "awayScore": 0
+            },
+            "priceMicros": {
+              "HOME": 359746,
+              "DRAW": 349445,
+              "AWAY": 290809
+            },
+            "freshness": {
+              "marketUpdatedAtUtc": "2026-07-15T19:07:06.309Z",
+              "delayed": true,
+              "suspended": false
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:3",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 3,
+        "occurredAtUtc": "2026-07-15T19:07:06.349Z",
+        "type": "AGENTS_ANALYZING",
+        "checkpointId": "KICKOFF",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:4",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 4,
+        "occurredAtUtc": "2026-07-15T19:07:06.349Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "KICKOFF",
+        "agentId": "alpha",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:5",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 5,
+        "occurredAtUtc": "2026-07-15T19:07:06.349Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "KICKOFF",
+        "agentId": "beta",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:6",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 6,
+        "occurredAtUtc": "2026-07-15T19:07:06.349Z",
+        "type": "ROUND_REVEALED",
+        "checkpointId": "KICKOFF",
+        "payload": {
+          "decisions": {
+            "alpha": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+              "snapshotId": "f76d31b71c3fbbb9a156279144916e438f927e788ee0e371a7a15fa0d8af5020",
+              "checkpointId": "KICKOFF",
+              "agentId": "alpha",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            },
+            "beta": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+              "snapshotId": "f76d31b71c3fbbb9a156279144916e438f927e788ee0e371a7a15fa0d8af5020",
+              "checkpointId": "KICKOFF",
+              "agentId": "beta",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            }
+          },
+          "failures": [],
+          "portfoliosBefore": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            }
+          },
+          "portfoliosAfter": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:7",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 7,
+        "occurredAtUtc": "2026-07-15T19:07:06.349Z",
+        "type": "ROUND_COMPLETE",
+        "checkpointId": "KICKOFF",
+        "payload": {
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            }
+          },
+          "nextCheckpointId": "M15"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:8",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 8,
+        "occurredAtUtc": "2026-07-15T19:15:24.705Z",
+        "type": "CHECKPOINT_OPENED",
+        "checkpointId": "M15",
+        "payload": {
+          "snapshot": {
+            "schemaVersion": 1,
+            "snapshotId": "5ab987c5681f40c79a910f520b90071fb9d4bef106c69bd78c9578ffaca948b8",
+            "snapshotHash": "5ede04877b96949581c078555f0388d9ecbd8ad21feee36caf2853489dee9816",
+            "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+            "fixtureId": "18241006",
+            "checkpointId": "M15",
+            "observedAtUtc": "2026-07-15T19:15:24.705Z",
+            "source": "TXLINE_RECORDED",
+            "match": {
+              "status": "LIVE",
+              "minute": 15,
+              "addedTime": 0,
+              "homeScore": 0,
+              "awayScore": 0
+            },
+            "priceMicros": {
+              "HOME": 361028,
+              "DRAW": 360638,
+              "AWAY": 278334
+            },
+            "freshness": {
+              "marketUpdatedAtUtc": "2026-07-15T19:15:22.097Z",
+              "delayed": true,
+              "suspended": false
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:9",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 9,
+        "occurredAtUtc": "2026-07-15T19:15:24.705Z",
+        "type": "AGENTS_ANALYZING",
+        "checkpointId": "M15",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:10",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 10,
+        "occurredAtUtc": "2026-07-15T19:15:24.705Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M15",
+        "agentId": "alpha",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:11",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 11,
+        "occurredAtUtc": "2026-07-15T19:15:24.705Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M15",
+        "agentId": "beta",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:12",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 12,
+        "occurredAtUtc": "2026-07-15T19:15:24.705Z",
+        "type": "ROUND_REVEALED",
+        "checkpointId": "M15",
+        "payload": {
+          "decisions": {
+            "alpha": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+              "snapshotId": "5ab987c5681f40c79a910f520b90071fb9d4bef106c69bd78c9578ffaca948b8",
+              "checkpointId": "M15",
+              "agentId": "alpha",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            },
+            "beta": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+              "snapshotId": "5ab987c5681f40c79a910f520b90071fb9d4bef106c69bd78c9578ffaca948b8",
+              "checkpointId": "M15",
+              "agentId": "beta",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            }
+          },
+          "failures": [],
+          "portfoliosBefore": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            }
+          },
+          "portfoliosAfter": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M15"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M15"
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:13",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 13,
+        "occurredAtUtc": "2026-07-15T19:15:24.705Z",
+        "type": "ROUND_COMPLETE",
+        "checkpointId": "M15",
+        "payload": {
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M15"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M15"
+            }
+          },
+          "nextCheckpointId": "M30"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:14",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 14,
+        "occurredAtUtc": "2026-07-15T19:30:30.980Z",
+        "type": "CHECKPOINT_OPENED",
+        "checkpointId": "M30",
+        "payload": {
+          "snapshot": {
+            "schemaVersion": 1,
+            "snapshotId": "3e4176c72e14ced4a5504bf361777fe882e6fded911addc009225006304de0f8",
+            "snapshotHash": "a5819ea9f1928c3d317bad7a832c47c56735643edf59cd88cc35beec0f2534ab",
+            "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+            "fixtureId": "18241006",
+            "checkpointId": "M30",
+            "observedAtUtc": "2026-07-15T19:30:30.980Z",
+            "source": "TXLINE_RECORDED",
+            "match": {
+              "status": "LIVE",
+              "minute": 30,
+              "addedTime": 0,
+              "homeScore": 0,
+              "awayScore": 0
+            },
+            "priceMicros": {
+              "HOME": 350588,
+              "DRAW": 374345,
+              "AWAY": 275067
+            },
+            "freshness": {
+              "marketUpdatedAtUtc": "2026-07-15T19:30:29.220Z",
+              "delayed": true,
+              "suspended": false
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:15",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 15,
+        "occurredAtUtc": "2026-07-15T19:30:30.980Z",
+        "type": "AGENTS_ANALYZING",
+        "checkpointId": "M30",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:16",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 16,
+        "occurredAtUtc": "2026-07-15T19:30:30.980Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M30",
+        "agentId": "alpha",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:17",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 17,
+        "occurredAtUtc": "2026-07-15T19:30:30.980Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M30",
+        "agentId": "beta",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:18",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 18,
+        "occurredAtUtc": "2026-07-15T19:30:30.980Z",
+        "type": "ROUND_REVEALED",
+        "checkpointId": "M30",
+        "payload": {
+          "decisions": {
+            "alpha": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+              "snapshotId": "3e4176c72e14ced4a5504bf361777fe882e6fded911addc009225006304de0f8",
+              "checkpointId": "M30",
+              "agentId": "alpha",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            },
+            "beta": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+              "snapshotId": "3e4176c72e14ced4a5504bf361777fe882e6fded911addc009225006304de0f8",
+              "checkpointId": "M30",
+              "agentId": "beta",
+              "publicExplanation": "No approved strategy signal is active at checkpoint M30.",
+              "action": "NO_TRADE"
+            }
+          },
+          "failures": [],
+          "portfoliosBefore": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M15"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M15"
+            }
+          },
+          "portfoliosAfter": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M30"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M30"
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:19",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 19,
+        "occurredAtUtc": "2026-07-15T19:30:30.980Z",
+        "type": "ROUND_COMPLETE",
+        "checkpointId": "M30",
+        "payload": {
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M30"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M30"
+            }
+          },
+          "nextCheckpointId": "HALFTIME"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:20",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 20,
+        "occurredAtUtc": "2026-07-15T19:50:44.821Z",
+        "type": "CHECKPOINT_OPENED",
+        "checkpointId": "HALFTIME",
+        "payload": {
+          "snapshot": {
+            "schemaVersion": 1,
+            "snapshotId": "cefc2029bd5801c1649023a00b545e9cd2e7442ce1375953c2de2831f713564a",
+            "snapshotHash": "ced02a62c6d787ac9ed6a4e0f241db39c22c282f2523ef9df0d9bd126fd71371",
+            "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+            "fixtureId": "18241006",
+            "checkpointId": "HALFTIME",
+            "observedAtUtc": "2026-07-15T19:50:44.821Z",
+            "source": "TXLINE_RECORDED",
+            "match": {
+              "status": "HALFTIME",
+              "minute": 45,
+              "addedTime": 3,
+              "homeScore": 0,
+              "awayScore": 0
+            },
+            "priceMicros": {
+              "HOME": 321424,
+              "DRAW": 430638,
+              "AWAY": 247938
+            },
+            "freshness": {
+              "marketUpdatedAtUtc": "2026-07-15T19:50:01.681Z",
+              "delayed": true,
+              "suspended": false
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:21",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 21,
+        "occurredAtUtc": "2026-07-15T19:50:44.821Z",
+        "type": "AGENTS_ANALYZING",
+        "checkpointId": "HALFTIME",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:22",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 22,
+        "occurredAtUtc": "2026-07-15T19:50:44.821Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "HALFTIME",
+        "agentId": "alpha",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:23",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 23,
+        "occurredAtUtc": "2026-07-15T19:50:44.821Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "HALFTIME",
+        "agentId": "beta",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:24",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 24,
+        "occurredAtUtc": "2026-07-15T19:50:44.821Z",
+        "type": "ROUND_REVEALED",
+        "checkpointId": "HALFTIME",
+        "payload": {
+          "decisions": {
+            "alpha": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+              "snapshotId": "cefc2029bd5801c1649023a00b545e9cd2e7442ce1375953c2de2831f713564a",
+              "checkpointId": "HALFTIME",
+              "agentId": "alpha",
+              "publicExplanation": "No trade is executed because the deterministic policy signal required action is NO_TRADE as no approved strategy signal is active.",
+              "action": "NO_TRADE"
+            },
+            "beta": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+              "snapshotId": "cefc2029bd5801c1649023a00b545e9cd2e7442ce1375953c2de2831f713564a",
+              "checkpointId": "HALFTIME",
+              "agentId": "beta",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            }
+          },
+          "failures": [],
+          "portfoliosBefore": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M30"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M30"
+            }
+          },
+          "portfoliosAfter": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "HALFTIME"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "HALFTIME"
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:25",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 25,
+        "occurredAtUtc": "2026-07-15T19:50:44.821Z",
+        "type": "ROUND_COMPLETE",
+        "checkpointId": "HALFTIME",
+        "payload": {
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "HALFTIME"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "HALFTIME"
+            }
+          },
+          "nextCheckpointId": "M60"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:26",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 26,
+        "occurredAtUtc": "2026-07-15T20:21:11.977Z",
+        "type": "CHECKPOINT_OPENED",
+        "checkpointId": "M60",
+        "payload": {
+          "snapshot": {
+            "schemaVersion": 1,
+            "snapshotId": "e6a210511f74b865da3556a5329fdfa491c69378cb85b1eb613f5d9ff23f1e53",
+            "snapshotHash": "b2490d1167e134755b063ad9e454e771f706b54a97658abe815329d7ed0e95b4",
+            "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+            "fixtureId": "18241006",
+            "checkpointId": "M60",
+            "observedAtUtc": "2026-07-15T20:21:11.977Z",
+            "source": "TXLINE_RECORDED",
+            "match": {
+              "status": "LIVE",
+              "minute": 60,
+              "addedTime": 0,
+              "homeScore": 1,
+              "awayScore": 0
+            },
+            "priceMicros": {
+              "HOME": 637031,
+              "DRAW": 270425,
+              "AWAY": 92544
+            },
+            "freshness": {
+              "marketUpdatedAtUtc": "2026-07-15T20:21:11.288Z",
+              "delayed": true,
+              "suspended": false
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:27",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 27,
+        "occurredAtUtc": "2026-07-15T20:21:11.977Z",
+        "type": "AGENTS_ANALYZING",
+        "checkpointId": "M60",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:28",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 28,
+        "occurredAtUtc": "2026-07-15T20:21:11.977Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M60",
+        "agentId": "alpha",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:29",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 29,
+        "occurredAtUtc": "2026-07-15T20:21:11.977Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M60",
+        "agentId": "beta",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:30",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 30,
+        "occurredAtUtc": "2026-07-15T20:21:11.977Z",
+        "type": "ROUND_REVEALED",
+        "checkpointId": "M60",
+        "payload": {
+          "decisions": {
+            "alpha": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+              "snapshotId": "e6a210511f74b865da3556a5329fdfa491c69378cb85b1eb613f5d9ff23f1e53",
+              "checkpointId": "M60",
+              "agentId": "alpha",
+              "publicExplanation": "Countering the price overreaction on HOME after it scored and rose 315607 micros within 15 minutes.",
+              "action": "TARGET_ALLOCATION",
+              "targetAllocationBps": {
+                "cash": 2000,
+                "HOME": 1000,
+                "DRAW": 3500,
+                "AWAY": 3500
+              }
+            },
+            "beta": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+              "snapshotId": "e6a210511f74b865da3556a5329fdfa491c69378cb85b1eb613f5d9ff23f1e53",
+              "checkpointId": "M60",
+              "agentId": "beta",
+              "publicExplanation": "The policy signal indicates a TOWARD allocation to HOME after HOME scored once to make it 1-0 at minute 60 while remaining priced at 637031 micros.",
+              "action": "TARGET_ALLOCATION",
+              "targetAllocationBps": {
+                "cash": 1500,
+                "HOME": 6000,
+                "DRAW": 1500,
+                "AWAY": 1000
+              }
+            }
+          },
+          "failures": [],
+          "portfoliosBefore": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "HALFTIME"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "HALFTIME"
+            }
+          },
+          "portfoliosAfter": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "15697823",
+                "DRAW": "129425903",
+                "AWAY": "378198478"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M60"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "15000003",
+              "unitMicros": {
+                "HOME": "94186939",
+                "DRAW": "55468244",
+                "AWAY": "108056708"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M60"
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:31",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 31,
+        "occurredAtUtc": "2026-07-15T20:21:11.977Z",
+        "type": "ROUND_COMPLETE",
+        "checkpointId": "M60",
+        "payload": {
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "15697823",
+                "DRAW": "129425903",
+                "AWAY": "378198478"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M60"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "15000003",
+              "unitMicros": {
+                "HOME": "94186939",
+                "DRAW": "55468244",
+                "AWAY": "108056708"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M60"
+            }
+          },
+          "nextCheckpointId": "M75"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:32",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 32,
+        "occurredAtUtc": "2026-07-15T20:36:11.771Z",
+        "type": "CHECKPOINT_OPENED",
+        "checkpointId": "M75",
+        "payload": {
+          "snapshot": {
+            "schemaVersion": 1,
+            "snapshotId": "6ceade8a968e56d986a7795ae62fc6433480aa649e557c8e3a7918b28867bbc5",
+            "snapshotHash": "3c38c64abe6162647dbc82db7946b95326b79cce6e201415f2e3777743e149a8",
+            "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+            "fixtureId": "18241006",
+            "checkpointId": "M75",
+            "observedAtUtc": "2026-07-15T20:36:11.771Z",
+            "source": "TXLINE_RECORDED",
+            "match": {
+              "status": "LIVE",
+              "minute": 75,
+              "addedTime": 0,
+              "homeScore": 1,
+              "awayScore": 0
+            },
+            "priceMicros": {
+              "HOME": 657743,
+              "DRAW": 262853,
+              "AWAY": 79404
+            },
+            "freshness": {
+              "marketUpdatedAtUtc": "2026-07-15T20:36:10.426Z",
+              "delayed": true,
+              "suspended": false
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:33",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 33,
+        "occurredAtUtc": "2026-07-15T20:36:11.771Z",
+        "type": "AGENTS_ANALYZING",
+        "checkpointId": "M75",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:34",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 34,
+        "occurredAtUtc": "2026-07-15T20:36:11.771Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M75",
+        "agentId": "alpha",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:35",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 35,
+        "occurredAtUtc": "2026-07-15T20:36:11.771Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M75",
+        "agentId": "beta",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:36",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 36,
+        "occurredAtUtc": "2026-07-15T20:36:11.771Z",
+        "type": "ROUND_REVEALED",
+        "checkpointId": "M75",
+        "payload": {
+          "decisions": {
+            "alpha": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+              "snapshotId": "6ceade8a968e56d986a7795ae62fc6433480aa649e557c8e3a7918b28867bbc5",
+              "checkpointId": "M75",
+              "agentId": "alpha",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            },
+            "beta": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+              "snapshotId": "6ceade8a968e56d986a7795ae62fc6433480aa649e557c8e3a7918b28867bbc5",
+              "checkpointId": "M75",
+              "agentId": "beta",
+              "publicExplanation": "The policySignal required action is NO_TRADE because no approved strategy signal is active at checkpoint M75.",
+              "action": "NO_TRADE"
+            }
+          },
+          "failures": [],
+          "portfoliosBefore": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "15697823",
+                "DRAW": "129425903",
+                "AWAY": "378198478"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M60"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "15000003",
+              "unitMicros": {
+                "HOME": "94186939",
+                "DRAW": "55468244",
+                "AWAY": "108056708"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M60"
+            }
+          },
+          "portfoliosAfter": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "15697823",
+                "DRAW": "129425903",
+                "AWAY": "378198478"
+              },
+              "navMicros": "94375593",
+              "returnBps": -562,
+              "updatedAtCheckpoint": "M75"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "15000003",
+              "unitMicros": {
+                "HOME": "94186939",
+                "DRAW": "55468244",
+                "AWAY": "108056708"
+              },
+              "navMicros": "100110930",
+              "returnBps": 11,
+              "updatedAtCheckpoint": "M75"
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:37",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 37,
+        "occurredAtUtc": "2026-07-15T20:36:11.771Z",
+        "type": "ROUND_COMPLETE",
+        "checkpointId": "M75",
+        "payload": {
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "15697823",
+                "DRAW": "129425903",
+                "AWAY": "378198478"
+              },
+              "navMicros": "94375593",
+              "returnBps": -562,
+              "updatedAtCheckpoint": "M75"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "15000003",
+              "unitMicros": {
+                "HOME": "94186939",
+                "DRAW": "55468244",
+                "AWAY": "108056708"
+              },
+              "navMicros": "100110930",
+              "returnBps": 11,
+              "updatedAtCheckpoint": "M75"
+            }
+          },
+          "nextCheckpointId": "FINAL"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:38",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 38,
+        "occurredAtUtc": "2026-07-15T20:36:11.771Z",
+        "type": "FINALIZING",
+        "checkpointId": "FINAL",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-england-argentina-semifinal-replay:39",
+        "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+        "sequence": 39,
+        "occurredAtUtc": "2026-07-18T06:46:43.947Z",
+        "type": "COMPLETED",
+        "checkpointId": "FINAL",
+        "payload": {
+          "result": {
+            "schemaVersion": 2,
+            "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+            "winnerRule": "FINAL_NAV_ONLY_V1",
+            "winningAssetId": "AWAY",
+            "winner": "alpha",
+            "alphaFinalNavMicros": "398198481",
+            "betaFinalNavMicros": "123056711",
+            "terminalEvidence": {
+              "schemaVersion": 1,
+              "providerSequence": 963,
+              "arenaId": "world-cup-2026-england-argentina-semifinal-replay",
+              "fixtureId": "18241006",
+              "observedAtUtc": "2026-07-15T21:14:24.772Z",
+              "sourceEventId": "txline-score:18241006:962",
+              "source": "TXLINE_RECORDED",
+              "match": {
+                "status": "FINISHED",
+                "minute": 90,
+                "addedTime": 9,
+                "homeScore": 1,
+                "awayScore": 2
+              },
+              "winningAssetId": "AWAY",
+              "terminalEvidenceHash": "51cd243680d43b04ecc0b380eedc75501105fb467fb4ac2d7920612fedda2b7b"
+            },
+            "completedEventSequence": 39,
+            "preSettlementEventLogHash": "4df3775a398352d9b5f0a5359e89aa391ec3d02424447de3e069633dd8081a94",
+            "finalResultHash": "3edaf6b6b7f598f2e9b9a76e8a75428e994546a22516c875a1911e1f996cb71d"
+          },
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "15697823",
+                "DRAW": "129425903",
+                "AWAY": "378198478"
+              },
+              "navMicros": "398198481",
+              "returnBps": 29819,
+              "updatedAtCheckpoint": "FINAL"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "15000003",
+              "unitMicros": {
+                "HOME": "94186939",
+                "DRAW": "55468244",
+                "AWAY": "108056708"
+              },
+              "navMicros": "123056711",
+              "returnBps": 2305,
+              "updatedAtCheckpoint": "FINAL"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

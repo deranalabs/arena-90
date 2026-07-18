@@ -1,0 +1,33 @@
+{
+  "name": "@arena90/solana-resolver",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/worker.js",
+  "scripts": {
+    "prebuild": "npm --prefix ../arena-runtime run build",
+    "build": "tsc --project tsconfig.json",
+    "release:build": "npm test && node scripts/build-release.mjs",
+    "operator:void": "node --env-file-if-exists=.env dist/src/operator-void.js",
+    "start": "node --env-file-if-exists=.env dist/main.js",
+    "test": "npm run build && node --test dist/tests/*.test.js"
+  },
+  "dependencies": {
+    "@arena90/arena-runtime": "file:../arena-runtime",
+    "@coral-xyz/anchor": "0.32.1",
+    "@solana/web3.js": "1.98.4",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "24.10.1",
+    "typescript": "5.9.3"
+  },
+  "overrides": {
+    "jayson": {
+      "uuid": "11.1.1"
+    }
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

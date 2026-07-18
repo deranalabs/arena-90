@@ -1,86 +1,148 @@
-# Arena90: The 90-Minute AI Combat Arena
-# Subagent-Driven Development Protocol & Rules
+# Arena90 Repository Instructions
 
-## 1. Repository Purpose & Architecture
-Arena90 is an Agent vs Agent prediction market with on-chain settlement via Solana and Kamino Yield, built for the TxODDS Superteam Earn World Cup 2026 Hackathon.
-The architecture is strictly modular, divided into distinct layers:
-- **`frontend/web/` (Next.js 15)**: The Landing Page & Live Arena Dashboard.
-- **`backend/solana-actions/` (Express API)**: The Trojan Horse (Blinks) serving Action metadata to X/Twitter.
-- **`contracts/anchor/arena_escrow/` (Rust/Anchor)**: Settlement Layer escrowing funds and routing Kamino yield.
-- **`agents/zeroclaw/` (Python)**: The Gladiators (ISAGI & AIKU) ingesting TxLINE data and triggering state changes.
-Each directory is owned by a specific role. Boundaries must be respected.
+Global rules for AI coding agents in this repository.
 
-## 2. Scope & Isolation Rules
-- **Strict Isolation:** Agents must ONLY modify files within their assigned layer directory.
-- **Cross-Layer Changes:** Modifying multiple layers simultaneously requires explicit user authorization.
-- **Global Scope:** Shared files such as `AGENTS.md`, CI/CD workflows (`.github/workflows/`), and root documentation are treated as global scope.
-- **Respect Local Code:** Do not blindly overwrite existing local changes or monolithic structures without inspecting them first.
+Keep this file as a routing and safety layer. Product behavior belongs in
+approved product documents. Subsystem rules belong in the nearest `AGENTS.md`.
 
-## 3. Standard Workflow
-Strictly follow this execution order for every task:
-`inspect` → `implement` → `lint/typecheck` → `test` → `build` → `report`
+## 1. Product Mission
 
-- **Tool Execution:** Always use **absolute paths** when executing terminal commands.
-- **Source Code Paths:** NEVER hardcode absolute machine paths (e.g., `/Users/derana/...`) inside the source code. Use relative paths or environment variables.
-- **Mock First:** Use `txodds-mock.json` to simulate the Oracle API before integrating real endpoints.
-- **No Placeholders:** Write production-ready code. Never leave `YOUR_API_KEY_HERE` or empty function stubs.
-- **No Destructive Git Ops:** Do not force-push, delete branches, or reset history without permission.
+Arena90 is an autonomous AI strategy arena powered by football and market data.
 
-## 4. Layer Validation Commands
-Always validate your changes using the following commands in the respective directories:
+Two autonomous agents receive the same verified snapshot, independently manage
+equal virtual portfolios, and compete through deterministic execution and
+winner rules.
 
-### Frontend
-Working directory: `frontend/web/`
-- Install: `npm ci`
-- Lint: `npm run lint`
-- Test: `npm test -- --runInBand`
-- Build: `npm run build`
+Watching is authentication-free. Supporters may back an agent through Solana,
+but supporter funds remain separate from agent capital and decisions.
 
-### Backend
-Working directory: `backend/solana-actions/`
-- Install: `npm ci`
-- Typecheck: `npm run build`
-- Test: `npm test -- --runInBand`
+Do not describe Arena90 as a sportsbook, user-facing prediction-market trading
+terminal, copy-trading product, AI-controlled wallet, or scripted battle.
 
-### Contracts
-Working directory: `contracts/anchor/arena_escrow/`
-- Build: `anchor build`
-- Test: `cargo test`
+## 2. Authoritative Documentation
 
-### Agents
-Working directory: `agents/zeroclaw/`
-- Shell syntax check: `bash -n run_clash.sh`
-- Smoke test: `ARENA90_ZEROCLAW_REQUIRE_SUCCESS=1 ./run_clash.sh`
-*(Note: Python testing via `pytest` is currently a gap until `pyproject.toml` and a `tests/` directory are fully established. Rely on the shell smoke test for now).*
+Start with `docs/README.md`. For current work order and acceptance status, use
+`docs/specs/02-V2-Delivery-Roadmap.md`. For enduring product decisions, use
+`docs/product/00-Product-Index.md` to find the document that owns the decision.
 
-## 5. Cross-Layer Contracts
-Since isolation is strict, communication between layers must be carefully managed:
-- **`txodds-mock.json`:** Defines the TxLINE input schema. Owned by the backend/agents shared data structure.
-- **`clash-state.json` (Runtime):** Generated and owned by `agents/zeroclaw/`. Read by both `frontend/web/` and `backend/solana-actions/`.
-- **Write Permissions:** Agents operating in `agents/zeroclaw/` are permitted to write state outputs to a shared location accessible by the backend, but must not directly alter backend source code to do so.
-- **Schema Changes:** Any change to a JSON schema must synchronously update the tests and consumers in the impacted layers.
+Only documents marked `Approved` are implementation-authoritative. Read only
+the documents relevant to the task. Do not implement `Draft`, `In Review`,
+`Deprecated`, or `Archived` material unless explicitly authorized.
 
-## 6. Environment & Secrets
-- **Strictly `.env`:** All secrets MUST come from environment variables.
-- **No Commits:** Never commit `.env` files.
-- **Maintenance:** Always update `.env.example` when introducing a new configuration variable.
-- **No Hardcoding:** Never hardcode API keys, wallet secrets, RPC credentials, or local machine paths in the source code.
-- **Public Keys:** If a public key or non-secret ID is hardcoded, add a comment explaining why it is safe and intentional.
+V1 code, mocks, names, comments, and docs do not override approved V2 decisions.
+When requirements conflict or a required specification is missing, stop and
+report it instead of inventing behavior.
 
-## 7. Definition of Done
-A task is only considered complete when:
-- Modifications are strictly limited to the authorized scope/layer.
-- The layer's specific Lint, Typecheck, Test, and Build commands pass successfully.
-- Tests have been added or updated to reflect behavioral changes.
-- No secrets, placeholder text, or hardcoded machine paths exist in the code.
-- Documentation and `.env.example` are updated if interfaces/configs change.
-- The agent explicitly reports the commands run, the outcome, and any remaining blockers.
+## 3. Repository Map
 
-## 8. CI and Global Changes
-Changes to the following are considered **Global**:
-- `.github/workflows/**`
-- `AGENTS.md` and root documentation (`docs/`)
-- Shared schema definitions
-- Cross-layer toolchain or dependency versions (e.g., bumping Node/Rust versions)
+- `frontend/web/` — Next.js product UX.
+- `backend/solana-actions/` — Express API and Solana Action/Blink surfaces.
+- `contracts/anchor/arena_escrow/` — Rust/Anchor programs and tests.
+- `agents/zeroclaw/` — autonomous runtime, strategies, and tools.
+- `docs/` — decisions, specifications, plans, and references.
 
-*Rule:* If you make a Global Change, you must validate ALL impacted layers, not just the one you are currently working on.
+Some files remain V1 or experimental. ISAGI, AIKU, `clash-state.json`, Kamino
+mocks, and legacy runner behavior are not V2 requirements unless an approved
+current document retains them.
+
+## 4. Scope and Workflow
+
+Modify only files required by the authorized task.
+
+For cross-layer work, identify all affected layers and update contracts,
+producers, consumers, validators, tests, and docs together. Obtain explicit
+authorization before expanding into layers not already in scope.
+
+Root instructions, root docs, `docs/`, shared schemas, CI, toolchain changes,
+and dependency-version changes are global changes.
+
+A nearer `AGENTS.md` may add local rules but cannot override approved product
+decisions or repository safety rules.
+
+Use:
+
+`inspect → requirements → plan → implement → validate → inspect diff → report`
+
+Before editing:
+
+- inspect code and uncommitted changes;
+- read the nearest instructions;
+- read relevant approved docs;
+- verify commands in the package manifest or tool configuration.
+
+Do not build the whole product for a vertical-slice task or overwrite unrelated
+local changes.
+
+## 5. Critical Product Guardrails
+
+Unless an approved decision changes them:
+
+- Alpha and Beta receive the same canonical snapshot and equal bankrolls, then
+  decide independently.
+- Decisions occur only at approved checkpoints and return structured target
+  allocations or `NO_TRADE`.
+- Validation, pricing, execution, accounting, settlement, and winner
+  calculation are deterministic.
+- Invalid output never becomes a fabricated fallback trade.
+- Live and Replay use the same rules and engine; Replay uses recorded data but
+  generates new autonomous decisions.
+- Supporter funds never become agent capital, performance, or strategy input.
+- Agents never control wallets, private keys, supporter funds, or arbitrary
+  transactions.
+- Watching remains wallet-free.
+- Public states must be honest; never fabricate progress, reasoning,
+  transactions, decisions, or production readiness.
+- Private chain-of-thought, secrets, and raw infrastructure logs are not public
+  product output.
+
+## 6. Implementation and Security
+
+Use repository-relative paths or environment configuration. Never hardcode
+machine paths, secrets, private keys, seed phrases, RPC credentials, or
+production credentials.
+
+Secrets come from environment variables. When adding one, update the relevant
+`.env.example`, state whether it is required, and provide safe local behavior
+where appropriate.
+
+Use mocks before live integrations unless live TxLINE, wallet, RPC, or protocol
+access is explicitly authorized.
+
+Do not leave empty stubs, fake production data, placeholder keys, silent
+fallbacks, fabricated states or decisions, or misleading claims.
+
+Schema changes must update impacted producers, consumers, validators, fixtures,
+tests, and docs.
+
+## 7. Validation
+
+Use commands declared by the current package or tool configuration.
+
+- `frontend/web/`: `npm run lint`, `npm test -- --runInBand`, `npm run build`
+- `backend/solana-actions/`: `npm run build`, `npm test -- --runInBand`
+- `contracts/anchor/arena_escrow/`: `anchor build`, `npm test`, `cargo test`
+- `agents/zeroclaw/`: inspect the runner and configuration before execution;
+  do not treat `run_clash.sh` as portable while it contains absolute paths.
+
+Run only commands supported by available tooling. Never claim a command passed
+when it was skipped, unavailable, or failed.
+
+For documentation-only changes, run at minimum `git diff --check`.
+
+## 8. Git Safety and Completion
+
+Do not perform destructive Git operations without explicit permission,
+including hard resets, force-pushes, branch deletion, history rewriting,
+discarding uncommitted changes, or mass deletion outside task scope.
+
+Do not commit secrets, `.env` files, private keys, wallet files, build output,
+or local ledgers.
+
+Before completion, inspect the final diff, run relevant validation, confirm
+scope, update tests/docs where required, and report remaining gaps honestly.
+
+The completion report must state scope, files changed, behavior implemented,
+commands run, validation results, and known blockers.
+
+Do not describe mocked, trusted, untested, incomplete, or local-only behavior as
+verified, autonomous, decentralized, live, portable, or production-ready.

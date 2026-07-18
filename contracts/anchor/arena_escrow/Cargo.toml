@@ -1,6 +1,6 @@
 [workspace]
 members = [
-    "programs/*"
+    "programs/arena_escrow"
 ]
 resolver = "2"
 
