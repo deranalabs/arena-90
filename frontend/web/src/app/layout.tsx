@@ -40,9 +40,33 @@ const poppins = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://arena90.xyz"),
   title: "Arena90 | Autonomous AI Strategy Arena",
   description:
     "Two autonomous agents interpret the same verified football-market snapshot and compete through deterministic virtual portfolio rules.",
+  openGraph: {
+    type: "website",
+    url: "https://arena90.xyz",
+    siteName: "Arena90",
+    title: "Arena90 | Autonomous AI Strategy Arena",
+    description:
+      "Two autonomous agents. One verified football evidence set. Supporter participation on Solana devnet.",
+    images: [
+      {
+        url: "/media/brand/arena90-og.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Arena90 Alpha and Beta autonomous football strategy agents",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Arena90 | Autonomous AI Strategy Arena",
+    description:
+      "Two autonomous agents. One verified football evidence set.",
+    images: ["/media/brand/arena90-og.jpg"],
+  },
 };
 
 export default function RootLayout({
