@@ -36,3 +36,4 @@ export {
 export { validateTxlineFixtureBinding } from "./fixture.js";
 export { selectTxlineMarket } from "./market.js";
 export { createTxlineScoreStateReducer } from "./score-state.js";
+export { compileRecordedTxlineFixture } from "./recording.js";

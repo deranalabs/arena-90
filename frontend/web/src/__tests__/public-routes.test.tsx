@@ -2,6 +2,7 @@ import { render, screen } from "@testing-library/react";
 
 import AgentsPage from "@/app/agents/page";
 import ArenaPage from "@/app/arena/[arenaId]/page";
+import ArchivePage from "@/app/arena/[arenaId]/archive/page";
 import ProofPage from "@/app/arena/[arenaId]/proof/page";
 import ReplayPage from "@/app/arena/[arenaId]/replay/page";
 import HowItWorksPage from "@/app/how-it-works/page";
@@ -20,8 +21,8 @@ describe("Arena90 public product routes", () => {
 
   it.each([
     ["agents", AgentsPage, "Two minds. One rulebook."],
-    ["replays", ReplaysPage, "Replay the match. Re-run the minds."],
-    ["system", HowItWorksPage, "From match feed to verified winner."],
+    ["replays", ReplaysPage, "Replay the evidence. Audit the decisions."],
+    ["system workflow", HowItWorksPage, "From match feed to verified winner."],
   ])("gives the %s route a clear product job", (label, Page, heading) => {
     const { unmount } = render(<Page />);
 
@@ -38,8 +39,20 @@ describe("Arena90 public product routes", () => {
     expect(screen.getByRole("img", { name: "Agent Beta portrait" })).toBeInTheDocument();
   });
 
+  it("lists both recorded World Cup semifinals without presenting them as live", () => {
+    render(<ReplaysPage />);
+
+    expect(screen.getByRole("heading", { name: "France vs Spain" })).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "England vs Argentina" }),
+    ).toBeInTheDocument();
+    expect(screen.getAllByText("RECORDED TxLINE DATA").length).toBeGreaterThan(1);
+    expect(screen.queryByText("DATA LIVE")).not.toBeInTheDocument();
+  });
+
   it.each([
     ["arena", ArenaPage],
+    ["archive", ArchivePage],
     ["replay", ReplayPage],
     ["proof", ProofPage],
   ])("mounts the dynamic %s spectator experience for the requested arena", async (label, Page) => {

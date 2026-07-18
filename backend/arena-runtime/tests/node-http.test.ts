@@ -765,7 +765,7 @@ describe("Node HTTP runtime composition", () => {
         strategies: {
           alpha: "alpha-overreaction-hunter",
           beta: "beta-underreaction-hunter",
-          version: "3",
+          version: "4",
         },
       },
     });
@@ -973,6 +973,40 @@ describe("Node HTTP runtime composition", () => {
         store: testStore(),
       }),
     ).rejects.toMatchObject({ category: "CONFIG_FAILURE" });
+
+    const sourceKickoffUtc = "2026-07-13T11:55:00.000Z";
+    const historicalRecording = {
+      ...recording,
+      provenance: {
+        source: "TXLINE_HISTORICAL_API",
+        sourceFixtureId: 123,
+        sourceKickoffUtc,
+        capturedAtUtc: "2026-07-14T00:00:00.000Z",
+        scoreEventCount: 7,
+        oddsUpdateCount: 21,
+        inputHash: "a".repeat(64),
+      },
+    };
+    const historicalComposition = await createNodeHttpRuntimeComposition({
+      env: replayEnv,
+      readFile: replayFiles(
+        { ...manifest, kickoffUtc: sourceKickoffUtc },
+        historicalRecording,
+      ),
+      agents: { alpha: agent("alpha"), beta: agent("beta") },
+      store: testStore(),
+    });
+    await historicalComposition.shutdown();
+
+    await expect(
+      createNodeHttpRuntimeComposition({
+        env: replayEnv,
+        readFile: replayFiles(manifest, historicalRecording),
+        agents: { alpha: agent("alpha"), beta: agent("beta") },
+        store: testStore(),
+      }),
+    ).rejects.toMatchObject({ category: "RECORDING_FAILURE" });
+
     await expect(
       createNodeHttpRuntimeComposition({
         env: replayEnv,

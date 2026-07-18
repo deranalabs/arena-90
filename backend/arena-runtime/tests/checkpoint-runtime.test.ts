@@ -492,6 +492,7 @@ describe("checkpoint orchestrator", () => {
   it.each([
     ["FORMAT_FAILURE", 0] as const,
     ["AMBIGUOUS_OUTPUT", 2] as const,
+    ["POLICY_FAILURE", 1] as const,
   ])("routes %s through exactly one bounded repair", async (category, candidateCount) => {
     const dataAdapter = createRecordedDataAdapter(await loadRecordedFixture());
     const alphaAttempts: Array<{
@@ -556,6 +557,7 @@ describe("checkpoint orchestrator", () => {
   it.each([
     ["FORMAT_FAILURE", 0] as const,
     ["AMBIGUOUS_OUTPUT", 2] as const,
+    ["POLICY_FAILURE", 1] as const,
   ])(
     "stops after one repair when repaired output has %s",
     async (category, candidateCount) => {

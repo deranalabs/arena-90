@@ -47,6 +47,8 @@
     "inspect:txline:fixtures": "npm run build && node --env-file-if-exists=.env scripts/txline-fixture-inspect.mjs",
     "smoke:zeroclaw": "npm run build && node --env-file-if-exists=.env scripts/zeroclaw-smoke.mjs",
     "smoke:zeroclaw:strategy": "npm run build && node --env-file-if-exists=.env scripts/zeroclaw-strategy-smoke.mjs",
+    "record:txline:semifinals": "npm run build && node --env-file-if-exists=.env scripts/record-txline-semifinals.mjs",
+    "export:replay": "npm run build && node --env-file-if-exists=.env scripts/export-replay-artifact.mjs",
     "test": "vitest run"
   },
   "dependencies": {

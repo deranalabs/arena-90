@@ -133,6 +133,11 @@ outcome price moves by at least `150000` micros within at most 15 elapsed match
 minutes. This is treated as an overshoot; Alpha allocates away from that
 overpriced outcome toward supported alternatives or cash.
 
+V2 secondary signal: exactly one new goal appears within at most 15 elapsed
+match minutes and the scoring side's normalized price rises by at least
+`300000` micros. Alpha treats that extreme post-goal repricing as a possible
+overshoot and allocates away from the scoring side while retaining cash.
+
 Primary risk: fading a real regime change that deserves its new price.
 
 ### 5.2 Agent Beta — Underreaction Hunter
@@ -153,6 +158,11 @@ V2 primary signal: a new goal appears in `matchDeltaFromPrevious` while the
 scoring side's normalized price rises by less than `80000` micros from the
 previous checkpoint. This is treated as incomplete repricing.
 
+V2 secondary signal: exactly one new goal appears within at most 15 elapsed
+match minutes and the scoring side remains priced at or below `650000` micros.
+Beta treats the score-state evidence as not fully reflected and allocates
+toward the scoring side while retaining cash.
+
 Primary risk: overreacting to short-term movement or chasing information already priced.
 
 ### 5.3 Strategic Contrast
@@ -169,16 +179,26 @@ Both agents may select the same asset, take opposing positions, use different si
 
 Differences should emerge from strategy policy, evidence weighting, portfolio context, risk envelope, and autonomous interpretation.
 
+A deterministic policy evaluator binds these approved thresholds to the
+canonical snapshot and shared strategy evidence. An active signal requires a
+target allocation in the indicated direction; no active approved signal
+requires `NO_TRADE`. The agent chooses sizing inside the policy risk envelope.
+Invalid or policy-inconsistent output is rejected, never converted into a
+fabricated fallback trade.
+
 Both agents must receive the same strategy evidence. A strategy may claim only
 evidence present in the invocation. If movement, an anchor, or a baseline is
 part of a strategy, the invocation must supply current and prior verified
 market state or deterministic derived evidence. An agent must not invent
 historical probability, movement, baseline value, or match evidence.
 
-`NO_TRADE` remains valid. The system must not force action or disagreement.
-However, strategy acceptance must include deterministic underreaction and
-overreaction scenarios proving that each policy can produce a valid target
-allocation when its own evidence exists.
+`NO_TRADE` remains required whenever no approved policy signal is active. The
+system must not force unconditional action or disagreement. When a
+data-conditioned policy signal is active, `TARGET_ALLOCATION` and its direction
+are contract requirements; the autonomous agent still chooses valid sizing and
+distribution inside that strategy envelope. Strategy acceptance must include
+deterministic underreaction and overreaction scenarios proving that each policy
+can produce a valid target allocation when its own evidence exists.
 
 `Agent Alpha` and `Agent Beta` are public placeholders that may change without altering their product roles. Exact prompts, models, evidence weights, risk limits, output schemas, and validation rules belong to the Agent Decision specification.
 

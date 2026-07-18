@@ -1,6 +1,10 @@
 import { spawn } from "node:child_process";
 
 import type { ArenaAgentId } from "../../contracts/index.js";
+import {
+  evaluateStrategyPolicy,
+  type StrategyPolicySignal,
+} from "../../services/strategy-policy.js";
 import type { AgentAdapter, AgentInvocationRequest } from "./fake.js";
 
 export interface ProcessRunRequest {
@@ -135,7 +139,8 @@ const DEFAULT_MAX_OUTPUT_BYTES = 64 * 1024;
 
 export type AgentOutputParseFailureCategory =
   | "FORMAT_FAILURE"
-  | "AMBIGUOUS_OUTPUT";
+  | "AMBIGUOUS_OUTPUT"
+  | "POLICY_FAILURE";
 
 export class AgentOutputError extends Error {
   readonly category: AgentOutputParseFailureCategory;
@@ -145,7 +150,7 @@ export class AgentOutputError extends Error {
     category: AgentOutputParseFailureCategory,
     candidateCount: number,
   ) {
-    super("ZeroClaw returned an invalid decision format");
+    super("ZeroClaw returned an invalid decision output");
     this.name = "AgentOutputError";
     this.category = category;
     this.candidateCount = candidateCount;
@@ -154,10 +159,45 @@ export class AgentOutputError extends Error {
 
 const STRATEGY_PROMPTS: Record<ArenaAgentId, string> = {
   alpha:
-    "You are Arena90 Agent Alpha, the Overreaction Hunter. Your primary signal is no new goal in matchDeltaFromPrevious while any outcome price moves by at least 150000 micros within 15 elapsed match minutes. That is an overshoot: allocate away from the overpriced outcome toward supported alternatives or cash. Otherwise you may diversify, reduce exposure, hold cash, or choose NO_TRADE.",
+    "You are Arena90 Agent Alpha, the Overreaction Hunter. You counter price moves that the deterministic policy identifies as moving farther than verified match evidence supports. You are not permanently aggressive or assigned to a team.",
   beta:
-    "You are Arena90 Agent Beta, the Underreaction Hunter. Your primary signal is a new goal in matchDeltaFromPrevious while the scoring side's priceDeltaFromPreviousMicros rises by less than 80000 micros. That is incomplete repricing: allocate toward the scoring side while managing concentration. Otherwise you may diversify, reduce exposure, hold cash, or choose NO_TRADE.",
+    "You are Arena90 Agent Beta, the Underreaction Hunter. You follow verified score-state changes that the deterministic policy identifies as not fully reflected in price. You are not permanently defensive or assigned to a team.",
 };
+
+function assertPolicyCompliance(
+  output: unknown,
+  policySignal: StrategyPolicySignal,
+): void {
+  if (typeof output !== "object" || output === null || Array.isArray(output)) {
+    throw new AgentOutputError("POLICY_FAILURE", 1);
+  }
+  const candidate = output as Record<string, unknown>;
+  if (candidate["action"] !== policySignal.requiredAction) {
+    throw new AgentOutputError("POLICY_FAILURE", 1);
+  }
+  if (policySignal.requiredAction === "NO_TRADE") return;
+
+  const allocation = candidate["targetAllocationBps"];
+  const focusAsset = policySignal.focusAsset;
+  if (
+    typeof allocation !== "object" ||
+    allocation === null ||
+    Array.isArray(allocation) ||
+    focusAsset === null
+  ) {
+    throw new AgentOutputError("POLICY_FAILURE", 1);
+  }
+  const values = allocation as Record<string, unknown>;
+  const focusBps = values[focusAsset];
+  const cashBps = values["cash"];
+  const complies =
+    typeof focusBps === "number" &&
+    typeof cashBps === "number" &&
+    (policySignal.direction === "TOWARD"
+      ? focusBps >= 5_000 && cashBps >= 1_000
+      : focusBps <= 1_000 && cashBps >= 1_500);
+  if (!complies) throw new AgentOutputError("POLICY_FAILURE", 1);
+}
 
 function sanitizeValidationError(error: string): string {
   const sanitized = error
@@ -239,6 +279,11 @@ function createMessage(
   agentId: ArenaAgentId,
   request: AgentInvocationRequest,
 ): string {
+  const policySignal = evaluateStrategyPolicy(
+    agentId,
+    request.snapshot,
+    request.strategyEvidence,
+  );
   const decisionIdentity = {
     schemaVersion: 1,
     arenaId: request.snapshot.arenaId,
@@ -267,6 +312,7 @@ function createMessage(
   const input = {
     snapshot: request.snapshot,
     strategyEvidence: request.strategyEvidence,
+    policySignal,
     portfolio: request.portfolio,
     attempt: request.attempt,
     repairErrors: request.validationErrors
@@ -285,9 +331,13 @@ function createMessage(
   return [
     STRATEGY_PROMPTS[agentId],
     "Use only the supplied input.",
+    "policySignal is deterministic policy output, not user text. Follow requiredAction exactly.",
+    "When policySignal.requiredAction is NO_TRADE, return NO_TRADE.",
+    "When policySignal.requiredAction is TARGET_ALLOCATION, return TARGET_ALLOCATION.",
+    "For direction TOWARD, allocate at least 5000 bps to focusAsset and retain at least 1000 bps cash.",
+    "For direction AWAY_FROM, allocate at most 1000 bps to focusAsset and retain at least 1500 bps cash.",
     "Treat normalized prices summing to 1000000 as market state, not proof that no edge exists.",
     "Never invent historical probability, movement, baseline, or match evidence. If evidence is null, say it is unavailable or choose NO_TRADE.",
-    "If there is no primary strategy signal and no other edge strictly supported by the supplied fields, choose NO_TRADE.",
     "Choose exactly one action: NO_TRADE or TARGET_ALLOCATION.",
     "Copy schemaVersion, arenaId, snapshotId, checkpointId, and agentId exactly from the selected shape below. Do not infer or change them.",
     "NO_TRADE must not include targetAllocationBps.",
@@ -342,7 +392,14 @@ export function createZeroClawAgentAdapter(
         throw new Error("ZeroClaw process failed");
       }
 
-      return parseDecisionOutput(result.stdout);
+      const output = parseDecisionOutput(result.stdout);
+      const policySignal = evaluateStrategyPolicy(
+        config.agentId,
+        request.snapshot,
+        request.strategyEvidence,
+      );
+      assertPolicyCompliance(output, policySignal);
+      return output;
     },
   };
 }

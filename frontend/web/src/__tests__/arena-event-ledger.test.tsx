@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 
 import { ArenaEventLedger } from "@/components/arena/ArenaEventLedger";
 import type { PublicArenaEventV1 } from "@/lib/arena-api/contracts";
@@ -49,5 +49,35 @@ describe("Public Event Ledger", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "RESUME DISPLAY" }));
     expect(screen.getAllByText("DECISION RECEIVED")).toHaveLength(2);
+  });
+
+  it("plays a recorded event ledger in committed sequence without calling it live", () => {
+    jest.useFakeTimers();
+    try {
+      render(
+        <ArenaEventLedger
+          connection="Arena event record complete."
+          events={events()}
+          recordedPlayback
+        />,
+      );
+
+      expect(screen.getByText("Recorded autonomous activity")).toBeInTheDocument();
+      fireEvent.click(screen.getByRole("button", { name: "PLAY EVENT RECORD" }));
+      expect(screen.getByLabelText("Ledger connection status")).toHaveTextContent(
+        "PLAYING RECORDED EVENTS",
+      );
+      expect(screen.queryByText("DECISION RECEIVED")).not.toBeInTheDocument();
+
+      act(() => jest.advanceTimersByTime(250));
+      expect(screen.getAllByText("DECISION RECEIVED")).toHaveLength(1);
+      act(() => jest.advanceTimersByTime(250));
+      expect(screen.getAllByText("DECISION RECEIVED")).toHaveLength(2);
+      expect(screen.getByLabelText("Ledger connection status")).toHaveTextContent(
+        "EVENT RECORD COMPLETE",
+      );
+    } finally {
+      jest.useRealTimers();
+    }
   });
 });

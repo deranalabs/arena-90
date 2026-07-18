@@ -1,0 +1,45 @@
+{
+  "schemaVersion": 1,
+  "arenaId": "world-cup-2026-france-spain-semifinal-replay",
+  "mode": "REPLAY",
+  "competition": "FIFA World Cup 2026",
+  "fixtureId": "18237038",
+  "homeTeam": {
+    "name": "France",
+    "code": "FRA"
+  },
+  "awayTeam": {
+    "name": "Spain",
+    "code": "ESP"
+  },
+  "kickoffUtc": "2026-07-14T19:00:00.000Z",
+  "startingBankrollMicros": "100000000",
+  "currency": "VIRTUAL_USD_MICROS",
+  "assets": [
+    {
+      "id": "HOME",
+      "market": "FULL_TIME_1X2",
+      "label": "France win"
+    },
+    {
+      "id": "DRAW",
+      "market": "FULL_TIME_1X2",
+      "label": "Draw"
+    },
+    {
+      "id": "AWAY",
+      "market": "FULL_TIME_1X2",
+      "label": "Spain win"
+    }
+  ],
+  "checkpoints": [
+    "KICKOFF",
+    "M15",
+    "M30",
+    "HALFTIME",
+    "M60",
+    "M75",
+    "FINAL"
+  ],
+  "createdAtUtc": "2026-07-17T20:18:30.067Z"
+}

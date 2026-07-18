@@ -107,6 +107,10 @@ const replayIdentitySchema = z
     provider: z.literal("TXLINE_RECORDED"),
     arenaId: z.string().trim().min(1),
     fixtureId: z.string().trim().min(1),
+    provenance: z
+      .object({ sourceKickoffUtc: z.iso.datetime({ offset: true }) })
+      .passthrough()
+      .optional(),
     records: z
       .array(
         z
@@ -326,7 +330,9 @@ export async function createNodeHttpRuntimeComposition(
       manifest.arenaId !== identity.arenaId ||
       manifest.fixtureId !== identity.fixtureId ||
       identity.records[0]?.checkpointId !== "KICKOFF" ||
-      manifest.kickoffUtc !== identity.records[0].observedAtUtc
+      manifest.kickoffUtc !==
+        (identity.provenance?.sourceKickoffUtc ??
+          identity.records[0].observedAtUtc)
     ) {
       throw new NodeHttpRuntimeError("RECORDING_FAILURE");
     }
@@ -405,13 +411,13 @@ export async function createNodeHttpRuntimeComposition(
           adapterId: options.agents === undefined ? "zeroclaw" : "injected",
           adapterVersion: "1",
           strategyId: "alpha-overreaction-hunter",
-          strategyVersion: "3",
+          strategyVersion: "4",
         },
         beta: {
           adapterId: options.agents === undefined ? "zeroclaw" : "injected",
           adapterVersion: "1",
           strategyId: "beta-underreaction-hunter",
-          strategyVersion: "3",
+          strategyVersion: "4",
         },
       },
     },

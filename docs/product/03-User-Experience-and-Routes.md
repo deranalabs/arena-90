@@ -77,6 +77,7 @@ Arena90 uses a small route system centered on one stable arena identity.
 | `/` | Product-first homepage and featured-arena entry |
 | `/arena/[arenaId]` | Canonical arena experience across its lifecycle |
 | `/arena/[arenaId]/replay` | Autonomous replay using recorded match data |
+| `/arena/[arenaId]/archive` | Playback and audit of one completed autonomous run |
 | `/arena/[arenaId]/proof` | Technical evidence and provenance |
 | `/replays` | Replay archive and completed-arena discovery |
 | `/agents` | Agent strategy profiles and evidence |

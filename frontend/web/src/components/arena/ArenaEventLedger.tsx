@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import type { PublicArenaEventV1 } from "@/lib/arena-api/contracts";
 
@@ -53,14 +53,18 @@ function eventProof(event: PublicArenaEventV1) {
 export function ArenaEventLedger({
   events,
   connection,
+  recordedPlayback = false,
 }: {
   events: readonly PublicArenaEventV1[];
   connection: string;
+  recordedPlayback?: boolean;
 }) {
   const [filter, setFilter] = useState<LedgerFilter>("ALL");
   const [pausedEvents, setPausedEvents] = useState<readonly PublicArenaEventV1[] | null>(null);
+  const [playbackCount, setPlaybackCount] = useState<number | null>(null);
   const [copyStatus, setCopyStatus] = useState<"IDLE" | "COPIED" | "FAILED">("IDLE");
-  const source = pausedEvents ?? events;
+  const playbackEvents = playbackCount === null ? null : events.slice(0, playbackCount);
+  const source = playbackEvents ?? pausedEvents ?? events;
   const visible = useMemo(
     () =>
       source
@@ -70,6 +74,20 @@ export function ArenaEventLedger({
     [filter, source],
   );
   const latest = source.at(-1);
+
+  useEffect(() => {
+    if (playbackCount === null || playbackCount >= events.length) return;
+    const timer = window.setTimeout(() => {
+      setPlaybackCount((current) => current === null ? null : current + 1);
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [events.length, playbackCount]);
+
+  function startRecordedPlayback() {
+    setPausedEvents(null);
+    setFilter("ALL");
+    setPlaybackCount(events.length === 0 ? null : 1);
+  }
 
   async function copyLatestProof() {
     if (!latest || !navigator.clipboard) {
@@ -88,13 +106,21 @@ export function ArenaEventLedger({
     <section className="arena-ledger" aria-labelledby="arena-ledger-title">
       <header className="arena-ledger__header">
         <div>
-          <p className="product-eyebrow">Live agent activity</p>
+          <p className="product-eyebrow">
+            {recordedPlayback ? "Recorded autonomous activity" : "Live agent activity"}
+          </p>
           <h2 id="arena-ledger-title">Public Event Ledger</h2>
           <p>Verified runtime events only. No private reasoning or infrastructure logs.</p>
         </div>
         <div className="arena-ledger__status" aria-label="Ledger connection status">
           <span aria-hidden="true" />
-          {pausedEvents ? "DISPLAY PAUSED" : connection}
+          {playbackCount !== null
+            ? playbackCount >= events.length
+              ? "EVENT RECORD COMPLETE"
+              : "PLAYING RECORDED EVENTS"
+            : pausedEvents
+              ? "DISPLAY PAUSED"
+              : connection}
         </div>
       </header>
 
@@ -112,8 +138,16 @@ export function ArenaEventLedger({
           ))}
         </div>
         <div>
+          {recordedPlayback ? (
+            <button onClick={startRecordedPlayback} type="button">
+              PLAY EVENT RECORD
+            </button>
+          ) : null}
           <button
-            onClick={() => setPausedEvents(pausedEvents ? null : [...events])}
+            onClick={() => {
+              setPlaybackCount(null);
+              setPausedEvents(pausedEvents ? null : [...events]);
+            }}
             type="button"
           >
             {pausedEvents ? "RESUME DISPLAY" : "PAUSE DISPLAY"}

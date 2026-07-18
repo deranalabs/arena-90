@@ -11,7 +11,10 @@ import {
 } from "../src/adapters/agents/index.js";
 import { createRecordedDataAdapter } from "../src/adapters/data/index.js";
 import { initializePortfolio } from "../src/engine/index.js";
-import { deriveStrategyEvidence } from "../src/services/index.js";
+import {
+  deriveStrategyEvidence,
+  evaluateStrategyPolicy,
+} from "../src/services/index.js";
 
 async function loadRecordedFixture(): Promise<unknown> {
   const contents = await readFile(
@@ -22,6 +25,17 @@ async function loadRecordedFixture(): Promise<unknown> {
   return JSON.parse(contents) as unknown;
 }
 
+async function loadSemifinalFixture(): Promise<unknown> {
+  const contents = await readFile(
+    new URL(
+      "../fixtures/replay/world-cup-2026-france-spain-semifinal-replay-checkpoints.json",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+  return JSON.parse(contents) as unknown;
+}
+
 describe("ZeroClaw agent adapter", () => {
   it("provides two exact decision shapes with request-bound identity fields", async () => {
     let message = "";
@@ -29,7 +43,15 @@ describe("ZeroClaw agent adapter", () => {
       message = request.args[6] ?? "";
       return {
         exitCode: 0,
-        stdout: "{}",
+        stdout: JSON.stringify({
+          schemaVersion: 1,
+          arenaId: "arena-replay-001",
+          snapshotId: "snapshot-kickoff",
+          checkpointId: "KICKOFF",
+          agentId: "beta",
+          action: "NO_TRADE",
+          publicExplanation: "No approved signal at kickoff.",
+        }),
         stderr: "",
         outputLimitExceeded: false,
       };
@@ -81,7 +103,15 @@ describe("ZeroClaw agent adapter", () => {
       message = request.args[6] ?? "";
       return {
         exitCode: 0,
-        stdout: "{}",
+        stdout: JSON.stringify({
+          schemaVersion: 1,
+          arenaId: "arena-replay-001",
+          snapshotId: "snapshot-kickoff",
+          checkpointId: "KICKOFF",
+          agentId: "alpha",
+          action: "NO_TRADE",
+          publicExplanation: "No approved signal at kickoff.",
+        }),
         stderr: "",
         outputLimitExceeded: false,
       };
@@ -189,6 +219,11 @@ describe("ZeroClaw agent adapter", () => {
     ).toEqual({
       snapshot,
       strategyEvidence: deriveStrategyEvidence(snapshot, []),
+      policySignal: evaluateStrategyPolicy(
+        "alpha",
+        snapshot,
+        deriveStrategyEvidence(snapshot, []),
+      ),
       portfolio,
       attempt: 1,
       repairErrors: ["Target allocations must sum to 10000 basis points"],
@@ -508,7 +543,15 @@ describe("ZeroClaw agent adapter", () => {
       if (agentId !== undefined && message !== undefined) messages[agentId] = message;
       return {
         exitCode: 0,
-        stdout: "{}",
+        stdout: JSON.stringify({
+          schemaVersion: 1,
+          arenaId: "arena-replay-001",
+          snapshotId: "snapshot-kickoff",
+          checkpointId: "KICKOFF",
+          agentId,
+          action: "NO_TRADE",
+          publicExplanation: "No approved signal at kickoff.",
+        }),
         stderr: "",
         outputLimitExceeded: false,
       };
@@ -555,6 +598,75 @@ describe("ZeroClaw agent adapter", () => {
       alphaUsesBetaStrategy: false,
       betaUsesAlphaStrategy: false,
       betaUsesUnderreaction: true,
+    });
+  });
+
+  it("rejects NO_TRADE when an approved policy signal requires exposure", async () => {
+    const adapter = createRecordedDataAdapter(await loadSemifinalFixture());
+    const history = [
+      adapter.getSnapshot("KICKOFF"),
+      adapter.getSnapshot("M15"),
+    ];
+    const snapshot = adapter.getSnapshot("M30");
+    const request = {
+      snapshot,
+      strategyEvidence: deriveStrategyEvidence(snapshot, history),
+      portfolio: initializePortfolio("beta", "100000000"),
+      attempt: 0,
+      validationErrors: [],
+      signal: new AbortController().signal,
+    } as const;
+    const identity = {
+      schemaVersion: 1,
+      arenaId: snapshot.arenaId,
+      snapshotId: snapshot.snapshotId,
+      checkpointId: snapshot.checkpointId,
+      agentId: "beta",
+    } as const;
+
+    const noTrade = createZeroClawAgentAdapter({
+      agentId: "beta",
+      binaryPath: "zeroclaw",
+      configDir: ".zeroclaw",
+      processRunner: async () => ({
+        exitCode: 0,
+        stdout: JSON.stringify({
+          ...identity,
+          action: "NO_TRADE",
+          publicExplanation: "Ignored active signal.",
+        }),
+        stderr: "",
+        outputLimitExceeded: false,
+      }),
+    });
+    await expect(noTrade.invoke(request)).rejects.toMatchObject({
+      category: "POLICY_FAILURE",
+    });
+
+    const compliant = createZeroClawAgentAdapter({
+      agentId: "beta",
+      binaryPath: "zeroclaw",
+      configDir: ".zeroclaw",
+      processRunner: async () => ({
+        exitCode: 0,
+        stdout: JSON.stringify({
+          ...identity,
+          action: "TARGET_ALLOCATION",
+          targetAllocationBps: {
+            cash: 1_000,
+            HOME: 1_500,
+            DRAW: 1_500,
+            AWAY: 6_000,
+          },
+          publicExplanation: "The scoring side remains underpriced.",
+        }),
+        stderr: "",
+        outputLimitExceeded: false,
+      }),
+    });
+    await expect(compliant.invoke(request)).resolves.toMatchObject({
+      action: "TARGET_ALLOCATION",
+      targetAllocationBps: { AWAY: 6_000 },
     });
   });
 

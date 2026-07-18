@@ -28,6 +28,7 @@ pnpm-debug.log*
 .next/
 out/
 next-env.d.ts
+.vercel/
 
 # Build outputs
 dist/

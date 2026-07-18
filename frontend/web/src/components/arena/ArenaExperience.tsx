@@ -26,7 +26,7 @@ import type { SupporterArena } from "@/lib/solana-actions/supporter-arena";
 
 type ArenaExperienceProps = {
   arenaId: string;
-  experience: "arena" | "replay" | "proof";
+  experience: "arena" | "replay" | "archive" | "proof";
   transport?: RuntimeTransport;
   supporterArena?: SupporterArena;
   publicOrigin?: string;
@@ -270,6 +270,7 @@ function experienceEyebrow(
   state: PublicArenaStateV1,
 ) {
   if (experience === "proof") return "PUBLIC EVENT RECORD";
+  if (experience === "archive") return "ARCHIVED AUTONOMOUS RUN · RECORDED TXLINE DATA";
   if (experience === "replay") return "AUTONOMOUS REPLAY · RECORDED MATCH DATA";
   return state.manifest.mode === "LIVE" ? "LIVE ARENA" : "REPLAY ARENA";
 }
@@ -373,7 +374,13 @@ export function ArenaExperience({
         phase={state.phase}
         scoreLabel={terminalEvidence ? `Final score ${terminalEvidence.match.homeScore} to ${terminalEvidence.match.awayScore} at ${terminalEvidence.match.minute} minutes` : undefined}
         source={displaySource}
-        statement={experience === "replay" ? "The match is recorded. The decisions are new." : undefined}
+        statement={
+          experience === "archive"
+            ? "Archived completed run. The event playback below does not invoke the agents again."
+            : experience === "replay"
+              ? "The match is recorded. New decisions are generated during this Replay session."
+              : undefined
+        }
       />
 
       <CompetitionStatusBand detail={roundStatus.detail} label={roundStatus.label} />
@@ -381,6 +388,7 @@ export function ArenaExperience({
       <ArenaEventLedger
         connection={connectionMessage(session.status)}
         events={session.events}
+        recordedPlayback={experience === "archive"}
       />
 
       <section className="arena-leader-strip" aria-label="Competition leader">

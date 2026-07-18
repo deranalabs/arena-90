@@ -1,7 +1,7 @@
 # Arena90 — V2 Delivery Roadmap
 
 **Status:** Approved
-**Last verified:** 2026-07-17
+**Last verified:** 2026-07-18
 
 This document is the single source of truth for current work order, delivery
 status, and acceptance evidence. Product documents own enduring behavior.
@@ -77,7 +77,7 @@ fallback evidence, not a substitute for the required live integration.
 
 | Gate | Status | Next acceptance evidence |
 | --- | --- | --- |
-| 1. Strategy Integrity | Complete locally | Deploy strategy v2 and preserve smoke evidence |
+| 1. Strategy Integrity | Complete locally | Deploy strategy v4 and preserve smoke evidence |
 | 2. Always-On World Cup Live | In progress | Supervisor clean-boot and restart proof |
 | 3. Spectator & Technical Proof | In progress | World Cup API/SSE through browser |
 | 4. Solana Supporter Slice | In progress | Runtime resolver seam, public Blink, and frontend proof |
@@ -100,8 +100,13 @@ or an isolated unit test does not close a gate.
   checkpoint state, exact price movement, and match movement. Both invocation
   paths receive the same evidence object, including schema repair attempts.
 - Local strategy identities are now Alpha Overreaction Hunter and Beta
-  Underreaction Hunter with strategy metadata version `3`. Runtime build and
-  all 401 tests pass.
+  Underreaction Hunter with deterministic policy metadata version `4`. Runtime
+  build and all 439 tests pass.
+- Two immutable World Cup semifinal Replay recordings now preserve historical
+  TxLINE provenance and prevent future-odds leakage. Fresh ZeroClaw strategy-v4
+  runs completed all six checkpoints with no failures: Beta won France–Spain,
+  and Alpha won England–Argentina. Both agents took data-conditioned exposure,
+  and the public artifacts preserve 39 ordered runtime events per arena.
 - Real ZeroClaw acceptance smoke passes Alpha overreaction allocation, Beta
   underreaction allocation, and Alpha/Beta no-edge `NO_TRADE` scenarios. The
   smoke also rejects unsupported historical/baseline claims in public output.
@@ -131,9 +136,10 @@ or an isolated unit test does not close a gate.
   Replay-default code is deployed to `arena-90.vercel.app`.
 - Frontend now includes a read-only public Event Ledger derived from the same
   SSE event stream as the arena view. It supports agent/type filtering,
-  display pause, and copying public proof identity without exposing prompts,
-  private reasoning, raw model output, or infrastructure logs. Frontend lint,
-  all 89 tests, Replay build, and World Cup Live build pass locally.
+  display pause, recorded-event playback, and copying public proof identity
+  without exposing prompts, private reasoning, raw model output, or
+  infrastructure logs. Frontend lint, all 117 tests, and production build pass
+  locally.
 - Replay runtime is deployed on the agentic VPS; frontend is deployed on
   Vercel through a same-origin read-only gateway.
 - Replay spectator flow and public proof are available as fallback evidence.

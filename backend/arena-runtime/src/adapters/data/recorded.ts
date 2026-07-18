@@ -33,6 +33,18 @@ const recordedFixtureSchema = z
     provider: z.literal("TXLINE_RECORDED"),
     arenaId: nonBlankStringSchema,
     fixtureId: nonBlankStringSchema,
+    provenance: z
+      .object({
+        source: z.literal("TXLINE_HISTORICAL_API"),
+        sourceFixtureId: z.number().int().positive(),
+        sourceKickoffUtc: utcDateTimeSchema,
+        capturedAtUtc: utcDateTimeSchema,
+        scoreEventCount: z.number().int().positive(),
+        oddsUpdateCount: z.number().int().positive(),
+        inputHash: z.string().regex(/^[a-f0-9]{64}$/u),
+      })
+      .strict()
+      .optional(),
     records: z.array(recordedCheckpointSchema),
   })
   .strict()

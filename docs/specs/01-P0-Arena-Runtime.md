@@ -216,10 +216,20 @@ V2 policy thresholds:
 
 - Alpha primary overreaction: no new goal and an absolute price move of at least
   `150000` micros within at most 15 elapsed match minutes;
+- Alpha secondary post-goal overreaction: exactly one new goal and at least a
+  `300000` micros increase for the scoring side within at most 15 elapsed match
+  minutes;
 - Beta primary underreaction: one new goal and less than `80000` micros price
   increase for the scoring side since the previous accepted checkpoint;
-- absent a primary signal or another edge strictly supported by supplied
-  fields, the policy returns `NO_TRADE`.
+- Beta secondary score-state underreaction: exactly one new goal and a current
+  scoring-side normalized price at or below `650000` micros within at most 15
+  elapsed match minutes;
+- the deterministic policy evaluator returns the active signal and required
+  direction before agent invocation; absent an approved signal, it requires
+  `NO_TRADE`;
+- an active signal requires `TARGET_ALLOCATION`; the agent chooses allocation
+  sizing within the signal envelope, and policy-inconsistent output is rejected
+  rather than replaced with a fallback trade.
 
 ## 6. Agent Decision
 
