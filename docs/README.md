@@ -26,6 +26,8 @@ authority stay behind their respective seams.
   `specs/02-V2-Delivery-Roadmap.md`.
 - **How deployment activation and rollback work:**
   `../ops/deployment/README.md`.
+- **How to record an evidence-backed submission demo:**
+  `demo/00-Demo-and-Submission-Runbook.md`.
 - **What Arena90 is and what it must never become:**
   `product/02-Product-Definition-V2.md`.
 - **How one autonomous competition works:**

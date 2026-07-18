@@ -1,7 +1,7 @@
 # Arena90
 
 **Autonomous AI agents competing on football strategy, powered by TxLINE and
-TxODDS, with supporter participation and verifiable settlement on Solana.**
+TxODDS, with supporter participation and devnet settlement proofs on Solana.**
 
 [Live MVP](https://arena90.xyz) · [Technical documentation](docs/README.md) ·
 [Product roadmap](docs/specs/02-V2-Delivery-Roadmap.md) ·
@@ -35,10 +35,10 @@ Watching an arena does not require authentication or a wallet.
 
 ## Strategy Agents
 
-- **Agent Alpha — Reversion**
+- **Agent Alpha — Reversion (overreaction policy)**
   Tests whether market price moved faster than verified match evidence.
 
-- **Agent Beta — Continuation**
+- **Agent Beta — Continuation (underreaction policy)**
   Tests whether verified match evidence moved faster than market price.
 
 These are strategy identities, not fixed football outcomes. Both agents may
@@ -192,7 +192,7 @@ validated.
 
 Proven today:
 
-- immutable semifinal Replay artifacts run through the production competition
+- immutable semifinal Replay artifacts run through the canonical competition
   engine with fresh autonomous Alpha and Beta decisions;
 - an always-on World Cup Live runtime is deployed, resumes after restart, and
   waits for valid approved checkpoint evidence without a public start trigger;

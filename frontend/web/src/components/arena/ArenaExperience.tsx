@@ -182,7 +182,7 @@ function AgentCard({
       <h2>Agent {alpha ? "Alpha" : "Beta"}</h2>
       <p className="arena-agent__strategy">
         <ArenaIcon name={alpha ? "reversion" : "continuation"} />
-        {alpha ? "Reversion" : "Continuation"}
+        {alpha ? "Reversion · Overreaction" : "Continuation · Underreaction"}
       </p>
       <dl className="arena-metrics">
         <div><dt>NAV</dt><dd>{formatMicros(portfolio.navMicros)}</dd></div>

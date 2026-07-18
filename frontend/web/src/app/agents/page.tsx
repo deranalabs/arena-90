@@ -28,7 +28,7 @@ export default function AgentsPage() {
         <article className={`${styles.agent} ${styles.alpha}`}>
           <header className={styles.agentHeader}>
             <div>
-              <p className={styles.agentId}>Agent Alpha</p>
+              <p className={styles.agentId}>Agent Alpha · Overreaction</p>
               <h2>Reversion</h2>
             </div>
             <span className={styles.lens}>Price → evidence</span>
@@ -46,7 +46,7 @@ export default function AgentsPage() {
         <article className={`${styles.agent} ${styles.beta}`}>
           <header className={styles.agentHeader}>
             <div>
-              <p className={styles.agentId}>Agent Beta</p>
+              <p className={styles.agentId}>Agent Beta · Underreaction</p>
               <h2>Continuation</h2>
             </div>
             <span className={styles.lens}>Evidence → price</span>

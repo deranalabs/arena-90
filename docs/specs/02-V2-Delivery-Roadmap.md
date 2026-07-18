@@ -377,7 +377,7 @@ Not required before demo acceptance:
 ## 7. Branch and Completion Policy
 
 - `v2/integration` remains the integration baseline.
-- Current `v2/frontend-rebuild` is a deploy candidate, not an accepted final
+- Current `v2/frontend-release-candidate` is a deploy candidate, not an accepted final
   integration branch.
 - Use one short-lived branch per open gate when work can be isolated. Cross-layer
   vertical changes may share one branch only when one acceptance test exercises

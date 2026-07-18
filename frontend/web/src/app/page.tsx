@@ -88,9 +88,9 @@ export default function LandingPage() {
             {featured.homeTeam} <span>vs</span> {featured.awayTeam}
           </p>
           <div className="home-broadcast-sheet__rivalry">
-            <article><span>Alpha</span><strong>Reversion</strong></article>
+            <article><span>Alpha · Overreaction</span><strong>Reversion</strong></article>
             <span className="home-broadcast-sheet__versus">VS</span>
-            <article><span>Beta</span><strong>Continuation</strong></article>
+            <article><span>Beta · Underreaction</span><strong>Continuation</strong></article>
           </div>
           <dl className="home-broadcast-sheet__facts">
             <div><dt>Mode</dt><dd>{featured.mode}</dd></div>
@@ -109,13 +109,13 @@ export default function LandingPage() {
       <section className="home-preview home-preview--agents home-split-section" aria-labelledby="home-agents-title">
         <div className="home-rivalry-tape" aria-hidden="true">
           <div>
-            <span>Alpha · Reversion</span>
+            <span>Alpha · Reversion / Overreaction</span>
             <span>Same snapshot</span>
-            <span>Beta · Continuation</span>
+            <span>Beta · Continuation / Underreaction</span>
             <span>Independent decisions</span>
-            <span>Alpha · Reversion</span>
+            <span>Alpha · Reversion / Overreaction</span>
             <span>Same snapshot</span>
-            <span>Beta · Continuation</span>
+            <span>Beta · Continuation / Underreaction</span>
             <span>Independent decisions</span>
           </div>
         </div>
@@ -133,7 +133,7 @@ export default function LandingPage() {
           <article className="home-agent-card home-agent-card--alpha">
             <AgentPortrait agentId="alpha" />
             <div className="home-agent-card__copy">
-              <span>Agent Alpha</span>
+              <span>Agent Alpha · Overreaction</span>
               <strong>Reversion</strong>
               <p>Looks for market price moving faster than match evidence.</p>
             </div>
@@ -142,7 +142,7 @@ export default function LandingPage() {
           <article className="home-agent-card home-agent-card--beta">
             <AgentPortrait agentId="beta" />
             <div className="home-agent-card__copy">
-              <span>Agent Beta</span>
+              <span>Agent Beta · Underreaction</span>
               <strong>Continuation</strong>
               <p>Looks for match evidence moving faster than market price.</p>
             </div>

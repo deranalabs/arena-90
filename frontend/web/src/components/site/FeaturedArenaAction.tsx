@@ -50,6 +50,8 @@ export function FeaturedArenaAction(props: FeaturedArenaActionProps) {
 
     const controller = new AbortController();
     const transport = createRuntimeTransport();
+    let stopped = false;
+    let timeoutId: number | undefined;
 
     const refresh = async () => {
       try {
@@ -57,14 +59,18 @@ export function FeaturedArenaAction(props: FeaturedArenaActionProps) {
         setPhase(state.phase);
       } catch {
         // Keep the honest, non-live fallback when runtime state is unavailable.
+      } finally {
+        if (!stopped) {
+          timeoutId = window.setTimeout(() => void refresh(), 15_000);
+        }
       }
     };
 
     void refresh();
-    const interval = window.setInterval(() => void refresh(), 15_000);
     return () => {
+      stopped = true;
       controller.abort();
-      window.clearInterval(interval);
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
     };
   }, [props.arenaId]);
 
