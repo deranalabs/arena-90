@@ -3,6 +3,7 @@ import Link from "next/link";
 import { AgentPortrait } from "@/components/agents/AgentPortrait";
 import { FEATURED_ARENA, resolveFeaturedArena } from "@/lib/featured-arena";
 import { listRecordedReplayArtifacts } from "@/lib/arena-api/recorded-replay-artifacts";
+import styles from "./home.module.css";
 
 export const dynamic = "force-dynamic";
 
@@ -19,19 +20,19 @@ export default function LandingPage() {
     {
       arena: thirdPlace,
       status: scheduledStatus(thirdPlace.kickoffUtc),
-      detail: "Eligible fixture. Open the arena for canonical runtime and supporter status.",
+      detail: "Open the arena to follow its verified runtime and current supporter window.",
       available: true,
     },
     {
       arena: final,
       status: scheduledStatus(final.kickoffUtc),
-      detail: "Eligible fixture. Arena activation and fixture revalidation pending.",
+      detail: "The fixture is listed. Arena activation and source revalidation are still pending.",
       available: false,
     },
     {
       arena: resolveFeaturedArena("FOUNDATION_REPLAY"),
       status: "REPLAY",
-      detail: "Baseline replay used to verify the public event and spectator surfaces.",
+      detail: "Recorded match data running through the same autonomous competition engine.",
       available: true,
     },
     ...semifinalReplays.map((replay) => ({
@@ -53,12 +54,12 @@ export default function LandingPage() {
   ] as const;
 
   return (
-    <main className="home-page product-page" aria-label="Arena90 home">
+    <main className={`${styles.homePage} product-page`} aria-label="Arena90 home">
       <section className="home-broadcast-hero" aria-labelledby="home-title">
         <div className="home-broadcast-hero__copy">
           <p className="home-typographic-hero__eyebrow">
             {featured.mode === "LIVE"
-              ? `${featured.competition} · Verified live feed`
+              ? `${featured.competition} · TxLINE-powered arena`
               : "Foundation Replay · Recorded TxLINE Data"}
           </p>
           <h1 id="home-title">
@@ -66,9 +67,9 @@ export default function LandingPage() {
             <span>Two autonomous strategies.</span>
           </h1>
           <p className="home-typographic-hero__lede">
-            Agent Alpha and Agent Beta receive the same TxLINE snapshot and equal
-            virtual bankrolls, then make independent portfolio decisions across
-            six match checkpoints.
+            Agent Alpha and Agent Beta receive the same verified snapshot and equal
+            virtual bankrolls, then independently manage portfolios at six approved
+            match checkpoints.
           </p>
           <div className="home-typographic-hero__actions">
             <Link className="home-typographic-hero__primary" href={featured.watchHref}>
@@ -87,9 +88,9 @@ export default function LandingPage() {
             {featured.homeTeam} <span>vs</span> {featured.awayTeam}
           </p>
           <div className="home-broadcast-sheet__rivalry">
-            <article><span>Alpha</span><strong>Overreaction</strong></article>
+            <article><span>Alpha</span><strong>Reversion</strong></article>
             <span className="home-broadcast-sheet__versus">VS</span>
-            <article><span>Beta</span><strong>Underreaction</strong></article>
+            <article><span>Beta</span><strong>Continuation</strong></article>
           </div>
           <dl className="home-broadcast-sheet__facts">
             <div><dt>Mode</dt><dd>{featured.mode}</dd></div>
@@ -108,13 +109,13 @@ export default function LandingPage() {
       <section className="home-preview home-preview--agents home-split-section" aria-labelledby="home-agents-title">
         <div className="home-rivalry-tape" aria-hidden="true">
           <div>
-            <span>Alpha · Overreaction</span>
+            <span>Alpha · Reversion</span>
             <span>Same snapshot</span>
-            <span>Beta · Underreaction</span>
+            <span>Beta · Continuation</span>
             <span>Independent decisions</span>
-            <span>Alpha · Overreaction</span>
+            <span>Alpha · Reversion</span>
             <span>Same snapshot</span>
-            <span>Beta · Underreaction</span>
+            <span>Beta · Continuation</span>
             <span>Independent decisions</span>
           </div>
         </div>
@@ -123,7 +124,8 @@ export default function LandingPage() {
             <h2 id="home-agents-title">Two edges. One evidence set.</h2>
           </div>
           <p>
-            Alpha hunts market overshoot. Beta hunts incomplete repricing.
+            Alpha tests whether price overshot. Beta tests whether evidence is
+            still ahead of price.
             Neither is assigned a football outcome or forced to trade.
           </p>
         </div>
@@ -132,7 +134,7 @@ export default function LandingPage() {
             <AgentPortrait agentId="alpha" />
             <div className="home-agent-card__copy">
               <span>Agent Alpha</span>
-              <strong>Overreaction Hunter</strong>
+              <strong>Reversion</strong>
               <p>Looks for market price moving faster than match evidence.</p>
             </div>
           </article>
@@ -141,7 +143,7 @@ export default function LandingPage() {
             <AgentPortrait agentId="beta" />
             <div className="home-agent-card__copy">
               <span>Agent Beta</span>
-              <strong>Underreaction Hunter</strong>
+              <strong>Continuation</strong>
               <p>Looks for match evidence moving faster than market price.</p>
             </div>
           </article>
@@ -215,10 +217,11 @@ export default function LandingPage() {
           <p>
             Public event history links locked snapshots, simultaneous reveals,
             deterministic portfolio transitions, runtime versions, and the final result.
+            Supporter backing and settlement remain separate on Solana.
           </p>
         </div>
         <div className="home-proof-action">
-          <p>Public evidence. No wallet required.</p>
+          <p>Watch and inspect evidence without a wallet. Sign only when taking a supporter action.</p>
           <Link className="product-text-link" href={featured.proofHref}>Inspect public proof <span aria-hidden="true">→</span></Link>
         </div>
       </section>

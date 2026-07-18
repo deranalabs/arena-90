@@ -1,13 +1,13 @@
 import { resolveFeaturedArena } from "@/lib/featured-arena";
 
 describe("featured arena catalog seam", () => {
-  it("keeps Replay as the fail-safe default", () => {
+  it("keeps the verified live World Cup arena as the default", () => {
     expect(resolveFeaturedArena(undefined)).toMatchObject({
-      preset: "FOUNDATION_REPLAY",
-      mode: "REPLAY",
-      arenaId: "arena-replay-001",
-      watchHref: "/arena/arena-replay-001/replay",
-      navigationLabel: "Replay Arena",
+      preset: "WORLD_CUP_THIRD_PLACE",
+      mode: "LIVE",
+      arenaId: "world-cup-2026-france-england-third-place-v4",
+      watchHref: "/arena/world-cup-2026-france-england-third-place-v4",
+      navigationLabel: "Live Arena",
     });
   });
 

@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { ArenaIcon } from "@/components/icons/ArenaIcons";
+
 type ArenaScoreboardProps = {
   eyebrow: string;
   statement?: string;
@@ -65,9 +67,9 @@ export function ArenaScoreboard({
       <div className="arena-scoreboard__source">
         <p>{statement ?? "Both agents receive the same locked snapshot and equal virtual bankroll."}</p>
         <dl>
-          <div><dt>Source</dt><dd>{source ?? "Awaiting snapshot"}</dd></div>
-          <div><dt>Checkpoint</dt><dd>{checkpoint ?? "—"}</dd></div>
-          <div><dt>Connection</dt><dd className={connectionWarning ? "is-warning" : undefined}>{connection}</dd></div>
+          <div><ArenaIcon name="source" /><dt>Source</dt><dd>{source ?? "Awaiting snapshot"}</dd></div>
+          <div><ArenaIcon name="checkpoint" /><dt>Checkpoint</dt><dd>{checkpoint ?? "—"}</dd></div>
+          <div><ArenaIcon name="connection" /><dt>Connection</dt><dd className={connectionWarning ? "is-warning" : undefined}>{connection}</dd></div>
         </dl>
       </div>
     </section>
@@ -82,7 +84,7 @@ type CompetitionStatusBandProps = {
 export function CompetitionStatusBand({ label, detail }: CompetitionStatusBandProps) {
   return (
     <section className="arena-competition-status" aria-live="polite">
-      <span>Lifecycle</span>
+      <span><ArenaIcon name="lifecycle" />Lifecycle</span>
       <strong>{label}</strong>
       <p>{detail}</p>
     </section>
@@ -118,7 +120,7 @@ type ArenaNextEventProps = {
 export function ArenaNextEvent({ label, value }: ArenaNextEventProps) {
   return (
     <section className="arena-next-event" aria-label="Next decision round">
-      <span>{label}</span>
+      <span><ArenaIcon name="next" />{label}</span>
       <strong>{value}</strong>
     </section>
   );

@@ -1,6 +1,11 @@
 # Arena90
 
-**A football-first autonomous AI strategy arena powered by real match and market data.**
+**Autonomous AI agents competing on football strategy, powered by TxLINE and
+TxODDS, with supporter participation and verifiable settlement on Solana.**
+
+[Live MVP](https://arena90.xyz) · [Technical documentation](docs/README.md) ·
+[Product roadmap](docs/specs/02-V2-Delivery-Roadmap.md) ·
+[Arena90 on X](https://x.com/arena90ai)
 
 Arena90 turns one football fixture into a competition between two autonomous
 strategy agents.
@@ -30,11 +35,11 @@ Watching an arena does not require authentication or a wallet.
 
 ## Strategy Agents
 
-- **Agent Alpha — Momentum & Repricing**
-  Reacts to meaningful match-state changes and repricing opportunities.
+- **Agent Alpha — Reversion**
+  Tests whether market price moved faster than verified match evidence.
 
-- **Agent Beta — Structure & Valuation Control**
-  Focuses on market structure, valuation discipline, concentration, and risk.
+- **Agent Beta — Continuation**
+  Tests whether verified match evidence moved faster than market price.
 
 These are strategy identities, not fixed football outcomes. Both agents may
 select similar allocations, hold cash, reduce exposure, or return `NO_TRADE`.
@@ -60,9 +65,15 @@ data while generating new autonomous agent decisions.
 
 ### `frontend/web/`
 
-Next.js 15, React 19, TypeScript, Tailwind CSS v4, and Framer Motion.
+Next.js 15, React 19, TypeScript, and Tailwind CSS v4.
 
 Public spectator, arena, replay, proof, agent, and participation experiences.
+
+### `backend/arena-runtime/`
+
+Always-on TxLINE/TxODDS ingestion, canonical snapshots, isolated Alpha/Beta
+invocations, deterministic validation, execution, accounting, persistence,
+HTTP state, and resumable SSE events.
 
 ### `backend/solana-actions/`
 
@@ -70,12 +81,15 @@ Node.js and Express API using `@solana/actions` and `@solana/web3.js`.
 
 Provides Solana Action and Blink-compatible surfaces.
 
+### `backend/solana-resolver/`
+
+Restricted resolver that binds the runtime final result to the supporter
+program settlement path.
+
 ### `contracts/anchor/arena_escrow/`
 
-Rust and Anchor workspace for supporter escrow and settlement development.
-
-The workspace still contains experimental and V1 artifacts. Their presence does
-not make them authoritative V2 requirements.
+Rust and Anchor program for native devnet SOL supporter escrow, deadline lock,
+settlement, claim, and refund.
 
 ### `agents/zeroclaw/`
 
@@ -174,16 +188,26 @@ identified honestly. They must not be described as live, verified,
 decentralized, autonomous, or production-ready unless that claim has been
 validated.
 
-## Current V2 Status
+## Current Submission Status
 
-The V2 product direction and UX are approved.
+Proven today:
 
-The repository still contains V1 and experimental artifacts that must be
-reviewed against the approved V2 documents before being retained or modified.
+- immutable semifinal Replay artifacts run through the production competition
+  engine with fresh autonomous Alpha and Beta decisions;
+- an always-on World Cup Live runtime is deployed, resumes after restart, and
+  waits for valid approved checkpoint evidence without a public start trigger;
+- public state, ordered SSE events, arena views, replay archives, and proof
+  routes are deployed at `arena90.xyz`;
+- the V2 supporter program and Action endpoints are deployed on Solana devnet;
+- real devnet smokes prove backing, lock, TxLINE terminal-proof validation,
+  settlement, winning claim, and void/refund behavior.
 
-Current documentation work:
+Not yet proven:
 
-- compress Product Definition V2 without changing approved decisions;
-- compress User Experience and Routes without changing approved decisions;
-- audit consistency across documents `01`, `02`, and `03`;
-- add subsystem-specific instructions as implementation resumes.
+- a World Cup Live checkpoint has not yet crossed TxLINE/TxODDS → both agents →
+  deterministic execution → browser ledger → canonical Solana settlement end
+  to end.
+
+Replay is demo fallback evidence, not a substitute for the required live-input
+integration. The detailed, evidence-owned status is maintained in
+[`docs/specs/02-V2-Delivery-Roadmap.md`](docs/specs/02-V2-Delivery-Roadmap.md).

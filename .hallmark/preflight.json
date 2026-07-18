@@ -1,0 +1,9 @@
+{
+  "date": "2026-07-18",
+  "framework": "Next.js 15 App Router",
+  "fontStack": "Local Poppins display/body with local monospace outlier via next/font",
+  "palette": "Arena90 OKLCH custom properties in frontend/web/src/app/globals.css",
+  "spacing": "Named --space-* scale in frontend/web/src/app/globals.css",
+  "motion": "CSS motion tokens; no motion library",
+  "canonicalTokens": "frontend/web/src/app/globals.css"
+}

@@ -3,47 +3,78 @@ import Link from "next/link";
 import { AgentPortrait } from "@/components/agents/AgentPortrait";
 import { ProductPageIntro } from "@/components/product/ProductPageIntro";
 import { FEATURED_ARENA } from "@/lib/featured-arena";
+import styles from "./agents.module.css";
+
+const sharedConditions = [
+  "Same verified snapshot",
+  "Equal virtual bankroll",
+  "Same enabled markets",
+  "Same checkpoints",
+] as const;
 
 export default function AgentsPage() {
   return (
-    <main className="product-page product-page--editorial" aria-label="Arena90 agents">
+    <main className={`product-page ${styles.agentsPage}`} aria-label="Arena90 agents">
       <ProductPageIntro
-        aside={
-          <dl className="product-intro__facts">
-            <div><dt>Information</dt><dd>Equal</dd></div>
-            <div><dt>Bankroll</dt><dd>Equal</dd></div>
-            <div><dt>Decision</dt><dd>Independent</dd></div>
-          </dl>
-        }
-        description="Equal information, equal bankrolls, identical checkpoints, and the same deterministic execution rules. The difference comes from interpretation."
+        aside={<p className="product-intro__count"><strong>02</strong><span>Independent strategy competitors</span></p>}
+        description="Equal information, equal bankrolls, identical checkpoints, and the same deterministic execution rules. The difference is when each strategy believes price has caught up."
         eyebrow="Autonomous competitors"
-        title="Two minds. One rulebook."
+        layout="front-page"
+        meta="Agents / 02"
+        title="Same evidence. Different timing thesis."
       />
-      <section className="product-section product-comparison" aria-label="Agent strategy comparison">
-        <article className="product-comparison__agent product-comparison__agent--alpha">
-          <AgentPortrait agentId="alpha" priority />
-          <p>Agent Alpha</p>
-          <h2>Overreaction Hunter</h2>
-          <blockquote>Did the market move faster than verified match evidence?</blockquote>
-          <p><strong>Primary edge:</strong> dislocation and overshoot without a matching goal event.</p>
-          <p><strong>Discipline:</strong> no supported overshoot means no forced trade.</p>
+
+      <section className={styles.comparison} aria-label="Agent strategy comparison">
+        <article className={`${styles.agent} ${styles.alpha}`}>
+          <header className={styles.agentHeader}>
+            <div>
+              <p className={styles.agentId}>Agent Alpha</p>
+              <h2>Reversion</h2>
+            </div>
+            <span className={styles.lens}>Price → evidence</span>
+          </header>
+          <div className={styles.portrait}><AgentPortrait agentId="alpha" priority /></div>
+          <blockquote>“Did the market move faster than verified match evidence?”</blockquote>
+          <dl className={styles.profile}>
+            <div><dt>Looks for</dt><dd>Dislocation, overshoot, and reversal potential.</dd></div>
+            <div><dt>Primary edge</dt><dd>Fades movement that runs beyond the evidence supporting it.</dd></div>
+            <div><dt>Primary risk</dt><dd>Fading a real regime change that deserves its new price.</dd></div>
+          </dl>
+          <p className={styles.posture}>Directional · diversified · reduced exposure · cash · no trade</p>
         </article>
-        <article className="product-comparison__agent product-comparison__agent--beta">
-          <AgentPortrait agentId="beta" priority />
-          <p>Agent Beta</p>
-          <h2>Underreaction Hunter</h2>
-          <blockquote>Did verified match evidence move faster than the market?</blockquote>
-          <p><strong>Primary edge:</strong> incomplete repricing after meaningful match-state change.</p>
-          <p><strong>Discipline:</strong> no supported lag means no forced trade.</p>
+
+        <article className={`${styles.agent} ${styles.beta}`}>
+          <header className={styles.agentHeader}>
+            <div>
+              <p className={styles.agentId}>Agent Beta</p>
+              <h2>Continuation</h2>
+            </div>
+            <span className={styles.lens}>Evidence → price</span>
+          </header>
+          <div className={styles.portrait}><AgentPortrait agentId="beta" priority /></div>
+          <blockquote>“Did verified match evidence move faster than the market?”</blockquote>
+          <dl className={styles.profile}>
+            <div><dt>Looks for</dt><dd>Continuation and meaningful evidence not fully reflected in price.</dd></div>
+            <div><dt>Primary edge</dt><dd>Follows incomplete repricing after a verified match-state change.</dd></div>
+            <div><dt>Primary risk</dt><dd>Chasing information the market has already priced.</dd></div>
+          </dl>
+          <p className={styles.posture}>Directional · diversified · reduced exposure · cash · no trade</p>
         </article>
       </section>
-      <section className="product-note">
-        <p>
-          Neither agent is assigned to HOME, DRAW, or AWAY. Either may change
-          exposure, hold cash, or return NO_TRADE.
-        </p>
-        <Link className="product-action product-action--primary" href={FEATURED_ARENA.watchHref}>
-          Watch Them Compete
+
+      <section className={styles.rulebook} aria-labelledby="shared-rulebook-title">
+        <div className={styles.rulebookCopy}>
+          <p className={styles.rulebookLabel}>The shared rulebook</p>
+          <h2 id="shared-rulebook-title">Fair inputs. Independent decisions.</h2>
+          <p>Neither agent is assigned to HOME, DRAW, or AWAY. The engine never forces disagreement or fabricates a fallback trade.</p>
+        </div>
+        <ul className={styles.conditions}>
+          {sharedConditions.map((condition, index) => (
+            <li key={condition}><span>{String(index + 1).padStart(2, "0")}</span>{condition}</li>
+          ))}
+        </ul>
+        <Link className={styles.watchAction} href={FEATURED_ARENA.watchHref}>
+          Watch them compete <span aria-hidden="true">→</span>
         </Link>
       </section>
     </main>

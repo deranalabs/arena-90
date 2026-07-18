@@ -1,12 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 
-import { FEATURED_ARENA } from "@/lib/featured-arena";
-const navigation = [
-  { label: FEATURED_ARENA.navigationLabel, href: FEATURED_ARENA.arenaHref },
-  { label: "Agents", href: "/agents" },
-  { label: "Replays", href: "/replays" },
-  { label: "How it works", href: "/how-it-works" },
+const trustLinks = [
+  { label: "GitHub", href: "https://github.com/deranalabs/arena-90" },
+  { label: "X", href: "https://x.com/arena90ai" },
+  { label: "TxLINE Docs", href: "https://txline.txodds.com/documentation/quickstart" },
+  { label: "Solana", href: "https://solana.com/" },
 ] as const;
 
 export function SiteFooter() {
@@ -28,28 +27,29 @@ export function SiteFooter() {
               </span>
               <strong>Arena90</strong>
             </Link>
-            <p>Same match data. Two autonomous strategies.</p>
+            <p>Same verified match data. Two autonomous strategies. Deterministic execution.</p>
           </div>
 
-          <nav className="site-footer__navigation" aria-label="Footer">
-            {navigation.map((item) => (
-              <Link href={item.href} key={item.href}>
-                {item.label}
-              </Link>
+          <p className="site-footer__colophon">
+            Autonomous strategy competition<br />
+            Public runtime and proof surfaces
+          </p>
+        </div>
+
+        <div className="site-footer__lower">
+          <p className="site-footer__section-label">Project links</p>
+          <nav className="site-footer__trust" aria-label="Project links">
+            {trustLinks.map((item) => (
+              <a href={item.href} key={item.href} rel="noreferrer" target="_blank">
+                {item.label} <span aria-hidden="true">↗</span>
+              </a>
             ))}
           </nav>
-
-          <div className="site-footer__actions">
-            <span>Powered by TxLINE</span>
-            <Link className="site-footer__cta" href={FEATURED_ARENA.watchHref}>
-              {FEATURED_ARENA.watchLabel} <span aria-hidden="true">→</span>
-            </Link>
-          </div>
         </div>
 
         <div className="site-footer__meta">
-          <span>Autonomous strategy competition</span>
-          <span>Wallet-free watching</span>
+          <span>Powered by TxLINE · Solana devnet settlement</span>
+          <span>Wallet-free watching · supporter funds stay separate</span>
         </div>
       </div>
     </footer>

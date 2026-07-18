@@ -5,6 +5,7 @@ import Link from "next/link";
 
 import { AgentPortrait } from "@/components/agents/AgentPortrait";
 import { ArenaEventLedger } from "@/components/arena/ArenaEventLedger";
+import { ArenaIcon } from "@/components/icons/ArenaIcons";
 import { SupporterPanel } from "@/components/solana/SupporterPanel";
 import {
   ArenaNextEvent,
@@ -23,6 +24,7 @@ import type {
 import type { RuntimeTransport } from "@/lib/arena-api/transport";
 import { validateSpectatorView } from "@/lib/arena-api/view-invariants";
 import type { SupporterArena } from "@/lib/solana-actions/supporter-arena";
+import styles from "./ArenaExperience.module.css";
 
 type ArenaExperienceProps = {
   arenaId: string;
@@ -175,11 +177,12 @@ function AgentCard({
   );
   return (
     <article className={`arena-agent arena-agent--${agentId}`}>
-      <AgentPortrait agentId={agentId} />
+      <AgentPortrait agentId={agentId} priority={alpha} />
       <p className="product-eyebrow">Agent {alpha ? "01" : "02"}</p>
       <h2>Agent {alpha ? "Alpha" : "Beta"}</h2>
       <p className="arena-agent__strategy">
-        {alpha ? "Overreaction Hunter" : "Underreaction Hunter"}
+        <ArenaIcon name={alpha ? "reversion" : "continuation"} />
+        {alpha ? "Reversion" : "Continuation"}
       </p>
       <dl className="arena-metrics">
         <div><dt>NAV</dt><dd>{formatMicros(portfolio.navMicros)}</dd></div>
@@ -295,7 +298,7 @@ export function ArenaExperience({
 
   if (unavailable) {
     return (
-      <main className="arena-experience" aria-label={`Arena90 ${experience} ${arenaId}`}>
+      <main className={`arena-experience ${styles.arenaPage}`} aria-label={`Arena90 ${experience} ${arenaId}`}>
         <section className="arena-unavailable" aria-labelledby="arena-unavailable-title">
           <p className="product-eyebrow">Verified state unavailable</p>
           <h1 id="arena-unavailable-title">Arena unavailable</h1>
@@ -308,7 +311,7 @@ export function ArenaExperience({
 
   if (!state) {
     return (
-      <main className="arena-experience" aria-label={`Arena90 ${experience} ${arenaId}`}>
+      <main className={`arena-experience ${styles.arenaPage}`} aria-label={`Arena90 ${experience} ${arenaId}`}>
         <p className="arena-loading" role="status">Loading verified arena state…</p>
       </main>
     );
@@ -356,7 +359,7 @@ export function ArenaExperience({
 
   return (
     <main
-      className="arena-experience"
+      className={`arena-experience ${styles.arenaPage}`}
       aria-label={`Arena90 ${experience} ${arenaId}`}
     >
       <ArenaScoreboard
@@ -385,17 +388,11 @@ export function ArenaExperience({
 
       <CompetitionStatusBand detail={roundStatus.detail} label={roundStatus.label} />
 
-      <ArenaEventLedger
-        connection={connectionMessage(session.status)}
-        events={session.events}
-        recordedPlayback={experience === "archive"}
-      />
-
       <section className="arena-leader-strip" aria-label="Competition leader">
-        <div><span>Standing</span><strong>{standing}</strong></div>
-        <div><span>Alpha NAV</span><strong>{formatMicros(state.portfolios.alpha.navMicros)}</strong></div>
-        <div><span>Lead margin</span><strong>{formatMicros(leadMarginMicros.toString())}</strong></div>
-        <div><span>Beta NAV</span><strong>{formatMicros(state.portfolios.beta.navMicros)}</strong></div>
+        <div><ArenaIcon name="standing" /><span>Standing</span><strong>{standing}</strong></div>
+        <div><ArenaIcon name="alpha" /><span>Alpha NAV</span><strong>{formatMicros(state.portfolios.alpha.navMicros)}</strong></div>
+        <div><ArenaIcon name="margin" /><span>Lead margin</span><strong>{formatMicros(leadMarginMicros.toString())}</strong></div>
+        <div><ArenaIcon name="beta" /><span>Beta NAV</span><strong>{formatMicros(state.portfolios.beta.navMicros)}</strong></div>
       </section>
 
       {state.manifest.mode === "LIVE" && supporterArena ? (
@@ -431,6 +428,12 @@ export function ArenaExperience({
         />
       </section>
 
+      <ArenaEventLedger
+        connection={connectionMessage(session.status)}
+        events={session.events}
+        recordedPlayback={experience === "archive"}
+      />
+
       {state.checkpoints.length > 0 ? (
         <section className="arena-rounds" aria-labelledby="arena-rounds-title">
           <ArenaSectionHeading
@@ -443,7 +446,10 @@ export function ArenaExperience({
             {[...state.checkpoints].reverse().map((checkpoint, index) => (
               <details className="arena-round-disclosure" key={checkpoint.checkpointId} open={index === 0}>
                 <summary>
-                  <span>{checkpointLabel(checkpoint.checkpointId)}</span>
+                  <span className="arena-round-disclosure__checkpoint">
+                    <ArenaIcon name="checkpoint" />
+                    <span>{checkpointLabel(checkpoint.checkpointId)}</span>
+                  </span>
                   <strong>{checkpoint.outcome === "GLOBAL_MISSED" ? "GLOBAL MISSED" : index === 0 ? "LATEST REVEAL" : "ROUND REVEALED"}</strong>
                 </summary>
                 <article
@@ -451,15 +457,15 @@ export function ArenaExperience({
                   role="group"
                   aria-label={`${checkpoint.checkpointId} simultaneous reveal`}
                 >
-                <header>
-                  <div>
-                    <h3>{checkpointLabel(checkpoint.checkpointId)}</h3>
-                    {checkpoint.snapshot ? (
-                      <p>{checkpoint.snapshot.match.minute}′ · {checkpoint.snapshot.match.homeScore}–{checkpoint.snapshot.match.awayScore}</p>
-                    ) : null}
-                  </div>
-                  <span>{checkpoint.outcome === "GLOBAL_MISSED" ? "GLOBAL MISSED DECISION ROUND" : "ROUND REVEALED"}</span>
-                </header>
+                  <header>
+                    <div>
+                      <h3>{checkpointLabel(checkpoint.checkpointId)}</h3>
+                      {checkpoint.snapshot ? (
+                        <p>Score {checkpoint.snapshot.match.homeScore}–{checkpoint.snapshot.match.awayScore}</p>
+                      ) : null}
+                    </div>
+                    <span>{checkpoint.outcome === "GLOBAL_MISSED" ? "GLOBAL MISSED DECISION ROUND" : "ROUND REVEALED"}</span>
+                  </header>
                 {checkpoint.outcome === "GLOBAL_MISSED" ? (
                   <div className="arena-round__global-failure">
                     <strong>Both portfolios preserved</strong>
@@ -488,7 +494,10 @@ export function ArenaExperience({
                           </p>
                           {checkpoint.snapshot ? (
                             <details>
-                              <summary>View allocation change</summary>
+                              <summary>
+                                <ArenaIcon name="margin" />
+                                <span>View allocation change</span>
+                              </summary>
                               <div className="arena-round__allocations">
                                 <AllocationBar
                                   portfolio={checkpoint.portfoliosBefore[agentId]}
@@ -527,7 +536,7 @@ export function ArenaExperience({
         <section className="arena-result arena-result--terminal" aria-labelledby="arena-result-title">
           <div className="arena-result__hero">
             <div>
-              <p className="product-eyebrow">Verified terminal result</p>
+              <p className="product-eyebrow arena-icon-label"><ArenaIcon name="winner" />Verified terminal result</p>
               <h2 id="arena-result-title">{resultTitle}</h2>
               <p>Final accounting is committed under {state.finalResult.winnerRule}.</p>
             </div>
@@ -556,7 +565,7 @@ export function ArenaExperience({
             <div><dt>Pre-settlement event log hash</dt><dd>{state.finalResult.preSettlementEventLogHash}</dd></div>
             <div><dt>Final result hash</dt><dd>{state.finalResult.finalResultHash}</dd></div>
           </dl>
-          <Link className="product-text-link" href={`/arena/${arenaId}/proof`}>Inspect public proof <span aria-hidden="true">→</span></Link>
+          <Link className="product-text-link arena-proof-link" href={`/arena/${arenaId}/proof`}><ArenaIcon name="proof" />Inspect public proof <span aria-hidden="true">→</span></Link>
         </section>
       ) : state.phase === "FINALIZING" ? (
         <section className="arena-result arena-result--finalizing" aria-label="Provisional result">

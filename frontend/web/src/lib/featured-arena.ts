@@ -52,7 +52,7 @@ const presets = {
 export function resolveFeaturedArena(
   configuredPreset: string | undefined = process.env.ARENA90_FEATURED_ARENA,
 ): FeaturedArena {
-  const preset = configuredPreset ?? "FOUNDATION_REPLAY";
+  const preset = configuredPreset ?? "WORLD_CUP_THIRD_PLACE";
   if (!(preset in presets)) {
     throw new Error("ARENA90_FEATURED_ARENA is not an approved preset");
   }

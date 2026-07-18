@@ -20,7 +20,7 @@ describe("Arena90 public product routes", () => {
   });
 
   it.each([
-    ["agents", AgentsPage, "Two minds. One rulebook."],
+    ["agents", AgentsPage, "Same evidence. Different timing thesis."],
     ["replays", ReplaysPage, "Replay the evidence. Audit the decisions."],
     ["system workflow", HowItWorksPage, "From match feed to verified winner."],
   ])("gives the %s route a clear product job", (label, Page, heading) => {

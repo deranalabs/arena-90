@@ -140,8 +140,11 @@ or an isolated unit test does not close a gate.
   SSE event stream as the arena view. It supports agent/type filtering,
   display pause, recorded-event playback, and copying public proof identity
   without exposing prompts, private reasoning, raw model output, or
-  infrastructure logs. Frontend lint, all 117 tests, and production build pass
+  infrastructure logs. Frontend lint, all 122 tests, and production build pass
   locally.
+- Home, Agents, Replays, How It Works, Arena, and proof/archive surfaces now
+  share the global Arena90 tokens with route-scoped CSS modules. The Home route
+  has verified no-horizontal-overflow checks at 320, 375, 414, and 768 CSS px.
 - Live runtime is deployed on the agentic VPS; frontend is deployed on Vercel
   through a same-origin read-only runtime gateway.
 - Replay spectator flow and public proof are available as fallback evidence.
@@ -190,8 +193,6 @@ or an isolated unit test does not close a gate.
 - The successful winner-settlement smoke used an isolated deterministic test
   result hash. The deployed runtime has not yet submitted its persisted
   canonical `finalResultHash` through the restricted resolver seam.
-- Demo-critical frontend routes still contain competing CSS foundations and
-  inconsistent information hierarchy.
 
 No incomplete item above may be described as live, autonomous end to end,
 production-ready, or Solana-complete.

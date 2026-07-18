@@ -13,11 +13,11 @@ describe("Arena90 homepage", () => {
         name: "Same verified match feed. Two autonomous strategies.",
       }),
     );
-    expect(main).toHaveTextContent(/same TxLINE snapshot and equal virtual bankrolls/i);
-    expect(main).toHaveTextContent(/independent portfolio decisions/i);
-    expect(screen.getByRole("link", { name: "Watch Autonomous Replay" })).toHaveAttribute(
+    expect(main).toHaveTextContent(/same verified snapshot and equal virtual bankrolls/i);
+    expect(main).toHaveTextContent(/independently manage portfolios/i);
+    expect(main.querySelector(".home-typographic-hero__primary")).toHaveAttribute(
       "href",
-      "/arena/arena-replay-001/replay",
+      expect.stringMatching(/^\/arena\//),
     );
     expect(screen.getByRole("link", { name: "See How It Works" })).toHaveAttribute(
       "href",
@@ -25,10 +25,10 @@ describe("Arena90 homepage", () => {
     );
     expect(screen.getByRole("heading", { name: "Two edges. One evidence set." })).toBeInTheDocument();
     expect(main).toHaveTextContent(
-      /Alpha hunts market overshoot\. Beta hunts incomplete repricing/i,
+      /Alpha tests whether price overshot\. Beta tests whether evidence is still ahead of price/i,
     );
-    expect(screen.getByText("Overreaction Hunter")).toBeInTheDocument();
-    expect(screen.getByText("Underreaction Hunter")).toBeInTheDocument();
+    expect(screen.getAllByText("Reversion").length).toBeGreaterThan(0);
+    expect(screen.getAllByText("Continuation").length).toBeGreaterThan(0);
     expect(main).toHaveTextContent(/one fixture\. equal capital\. different football intelligence/i);
     expect(screen.getByRole("img", { name: "Agent Alpha portrait" })).toHaveAttribute(
       "src",
@@ -50,7 +50,7 @@ describe("Arena90 homepage", () => {
     );
     expect(screen.getByRole("link", { name: "Inspect public proof" })).toHaveAttribute(
       "href",
-      "/arena/arena-replay-001/proof",
+      expect.stringMatching(/^\/arena\/.*\/proof$/),
     );
     expect(main).not.toHaveTextContent(/state completed/i);
     expect(screen.getByRole("heading", { name: "World Cup arenas" })).toBeInTheDocument();

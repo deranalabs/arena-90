@@ -429,7 +429,7 @@ export function SupporterPanel({
   const backingDisabled = busy || Boolean(record) || Boolean(review) || deadlinePassed;
 
   return (
-    <section className="supporter-panel" aria-labelledby="supporter-panel-title">
+    <section className="supporter-panel" id="support-arena" aria-labelledby="supporter-panel-title">
       <header>
         <div>
           <p className="product-eyebrow">SOLANA SUPPORTER LAYER</p>

@@ -2,13 +2,32 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { ArenaIcon, type ArenaIconName } from "@/components/icons/ArenaIcons";
 import type { PublicArenaEventV1 } from "@/lib/arena-api/contracts";
 
 type LedgerFilter = "ALL" | "SYSTEM" | "ALPHA" | "BETA";
 
+const RECORDED_EVENT_PLAYBACK_INTERVAL_MS = 900;
+
 function eventOwner(event: PublicArenaEventV1): LedgerFilter {
   if ("agentId" in event) return event.agentId === "alpha" ? "ALPHA" : "BETA";
   return "SYSTEM";
+}
+
+function eventIcon(event: PublicArenaEventV1): ArenaIconName {
+  switch (event.type) {
+    case "ARENA_READY": return "ready";
+    case "CHECKPOINT_OPENED": return "lock";
+    case "AGENTS_ANALYZING": return "agents";
+    case "DECISION_RECEIVED": return "decision";
+    case "RECHECKING_DECISION": return "retry";
+    case "MISSED_DECISION_ROUND":
+    case "GLOBAL_MISSED_DECISION_ROUND": return "warning";
+    case "ROUND_REVEALED": return "reveal";
+    case "ROUND_COMPLETE": return "settle";
+    case "FINALIZING": return "proof";
+    case "COMPLETED": return "winner";
+  }
 }
 
 function eventDetail(event: PublicArenaEventV1): string {
@@ -79,7 +98,7 @@ export function ArenaEventLedger({
     if (playbackCount === null || playbackCount >= events.length) return;
     const timer = window.setTimeout(() => {
       setPlaybackCount((current) => current === null ? null : current + 1);
-    }, 250);
+    }, RECORDED_EVENT_PLAYBACK_INTERVAL_MS);
     return () => window.clearTimeout(timer);
   }, [events.length, playbackCount]);
 
@@ -140,7 +159,7 @@ export function ArenaEventLedger({
         <div>
           {recordedPlayback ? (
             <button onClick={startRecordedPlayback} type="button">
-              PLAY EVENT RECORD
+              <ArenaIcon name="play" />PLAY EVENT RECORD
             </button>
           ) : null}
           <button
@@ -150,9 +169,11 @@ export function ArenaEventLedger({
             }}
             type="button"
           >
+            <ArenaIcon name={pausedEvents ? "play" : "pause"} />
             {pausedEvents ? "RESUME DISPLAY" : "PAUSE DISPLAY"}
           </button>
           <button disabled={!latest} onClick={() => void copyLatestProof()} type="button">
+            <ArenaIcon name="copy" />
             {copyStatus === "COPIED"
               ? "PROOF COPIED"
               : copyStatus === "FAILED"
@@ -168,6 +189,7 @@ export function ArenaEventLedger({
         ) : (
           visible.map((event) => (
             <li key={event.eventId}>
+              <span className="arena-ledger__event-icon"><ArenaIcon name={eventIcon(event)} /></span>
               <span className="arena-ledger__sequence">#{event.sequence.toString().padStart(3, "0")}</span>
               <span className={`arena-ledger__owner arena-ledger__owner--${eventOwner(event).toLowerCase()}`}>
                 {eventOwner(event)}

@@ -69,9 +69,11 @@ describe("Public Event Ledger", () => {
       );
       expect(screen.queryByText("DECISION RECEIVED")).not.toBeInTheDocument();
 
-      act(() => jest.advanceTimersByTime(250));
+      act(() => jest.advanceTimersByTime(899));
+      expect(screen.queryByText("DECISION RECEIVED")).not.toBeInTheDocument();
+      act(() => jest.advanceTimersByTime(1));
       expect(screen.getAllByText("DECISION RECEIVED")).toHaveLength(1);
-      act(() => jest.advanceTimersByTime(250));
+      act(() => jest.advanceTimersByTime(900));
       expect(screen.getAllByText("DECISION RECEIVED")).toHaveLength(2);
       expect(screen.getByLabelText("Ledger connection status")).toHaveTextContent(
         "EVENT RECORD COMPLETE",

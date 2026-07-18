@@ -1,16 +1,15 @@
 import Image from "next/image";
 import Link from "next/link";
 
+import { FeaturedArenaAction } from "@/components/site/FeaturedArenaAction";
+import { SiteNavigation } from "@/components/site/SiteNavigation";
 import { FEATURED_ARENA } from "@/lib/featured-arena";
-
-const navigation = [
-  { label: FEATURED_ARENA.navigationLabel, href: FEATURED_ARENA.arenaHref },
-  { label: "Agents", href: "/agents" },
-  { label: "Replays", href: "/replays" },
-  { label: "How it works", href: "/how-it-works" },
-] as const;
+import { SITE_NAVIGATION } from "@/lib/site-navigation";
+import { resolveSupporterArena } from "@/lib/solana-actions/supporter-arena";
 
 export function SiteHeader() {
+  const supporterArena = resolveSupporterArena(FEATURED_ARENA.arenaId);
+
   return (
     <header className="site-header">
       <div className="site-header__frame site-header__frame--compact">
@@ -39,21 +38,27 @@ export function SiteHeader() {
           />
         </div>
 
-        <nav className="site-navigation site-nav" aria-label="Primary">
-          {navigation.map((item) => (
-            <Link key={item.href} href={item.href}>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+        <SiteNavigation
+          items={SITE_NAVIGATION}
+          mobileAction={
+            <FeaturedArenaAction
+              arenaHref={FEATURED_ARENA.arenaHref}
+              arenaId={FEATURED_ARENA.arenaId}
+              backingDeadlineUtc={supporterArena?.backingDeadlineUtc}
+              mode={FEATURED_ARENA.mode}
+              watchHref={FEATURED_ARENA.watchHref}
+            />
+          }
+        />
 
         <div className="site-header__actions">
-          <Link className="site-header__proof" href={FEATURED_ARENA.proofHref}>
-            Public proof
-          </Link>
-          <Link className="site-header__cta" href={FEATURED_ARENA.watchHref}>
-            {FEATURED_ARENA.watchLabel} <span aria-hidden="true">→</span>
-          </Link>
+          <FeaturedArenaAction
+            arenaHref={FEATURED_ARENA.arenaHref}
+            arenaId={FEATURED_ARENA.arenaId}
+            backingDeadlineUtc={supporterArena?.backingDeadlineUtc}
+            mode={FEATURED_ARENA.mode}
+            watchHref={FEATURED_ARENA.watchHref}
+          />
         </div>
       </div>
     </header>

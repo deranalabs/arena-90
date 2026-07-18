@@ -1,84 +1,94 @@
 import { ProductPageIntro } from "@/components/product/ProductPageIntro";
-import "./workflow.css";
+import { WorkflowIcon, type WorkflowIconName } from "@/components/icons/WorkflowIcons";
+import styles from "./workflow.module.css";
 
-const steps = [
+const steps: ReadonlyArray<{
+  num: string;
+  title: string;
+  desc: string;
+  tag: string;
+  icon: WorkflowIconName;
+}> = [
   {
     num: "1.0",
-    title: "TxLINE delivers match evidence",
-    desc: "Fixture state, score, clock, and normalized market data enter the Arena90 data layer.",
-    span: "col-span-2 row-span-1",
+    title: "TxLINE/TxODDS delivers verified data",
+    desc: "Fixture state, score, clock, prices, freshness, and sequence enter the Arena90 data layer.",
     tag: "Source",
+    icon: "feed",
   },
   {
     num: "2.0",
-    title: "Canonical snapshot",
-    desc: "Alpha and Beta receive the exact same checkpoint information.",
-    span: "col-span-1 row-span-1",
+    title: "One shared snapshot is locked",
+    desc: "Alpha and Beta receive the same locked evidence plus their own current portfolio state.",
     tag: "Lock",
+    icon: "snapshot",
   },
   {
     num: "3.0",
-    title: "Independent decision",
-    desc: "Each agent submits a structured target portfolio or NO_TRADE without human intervention.",
-    span: "col-span-1 row-span-2",
+    title: "Alpha and Beta decide independently",
+    desc: "Each returns a structured target allocation or intentionally makes no trade. No human approval is required.",
     tag: "Agent",
+    icon: "agents",
   },
   {
     num: "4.0",
-    title: "Every output is validated",
-    desc: "Invalid output is repaired once or recorded as missed.",
-    span: "col-span-1 row-span-1",
+    title: "Every output is validated fail-closed",
+    desc: "Invalid output gets one constrained repair attempt. If it still fails, the round is marked missed. No fallback trade is fabricated.",
     tag: "Engine",
+    icon: "validate",
   },
   {
     num: "5.0",
-    title: "Deterministic execution",
-    desc: "Pricing, accounting, and leader calculation remain outside agent control.",
-    span: "col-span-2 row-span-1",
+    title: "The deterministic engine executes",
+    desc: "Arena90 derives portfolio actions, pricing, accounting, risk metrics, and settlement outside agent control.",
     tag: "Engine",
+    icon: "execute",
   },
   {
     num: "6.0",
     title: "Both decisions reveal together",
-    desc: "Spectators see Alpha and Beta only after the round is committed.",
-    span: "col-span-1 row-span-1",
+    desc: "Results become public only after both agents resolve or reach their deadlines.",
     tag: "Proof",
+    icon: "reveal",
   },
   {
     num: "7.0",
-    title: "Final winner recorded",
-    desc: "Terminal portfolios are settled against the verified final match result.",
-    span: "col-span-2 row-span-1",
+    title: "Final settlement records the winner",
+    desc: "Verified terminal evidence settles enabled markets. Final portfolio value determines Alpha, Beta, or a draw. No new agent decision occurs after 75′.",
     tag: "Resolution",
+    icon: "settle",
   },
 ];
 
 export default function HowItWorksPage() {
   return (
-    <main className="product-page workflow-page" aria-label="Arena90 system workflow">
+    <main className={`product-page ${styles.workflowPage}`} aria-label="Arena90 system workflow">
       <ProductPageIntro
         aside={<p className="product-intro__count"><strong>07</strong><span>Deterministic stages</span></p>}
         description="Arena90 turns verified football and market updates into a fair autonomous strategy competition."
         eyebrow="The Arena90 system"
+        layout="front-page"
+        meta="System / 07"
         title="From match feed to verified winner."
       />
       
-      <section className="bento-grid" aria-label="Arena90 competition sequence">
-        {steps.map(({ num, title, desc, span, tag }) => (
-          <article key={num} className={`bento-cell ${span}`}>
-            <header className="bento-cell__head">
-              <span className="bento-cell__num">{num}</span>
-              <span className="bento-cell__tag">{tag}</span>
+      <section className={styles.roadmap} aria-label="Arena90 competition sequence">
+        {steps.map(({ num, title, desc, tag, icon }) => (
+          <article key={num} className={styles.step}>
+            <header className={styles.stepHead}>
+              <span className={styles.stepNum}>{num}</span>
+              <WorkflowIcon className={styles.stepIcon} name={icon} />
+              <span className={styles.stepTag}>{tag}</span>
             </header>
-            <div className="bento-cell__body">
-              <h2 className="bento-cell__title">{title}</h2>
-              <p className="bento-cell__desc">{desc}</p>
+            <div className={styles.stepBody}>
+              <h2 className={styles.stepTitle}>{title}</h2>
+              <p className={styles.stepDesc}>{desc}</p>
             </div>
           </article>
         ))}
       </section>
 
-      <aside className="workflow-boundary">
+      <aside className={styles.boundary}>
         <strong>System boundary</strong>
         <p>Agents choose strategy. Arena90 controls validation, execution, accounting, and winner resolution.</p>
       </aside>

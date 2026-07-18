@@ -5,6 +5,10 @@ const stylesheet = readFileSync(
   join(process.cwd(), "src/app/globals.css"),
   "utf8",
 );
+const homeStylesheet = readFileSync(
+  join(process.cwd(), "src/app/home.module.css"),
+  "utf8",
+);
 
 describe("Arena90 design foundation", () => {
   it("uses one semantic Arena90 palette with compatibility role aliases", () => {
@@ -84,58 +88,60 @@ describe("Arena90 design foundation", () => {
   });
 
   it("keeps the home hero compact and separates rivalry labels", () => {
-    const hero = stylesheet.match(/\.home-broadcast-hero\s*{([^}]*)}/)?.[1];
-    const heroHeading = stylesheet.match(
-      /\.home-broadcast-hero__copy h1,[^{]*{([^}]*)}/,
+    const hero = homeStylesheet.match(/\.home-broadcast-hero\)\s*{([^}]*)}/)?.[1];
+    const heroHeading = homeStylesheet.match(
+      /\.home-broadcast-hero__copy\) h1\s*{([^}]*)}/,
     )?.[1];
-    const rivalryCard = stylesheet.match(
-      /\.home-broadcast-sheet__rivalry article\s*{([^}]*)}/,
+    const rivalryCard = homeStylesheet.match(
+      /\.home-broadcast-sheet__rivalry\) article\s*{([^}]*)}/,
     )?.[1];
-    const rivalryStrategy = stylesheet.match(
-      /\.home-broadcast-sheet__rivalry strong\s*{([^}]*)}/,
+    const rivalryStrategy = homeStylesheet.match(
+      /\.home-broadcast-sheet__rivalry\) article strong\s*{([^}]*)}/,
     )?.[1];
 
     expect(hero).toMatch(/min-height:\s*min\(52rem, calc\(100svh - 5\.5rem\)\)/);
     expect(heroHeading).toMatch(/font-weight:\s*var\(--weight-display\)/);
     expect(rivalryCard).toMatch(/display:\s*flex/);
     expect(rivalryCard).toMatch(/gap:\s*var\(--space-2xs\)/);
-    expect(rivalryStrategy).toMatch(/font-weight:\s*var\(--weight-display\)/);
+    expect(rivalryStrategy).toMatch(/font-size:\s*clamp/);
   });
 
   it("keeps agent strategy names intact and centers the versus marker", () => {
-    const agentCard = stylesheet.match(/\.home-agent-card\s*{([^}]*)}/)?.[1];
-    const strategyName = stylesheet.match(
-      /\.home-agent-card__copy strong\s*{([^}]*)}/,
+    const agentCard = homeStylesheet.match(/\.home-agent-card\)\s*{([^}]*)}/)?.[1];
+    const strategyName = homeStylesheet.match(
+      /\.home-agent-card__copy\) strong\s*{([^}]*)}/,
     )?.[1];
-    const versusMarker = stylesheet.match(
-      /\.home-agent-pair > \.home-agent-pair__versus\s*{([^}]*)}/,
+    const versusMarker = homeStylesheet.match(
+      /\.home-agent-pair__versus\)\s*{([^}]*)}/,
     )?.[1];
 
     expect(agentCard).toMatch(
-      /grid-template-columns:\s*minmax\(0, 0\.9fr\) minmax\(15rem, 1\.1fr\)/,
+      /grid-template-columns:\s*minmax\(0, 0\.9fr\) minmax\(12rem, 1\.1fr\)/,
     );
-    expect(strategyName).toMatch(/overflow-wrap:\s*normal/);
-    expect(strategyName).toMatch(/word-break:\s*normal/);
+    expect(strategyName).toMatch(/font-size:\s*clamp/);
+    expect(homeStylesheet).toMatch(
+      /\.homePage :where\(h1, h2, h3\)\s*{[^}]*overflow-wrap:\s*anywhere/,
+    );
     expect(versusMarker).toMatch(/display:\s*grid/);
     expect(versusMarker).toMatch(/place-items:\s*center/);
   });
 
   it("uses the shared display and metadata roles in the lifecycle section", () => {
-    const lifecycleHeading = stylesheet.match(
-      /\.home-system-heading h2\s*{([^}]*)}/,
+    const lifecycleHeading = homeStylesheet.match(
+      /\.home-system-heading\) h2\s*{([^}]*)}/,
     )?.[1];
-    const lifecycleMetadata = stylesheet.match(
-      /\.home-system-track small\s*{([^}]*)}/,
+    const lifecycleMetadata = homeStylesheet.match(
+      /\.home-system-track\) small\s*{([^}]*)}/,
     )?.[1];
 
     expect(lifecycleHeading).toMatch(/font-weight:\s*var\(--weight-heading\)/);
     expect(lifecycleHeading).toMatch(/line-height:\s*1/);
     expect(lifecycleMetadata).toMatch(/font-family:\s*var\(--font-outlier\)/);
-    expect(lifecycleMetadata).toMatch(/letter-spacing:\s*0\.04em/);
+    expect(lifecycleMetadata).toMatch(/text-transform:\s*uppercase/);
   });
 
   it("leaves no previous hero composition behind", () => {
-    expect(stylesheet).not.toMatch(
+    expect(homeStylesheet).not.toMatch(
       /arena-hero|arena-faceoff|arena-competitor|landing-hero__dock|arena-machine/,
     );
   });

@@ -1,10 +1,18 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
+import { usePathname } from "next/navigation";
 
 import { SiteHeader } from "@/components/site/SiteHeader";
 
+jest.mock("next/navigation", () => ({ usePathname: jest.fn() }));
+
 describe("Arena90 site header", () => {
-  it("exposes the public product routes and an honest Replay entry", () => {
+  beforeEach(() => {
+    jest.mocked(usePathname).mockReturnValue("/");
+  });
+
+  it("exposes the public product routes and the configured Live Arena", () => {
     render(<SiteHeader />);
+    const navigation = screen.getByRole("navigation", { name: "Primary" });
 
     expect(screen.getByRole("banner")).toBeInTheDocument();
     expect(screen.getByRole("link", { name: "Arena90 home" })).toHaveAttribute(
@@ -17,29 +25,26 @@ describe("Arena90 site header", () => {
     expect(
       screen.getByRole("img", { name: "World Cup Hackathon 2026" }),
     ).toHaveAttribute("src", expect.stringContaining("wc-hackathon.png"));
-    expect(screen.getByRole("link", { name: "Replay Arena" })).toHaveAttribute(
+    expect(within(navigation).getByRole("link", { name: "Live Arena" })).toHaveAttribute(
       "href",
-      "/arena/arena-replay-001",
+      "/arena/world-cup-2026-france-england-third-place-v4",
     );
-    expect(screen.getByRole("link", { name: "Agents" })).toHaveAttribute(
-      "href",
-      "/agents",
-    );
-    expect(screen.getByRole("link", { name: "Replays" })).toHaveAttribute(
+    expect(within(navigation).getByRole("link", { name: "Replays" })).toHaveAttribute(
       "href",
       "/replays",
     );
-    expect(screen.getByRole("link", { name: "How it works" })).toHaveAttribute(
+    expect(within(navigation).getByRole("link", { name: "Agents" })).toHaveAttribute(
+      "href",
+      "/agents",
+    );
+    expect(within(navigation).getByRole("link", { name: "How it works" })).toHaveAttribute(
       "href",
       "/how-it-works",
     );
-    expect(screen.getByRole("link", { name: "Public proof" })).toHaveAttribute(
+    expect(screen.queryByRole("link", { name: "Public proof" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /view arena/i })).toHaveAttribute(
       "href",
-      "/arena/arena-replay-001/proof",
-    );
-    expect(screen.getByRole("link", { name: /watch replay/i })).toHaveAttribute(
-      "href",
-      "/arena/arena-replay-001/replay",
+      "/arena/world-cup-2026-france-england-third-place-v4",
     );
     expect(document.body).not.toHaveTextContent(/log in|sign up|live now/i);
   });
@@ -54,5 +59,25 @@ describe("Arena90 site header", () => {
       screen.queryByRole("button", { name: "Dismiss announcement" }),
     ).not.toBeInTheDocument();
     expect(screen.getByRole("navigation", { name: "Primary" })).toBeInTheDocument();
+    const menu = screen.getByRole("button", { name: "Menu" });
+    expect(menu).toHaveAttribute("aria-expanded", "false");
+    fireEvent.click(menu);
+    const mobileNavigation = screen.getByRole("navigation", { name: "Mobile primary" });
+    expect(mobileNavigation).toBeInTheDocument();
+    expect(within(mobileNavigation).getByRole("link", { name: /view arena/i })).toHaveAttribute(
+      "href",
+      "/arena/world-cup-2026-france-england-third-place-v4",
+    );
+  });
+
+  it("marks the current product route in both navigation surfaces", () => {
+    jest.mocked(usePathname).mockReturnValue("/replays");
+    render(<SiteHeader />);
+    fireEvent.click(screen.getByRole("button", { name: "Menu" }));
+
+    expect(screen.getAllByRole("link", { name: "Replays" })).toHaveLength(2);
+    for (const link of screen.getAllByRole("link", { name: "Replays" })) {
+      expect(link).toHaveAttribute("aria-current", "page");
+    }
   });
 });
