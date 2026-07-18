@@ -217,3 +217,7 @@ not public product output.
 - [TxLINE adapter specification](docs/specs/03-TxLINE-Live-Data-Adapter.md)
 - [Solana escrow and settlement specification](docs/specs/04-Supporter-Escrow-and-Blink-Settlement.md)
 - [Demo and submission runbook](docs/demo/00-Demo-and-Submission-Runbook.md)
+
+## License
+
+Arena90 is available under the [MIT License](LICENSE).
