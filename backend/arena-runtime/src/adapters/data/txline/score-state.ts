@@ -152,8 +152,12 @@ function applyMaterial(
     state.addedTime = 0;
   }
   if (event.action === "additional_time") {
-    if (event.data?.minutes === undefined) throw scoreError();
-    state.addedTime = event.data.minutes;
+    const minutes = event.data?.minutes;
+    if (minutes === undefined) {
+      if (event.confirmed !== false) throw scoreError();
+    } else {
+      state.addedTime = minutes;
+    }
   }
 
   state.minute = calculateMinute(state.statusId, state.clock);
