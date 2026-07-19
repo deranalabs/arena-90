@@ -68,7 +68,8 @@ const LIVE_KICKOFF_WAIT_CHUNK_MS = 60_000;
 function isRetryableManagedRunFailure(error: unknown): boolean {
   return (
     error instanceof TxlineDataError &&
-    (error.code === "PROVIDER_TIMEOUT" ||
+    (error.code === "INVALID_PROVIDER_INPUT" ||
+      error.code === "PROVIDER_TIMEOUT" ||
       error.code === "PROVIDER_NETWORK_FAILURE")
   );
 }

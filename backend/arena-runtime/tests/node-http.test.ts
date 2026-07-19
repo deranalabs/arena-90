@@ -392,7 +392,10 @@ describe("Node HTTP runtime composition", () => {
     }
   });
 
-  it("keeps LIVE supervised while retrying one transient provider timeout", async () => {
+  it.each([
+    "PROVIDER_TIMEOUT",
+    "INVALID_PROVIDER_INPUT",
+  ] as const)("keeps LIVE supervised while retrying one transient %s failure", async (errorCode) => {
     vi.useFakeTimers();
     const liveManifest = lockedLiveManifest(
       "arena-live-supervisor-retry-001",
@@ -402,10 +405,7 @@ describe("Node HTTP runtime composition", () => {
       async getFixtureSnapshot() {
         fixtureCalls += 1;
         if (fixtureCalls === 1) {
-          throw new TxlineDataError(
-            "PROVIDER_TIMEOUT",
-            "TxLINE provider request timed out",
-          );
+          throw new TxlineDataError(errorCode, "Transient TxLINE provider failure");
         }
         return [liveFixtureRow()];
       },
