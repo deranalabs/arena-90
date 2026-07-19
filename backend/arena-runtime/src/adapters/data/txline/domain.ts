@@ -87,6 +87,7 @@ export interface TxlineScoreState {
 export interface CreateTxlineScoreStateReducerInput {
   readonly fixture: NormalizedTxlineFixture;
   readonly bootstrapEvents: unknown;
+  readonly semantics?: "LIVE" | "HISTORICAL_REPLAY";
 }
 
 export interface TxlineScoreStateReducer {

@@ -269,12 +269,12 @@ function completingLiveClient(
     },
     async getOddsSnapshot() {
       onCall("provider:odds-snapshot");
-      return [];
+      marketSequence += 1;
+      return [liveMarketRow(`odds-${marketSequence}`)];
     },
     async getOddsUpdates() {
       onCall("provider:odds-updates");
-      marketSequence += 1;
-      return [liveMarketRow(`odds-${marketSequence}`)];
+      return [];
     },
     async getScoreSnapshot() {
       onCall("provider:score-snapshot");
@@ -293,6 +293,33 @@ function completingLiveClient(
 }
 
 describe("Node HTTP runtime composition", () => {
+  it("creates Alpha and Beta adapters with isolated ZeroClaw state", async () => {
+    const configuredDirectories: Record<string, string> = {};
+    const composition = await createNodeHttpRuntimeComposition({
+      env: {
+        ...replayEnv,
+        ZEROCLAW_BIN: "zeroclaw",
+        ZEROCLAW_ALPHA_CONFIG_DIR: "/isolated/zeroclaw-alpha",
+        ZEROCLAW_BETA_CONFIG_DIR: "/isolated/zeroclaw-beta",
+      },
+      readFile: replayFiles(),
+      zeroClawAgentFactory(config) {
+        configuredDirectories[config.agentId] = config.configDir;
+        return agent(config.agentId);
+      },
+      store: testStore(),
+    });
+
+    try {
+      expect(configuredDirectories).toEqual({
+        alpha: "/isolated/zeroclaw-alpha",
+        beta: "/isolated/zeroclaw-beta",
+      });
+    } finally {
+      await composition.shutdown();
+    }
+  });
+
   it("waits until locked kickoff before autonomously polling LIVE evidence", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(liveBinding.startTime - 1_000);
@@ -487,6 +514,46 @@ describe("Node HTTP runtime composition", () => {
           },
         },
       });
+    } finally {
+      await composition.shutdown();
+    }
+  });
+
+  it("exposes DEGRADED on public arena state when a non-retryable Live failure ends the managed run before COMPLETED", async () => {
+    const liveManifest = lockedLiveManifest(
+      "arena-live-supervisor-degraded-projection-001",
+    );
+    const client = failingBootstrapClient(
+      new TxlineDataError(
+        "PROVIDER_AUTHENTICATION_FAILURE",
+        "TxLINE provider authentication failed",
+      ),
+      () => {},
+    );
+    const composition = await createNodeHttpRuntimeComposition({
+      env: liveEnv,
+      readFile: liveFiles(liveManifest),
+      agents: { alpha: agent("alpha"), beta: agent("beta") },
+      store: testStore(),
+      txlineClientFactory: () => client,
+    });
+
+    try {
+      const address = await composition.listen({ port: 0 });
+      await vi.waitFor(() => expect(composition.isReady()).toBe(false));
+      const publicState = await fetch(
+        `http://${address.host}:${address.port}/api/arenas/${liveManifest.arenaId}`,
+      );
+      const body = (await publicState.json()) as { phase: unknown };
+
+      expect({
+        status: publicState.status,
+        phase: body.phase,
+      }).toEqual({
+        status: 200,
+        phase: "DEGRADED",
+      });
+      expect(publicArenaStateV1Schema.safeParse(body).success).toBe(true);
     } finally {
       await composition.shutdown();
     }
@@ -901,9 +968,8 @@ describe("Node HTTP runtime composition", () => {
         checkpointSources: Array.from({ length: 6 }, () => "TXLINE_LIVE"),
         firstProviderCalls: [
           "provider:fixture",
-          "provider:score-snapshot",
-          "provider:odds-snapshot",
-          "provider:odds-updates",
+        "provider:score-snapshot",
+        "provider:odds-snapshot",
         ],
         firstResumedProviderIndex: 2,
         resumedKickoffCalls: ["agent:alpha:KICKOFF", "agent:beta:KICKOFF"],

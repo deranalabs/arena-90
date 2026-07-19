@@ -7,7 +7,10 @@ import type {
   AgentAdapter,
   AgentInvocationRequest,
 } from "../adapters/agents/fake.js";
-import { createZeroClawAgentAdapter } from "../adapters/agents/zeroclaw.js";
+import {
+  createZeroClawAgentAdapter,
+  type ZeroClawAgentAdapterConfig,
+} from "../adapters/agents/zeroclaw.js";
 import { createRecordedDataAdapter } from "../adapters/data/recorded.js";
 import {
   TxlineDataError,
@@ -33,6 +36,7 @@ import {
   type SupporterChainResolver,
 } from "../services/supporter-resolver.js";
 import { createNodeArenaLifecycleComposition } from "./node-lifecycle.js";
+import { resolveZeroClawConfigDirectory } from "./zeroclaw-config.js";
 
 export type NodeHttpRuntimeMode = "REPLAY" | "LIVE";
 
@@ -73,6 +77,9 @@ export interface CreateNodeHttpRuntimeCompositionOptions {
   readonly env?: Environment;
   readonly readFile?: TextFileReader;
   readonly agents?: Readonly<Record<ArenaAgentId, AgentAdapter>>;
+  readonly zeroClawAgentFactory?: (
+    config: ZeroClawAgentAdapterConfig,
+  ) => AgentAdapter;
   readonly store?: ArenaLifecycleStore;
   readonly txlineClientFactory?: (env: Environment) => TxlineProviderClient;
   readonly nowMs?: () => number;
@@ -194,23 +201,20 @@ function resolveAgents(
     }
     return options.agents;
   }
-  const configDir = requiredEnvironmentValue(env, "ZEROCLAW_CONFIG_DIR");
   const binaryPath = env["ZEROCLAW_BIN"] ?? "zeroclaw";
   if (binaryPath === "" || binaryPath.trim() !== binaryPath) {
     throw new NodeHttpRuntimeError("CONFIG_FAILURE");
   }
-  return Object.freeze({
-    alpha: createZeroClawAgentAdapter({
-      agentId: "alpha",
-      binaryPath,
-      configDir,
-    }),
-    beta: createZeroClawAgentAdapter({
-      agentId: "beta",
-      binaryPath,
-      configDir,
-    }),
-  });
+  const factory = options.zeroClawAgentFactory ?? createZeroClawAgentAdapter;
+  const adapters = {} as Record<ArenaAgentId, AgentAdapter>;
+  for (const agentId of ["alpha", "beta"] as const) {
+    const configDir = resolveZeroClawConfigDirectory(env, agentId);
+    if (configDir === undefined) {
+      throw new NodeHttpRuntimeError("CONFIG_FAILURE");
+    }
+    adapters[agentId] = factory({ agentId, binaryPath, configDir });
+  }
+  return Object.freeze(adapters);
 }
 
 function abortableWait(delayMs: number, signal: AbortSignal): Promise<void> {

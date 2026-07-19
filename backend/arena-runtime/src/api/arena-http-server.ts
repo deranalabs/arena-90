@@ -745,7 +745,14 @@ export function createArenaHttpServer(
   async function readArena(response: ServerResponse, arenaId: string) {
     const persisted = await input.store.read(arenaId, 0);
     if (persisted === "NOT_FOUND") throw arenaNotFound();
-    writeJson(response, 200, projectArenaState(persisted.state));
+    let runtimeReady = true;
+    try {
+      runtimeReady = input.isReady();
+    } catch {
+      runtimeReady = false;
+    }
+    const isDegraded = !runtimeReady && persisted.state.phase !== "COMPLETED";
+    writeJson(response, 200, projectArenaState(persisted.state, isDegraded));
   }
 
   async function readEvents(

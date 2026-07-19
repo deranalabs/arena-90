@@ -1,0 +1,2071 @@
+{
+  "schemaVersion": 1,
+  "semanticHash": "37c0133130b92ab3f9cec1a534ff7492bcf69ab77d8d3ea8d4603e80c96b7832",
+  "recordedSource": {
+    "label": "RECORDED TxLINE DATA",
+    "fixtureId": "18257865",
+    "matchDateUtc": "2026-07-18T21:00:00.000Z",
+    "capturedAtUtc": "2026-07-19T08:57:57.232Z",
+    "scoreEventCount": 1197,
+    "oddsUpdateCount": 75650,
+    "inputHash": "86d369302ad3c19103c3271dba5dc3850e40207b0c91c02d84b715397a227147"
+  },
+  "state": {
+    "schemaVersion": 1,
+    "manifest": {
+      "schemaVersion": 1,
+      "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+      "mode": "REPLAY",
+      "competition": "World Cup 2026 · Third Place Recovery Replay",
+      "fixtureId": "18257865",
+      "homeTeam": {
+        "name": "France",
+        "code": "FRA"
+      },
+      "awayTeam": {
+        "name": "England",
+        "code": "ENG"
+      },
+      "kickoffUtc": "2026-07-18T21:00:00.000Z",
+      "startingBankrollMicros": "100000000",
+      "currency": "VIRTUAL_USD_MICROS",
+      "assets": [
+        {
+          "id": "HOME",
+          "market": "FULL_TIME_1X2",
+          "label": "France win"
+        },
+        {
+          "id": "DRAW",
+          "market": "FULL_TIME_1X2",
+          "label": "Draw"
+        },
+        {
+          "id": "AWAY",
+          "market": "FULL_TIME_1X2",
+          "label": "England win"
+        }
+      ],
+      "checkpoints": [
+        "KICKOFF",
+        "M15",
+        "M30",
+        "HALFTIME",
+        "M60",
+        "M75",
+        "FINAL"
+      ],
+      "replayDisclosure": "RECOVERY REPLAY — recorded data, not live execution",
+      "createdAtUtc": "2026-07-19T08:57:57.232Z"
+    },
+    "phase": "COMPLETED",
+    "runtimeVersions": {
+      "runtimeVersion": "7.5",
+      "executionRuleVersion": "p0-v1",
+      "winnerRuleVersion": "FINAL_NAV_ONLY_V1",
+      "agents": {
+        "alpha": {
+          "strategyId": "alpha-overreaction-hunter",
+          "strategyVersion": "4"
+        },
+        "beta": {
+          "strategyId": "beta-underreaction-hunter",
+          "strategyVersion": "4"
+        }
+      }
+    },
+    "portfolios": {
+      "alpha": {
+        "agentId": "alpha",
+        "cashMicros": "100000000",
+        "unitMicros": {
+          "HOME": "0",
+          "DRAW": "0",
+          "AWAY": "0"
+        },
+        "navMicros": "100000000",
+        "returnBps": 0,
+        "updatedAtCheckpoint": "FINAL"
+      },
+      "beta": {
+        "agentId": "beta",
+        "cashMicros": "10326845",
+        "unitMicros": {
+          "HOME": "204415012",
+          "DRAW": "62124376",
+          "AWAY": "49774150"
+        },
+        "navMicros": "60100995",
+        "returnBps": -3989,
+        "updatedAtCheckpoint": "FINAL"
+      }
+    },
+    "checkpoints": [
+      {
+        "checkpointId": "KICKOFF",
+        "outcome": "REVEALED",
+        "snapshot": {
+          "schemaVersion": 1,
+          "snapshotId": "ef15d6a8bec73a78107e5e3bf3c4447b445ef6b22f669c7cdf606d6de2fb859c",
+          "snapshotHash": "96eeb9d7f22f1db688dfe0ec64f0b2bce11e702d08f67d7c89b4ea783d860d86",
+          "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+          "fixtureId": "18257865",
+          "checkpointId": "KICKOFF",
+          "observedAtUtc": "2026-07-18T21:00:13.751Z",
+          "source": "TXLINE_RECORDED",
+          "match": {
+            "status": "LIVE",
+            "minute": 0,
+            "addedTime": 0,
+            "homeScore": 0,
+            "awayScore": 0
+          },
+          "priceMicros": {
+            "HOME": 565027,
+            "DRAW": 221552,
+            "AWAY": 213421
+          },
+          "freshness": {
+            "marketUpdatedAtUtc": "2026-07-18T21:00:12.229Z",
+            "delayed": true,
+            "suspended": false
+          }
+        },
+        "revealedDecisions": {
+          "alpha": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+            "snapshotId": "ef15d6a8bec73a78107e5e3bf3c4447b445ef6b22f669c7cdf606d6de2fb859c",
+            "checkpointId": "KICKOFF",
+            "agentId": "alpha",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          },
+          "beta": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+            "snapshotId": "ef15d6a8bec73a78107e5e3bf3c4447b445ef6b22f669c7cdf606d6de2fb859c",
+            "checkpointId": "KICKOFF",
+            "agentId": "beta",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          }
+        },
+        "failures": [],
+        "portfoliosBefore": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "KICKOFF"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "KICKOFF"
+          }
+        },
+        "portfoliosAfter": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "KICKOFF"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "KICKOFF"
+          }
+        },
+        "firstEventSequence": 2,
+        "lastEventSequence": 7
+      },
+      {
+        "checkpointId": "M15",
+        "outcome": "REVEALED",
+        "snapshot": {
+          "schemaVersion": 1,
+          "snapshotId": "949957bf0a7ddf16581a309a85830e564d00def8b4cd2b71e0ba5620d7e8387f",
+          "snapshotHash": "38102265dc44438a271c24c77ed1d591fb526dfc128fbecaca61b15902431c6c",
+          "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+          "fixtureId": "18257865",
+          "checkpointId": "M15",
+          "observedAtUtc": "2026-07-18T21:15:14.316Z",
+          "source": "TXLINE_RECORDED",
+          "match": {
+            "status": "LIVE",
+            "minute": 15,
+            "addedTime": 0,
+            "homeScore": 0,
+            "awayScore": 1
+          },
+          "priceMicros": {
+            "HOME": 350870,
+            "DRAW": 253732,
+            "AWAY": 395398
+          },
+          "freshness": {
+            "marketUpdatedAtUtc": "2026-07-18T21:15:11.850Z",
+            "delayed": true,
+            "suspended": false
+          }
+        },
+        "revealedDecisions": {
+          "alpha": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+            "snapshotId": "949957bf0a7ddf16581a309a85830e564d00def8b4cd2b71e0ba5620d7e8387f",
+            "checkpointId": "M15",
+            "agentId": "alpha",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          },
+          "beta": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+            "snapshotId": "949957bf0a7ddf16581a309a85830e564d00def8b4cd2b71e0ba5620d7e8387f",
+            "checkpointId": "M15",
+            "agentId": "beta",
+            "publicExplanation": "AWAY scored once but remains priced at 395398 micros.",
+            "action": "TARGET_ALLOCATION",
+            "targetAllocationBps": {
+              "cash": 2000,
+              "HOME": 1000,
+              "DRAW": 1000,
+              "AWAY": 6000
+            }
+          }
+        },
+        "failures": [],
+        "portfoliosBefore": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "KICKOFF"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "KICKOFF"
+          }
+        },
+        "portfoliosAfter": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M15"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "20000003",
+            "unitMicros": {
+              "HOME": "28500584",
+              "DRAW": "39411662",
+              "AWAY": "151745835"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M15"
+          }
+        },
+        "firstEventSequence": 8,
+        "lastEventSequence": 13
+      },
+      {
+        "checkpointId": "M30",
+        "outcome": "REVEALED",
+        "snapshot": {
+          "schemaVersion": 1,
+          "snapshotId": "a503b5c1b22c6fd44fc76cd786700c78986cde321e1cc1c47d4595867f6b3ed2",
+          "snapshotHash": "2adbf43c9ecf4eeb823f918b394b936fbd7f835331b4315a722e5ce9b8aa45cb",
+          "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+          "fixtureId": "18257865",
+          "checkpointId": "M30",
+          "observedAtUtc": "2026-07-18T21:30:14.672Z",
+          "source": "TXLINE_RECORDED",
+          "match": {
+            "status": "LIVE",
+            "minute": 30,
+            "addedTime": 0,
+            "homeScore": 0,
+            "awayScore": 2
+          },
+          "priceMicros": {
+            "HOME": 153492,
+            "DRAW": 188956,
+            "AWAY": 657552
+          },
+          "freshness": {
+            "marketUpdatedAtUtc": "2026-07-18T21:29:57.731Z",
+            "delayed": true,
+            "suspended": false
+          }
+        },
+        "revealedDecisions": {
+          "alpha": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+            "snapshotId": "a503b5c1b22c6fd44fc76cd786700c78986cde321e1cc1c47d4595867f6b3ed2",
+            "checkpointId": "M30",
+            "agentId": "alpha",
+            "publicExplanation": "The deterministic policy signal requires NO_TRADE because no approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          },
+          "beta": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+            "snapshotId": "a503b5c1b22c6fd44fc76cd786700c78986cde321e1cc1c47d4595867f6b3ed2",
+            "checkpointId": "M30",
+            "agentId": "beta",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          }
+        },
+        "failures": [],
+        "portfoliosBefore": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M15"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "20000003",
+            "unitMicros": {
+              "HOME": "28500584",
+              "DRAW": "39411662",
+              "AWAY": "151745835"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M15"
+          }
+        },
+        "portfoliosAfter": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M30"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "20000003",
+            "unitMicros": {
+              "HOME": "28500584",
+              "DRAW": "39411662",
+              "AWAY": "151745835"
+            },
+            "navMicros": "131602461",
+            "returnBps": 3160,
+            "updatedAtCheckpoint": "M30"
+          }
+        },
+        "firstEventSequence": 14,
+        "lastEventSequence": 19
+      },
+      {
+        "checkpointId": "HALFTIME",
+        "outcome": "REVEALED",
+        "snapshot": {
+          "schemaVersion": 1,
+          "snapshotId": "400d3ddf1d77e4ace3ce5135ff264dcb4fe71bf3786597f35d5a734f910b9f5f",
+          "snapshotHash": "febb17289f0dea37dae9616a9ab3e16c100b2e64f947349da37233e498413b51",
+          "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+          "fixtureId": "18257865",
+          "checkpointId": "HALFTIME",
+          "observedAtUtc": "2026-07-18T21:53:59.724Z",
+          "source": "TXLINE_RECORDED",
+          "match": {
+            "status": "HALFTIME",
+            "minute": 45,
+            "addedTime": 4,
+            "homeScore": 0,
+            "awayScore": 4
+          },
+          "priceMicros": {
+            "HOME": 13333,
+            "DRAW": 29507,
+            "AWAY": 957160
+          },
+          "freshness": {
+            "marketUpdatedAtUtc": "2026-07-18T21:53:48.071Z",
+            "delayed": true,
+            "suspended": false
+          }
+        },
+        "revealedDecisions": {
+          "alpha": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+            "snapshotId": "400d3ddf1d77e4ace3ce5135ff264dcb4fe71bf3786597f35d5a734f910b9f5f",
+            "checkpointId": "HALFTIME",
+            "agentId": "alpha",
+            "publicExplanation": "The deterministic policy requiredAction is NO_TRADE because no approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          },
+          "beta": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+            "snapshotId": "400d3ddf1d77e4ace3ce5135ff264dcb4fe71bf3786597f35d5a734f910b9f5f",
+            "checkpointId": "HALFTIME",
+            "agentId": "beta",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          }
+        },
+        "failures": [],
+        "portfoliosBefore": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M30"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "20000003",
+            "unitMicros": {
+              "HOME": "28500584",
+              "DRAW": "39411662",
+              "AWAY": "151745835"
+            },
+            "navMicros": "131602461",
+            "returnBps": 3160,
+            "updatedAtCheckpoint": "M30"
+          }
+        },
+        "portfoliosAfter": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "HALFTIME"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "20000003",
+            "unitMicros": {
+              "HOME": "28500584",
+              "DRAW": "39411662",
+              "AWAY": "151745835"
+            },
+            "navMicros": "166787963",
+            "returnBps": 6678,
+            "updatedAtCheckpoint": "HALFTIME"
+          }
+        },
+        "firstEventSequence": 20,
+        "lastEventSequence": 25
+      },
+      {
+        "checkpointId": "M60",
+        "outcome": "REVEALED",
+        "snapshot": {
+          "schemaVersion": 1,
+          "snapshotId": "3a2af2eeb74ec76c116f6fbf5f381d8d29cb8c2541a7c4c44a1a777f3ecad57d",
+          "snapshotHash": "f6d9aaeb6fcfd7325c926540b4b0f8b714afb43f85be7f4a43e41a38fff3ea7d",
+          "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+          "fixtureId": "18257865",
+          "checkpointId": "M60",
+          "observedAtUtc": "2026-07-18T22:23:03.950Z",
+          "source": "TXLINE_RECORDED",
+          "match": {
+            "status": "LIVE",
+            "minute": 60,
+            "addedTime": 0,
+            "homeScore": 2,
+            "awayScore": 4
+          },
+          "priceMicros": {
+            "HOME": 119049,
+            "DRAW": 186880,
+            "AWAY": 694071
+          },
+          "freshness": {
+            "marketUpdatedAtUtc": "2026-07-18T22:23:03.821Z",
+            "delayed": true,
+            "suspended": false
+          }
+        },
+        "revealedDecisions": {
+          "alpha": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+            "snapshotId": "3a2af2eeb74ec76c116f6fbf5f381d8d29cb8c2541a7c4c44a1a777f3ecad57d",
+            "checkpointId": "M60",
+            "agentId": "alpha",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint, so the policy required action is NO_TRADE.",
+            "action": "NO_TRADE"
+          },
+          "beta": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+            "snapshotId": "3a2af2eeb74ec76c116f6fbf5f381d8d29cb8c2541a7c4c44a1a777f3ecad57d",
+            "checkpointId": "M60",
+            "agentId": "beta",
+            "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          }
+        },
+        "failures": [],
+        "portfoliosBefore": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "HALFTIME"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "20000003",
+            "unitMicros": {
+              "HOME": "28500584",
+              "DRAW": "39411662",
+              "AWAY": "151745835"
+            },
+            "navMicros": "166787963",
+            "returnBps": 6678,
+            "updatedAtCheckpoint": "HALFTIME"
+          }
+        },
+        "portfoliosAfter": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M60"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "20000003",
+            "unitMicros": {
+              "HOME": "28500584",
+              "DRAW": "39411662",
+              "AWAY": "151745835"
+            },
+            "navMicros": "136080603",
+            "returnBps": 3608,
+            "updatedAtCheckpoint": "M60"
+          }
+        },
+        "firstEventSequence": 26,
+        "lastEventSequence": 31
+      },
+      {
+        "checkpointId": "M75",
+        "outcome": "REVEALED",
+        "snapshot": {
+          "schemaVersion": 1,
+          "snapshotId": "c48ee1c95d11e73b00e46ef26bde8548481c145b5b1f9a0845142432a07f17a0",
+          "snapshotHash": "3a1d5fa4bfe807c65754ca667a4dac0daf51fdf13028fb1a49cf4ff69240cb96",
+          "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+          "fixtureId": "18257865",
+          "checkpointId": "M75",
+          "observedAtUtc": "2026-07-18T22:38:09.270Z",
+          "source": "TXLINE_RECORDED",
+          "match": {
+            "status": "LIVE",
+            "minute": 75,
+            "addedTime": 0,
+            "homeScore": 3,
+            "awayScore": 4
+          },
+          "priceMicros": {
+            "HOME": 252595,
+            "DRAW": 332457,
+            "AWAY": 414948
+          },
+          "freshness": {
+            "marketUpdatedAtUtc": "2026-07-18T22:38:08.092Z",
+            "delayed": true,
+            "suspended": false
+          }
+        },
+        "revealedDecisions": {
+          "alpha": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+            "snapshotId": "c48ee1c95d11e73b00e46ef26bde8548481c145b5b1f9a0845142432a07f17a0",
+            "checkpointId": "M75",
+            "agentId": "alpha",
+            "publicExplanation": "The policy signal required action is NO_TRADE because no approved strategy signal is active at this checkpoint.",
+            "action": "NO_TRADE"
+          },
+          "beta": {
+            "schemaVersion": 1,
+            "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+            "snapshotId": "c48ee1c95d11e73b00e46ef26bde8548481c145b5b1f9a0845142432a07f17a0",
+            "checkpointId": "M75",
+            "agentId": "beta",
+            "publicExplanation": "The deterministic policy signals a TOWARD action for HOME because HOME scored once but remains priced at 252595 micros.",
+            "action": "TARGET_ALLOCATION",
+            "targetAllocationBps": {
+              "cash": 1000,
+              "HOME": 5000,
+              "DRAW": 2000,
+              "AWAY": 2000
+            }
+          }
+        },
+        "failures": [],
+        "portfoliosBefore": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M60"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "20000003",
+            "unitMicros": {
+              "HOME": "28500584",
+              "DRAW": "39411662",
+              "AWAY": "151745835"
+            },
+            "navMicros": "136080603",
+            "returnBps": 3608,
+            "updatedAtCheckpoint": "M60"
+          }
+        },
+        "portfoliosAfter": {
+          "alpha": {
+            "agentId": "alpha",
+            "cashMicros": "100000000",
+            "unitMicros": {
+              "HOME": "0",
+              "DRAW": "0",
+              "AWAY": "0"
+            },
+            "navMicros": "100000000",
+            "returnBps": 0,
+            "updatedAtCheckpoint": "M75"
+          },
+          "beta": {
+            "agentId": "beta",
+            "cashMicros": "10326845",
+            "unitMicros": {
+              "HOME": "204415012",
+              "DRAW": "62124376",
+              "AWAY": "49774150"
+            },
+            "navMicros": "103268420",
+            "returnBps": 326,
+            "updatedAtCheckpoint": "M75"
+          }
+        },
+        "firstEventSequence": 32,
+        "lastEventSequence": 37
+      }
+    ],
+    "leader": {
+      "result": "alpha",
+      "provisional": false
+    },
+    "finalResult": {
+      "schemaVersion": 2,
+      "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+      "winnerRule": "FINAL_NAV_ONLY_V1",
+      "winningAssetId": "AWAY",
+      "winner": "alpha",
+      "alphaFinalNavMicros": "100000000",
+      "betaFinalNavMicros": "60100995",
+      "terminalEvidence": {
+        "schemaVersion": 1,
+        "providerSequence": 1196,
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "fixtureId": "18257865",
+        "observedAtUtc": "2026-07-18T23:06:54.839Z",
+        "sourceEventId": "txline-score:18257865:1195",
+        "source": "TXLINE_RECORDED",
+        "match": {
+          "status": "FINISHED",
+          "minute": 98,
+          "addedTime": 7,
+          "homeScore": 4,
+          "awayScore": 6
+        },
+        "winningAssetId": "AWAY",
+        "terminalEvidenceHash": "72461c8bf6aa2c0f54c29e97e620f1806f39941bf106c048207fa6f2e38d95b3"
+      },
+      "completedEventSequence": 39,
+      "preSettlementEventLogHash": "5b9a03048492892b0c46a775608517a71a93b13ab23787f606b8de3ec3592162",
+      "finalResultHash": "a21af08f09c4e8878befcd28837dc431683ff256bdee44b8725ca32f0a972ad3"
+    },
+    "lastEventSequence": 39
+  },
+  "history": {
+    "schemaVersion": 1,
+    "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+    "afterSequence": 0,
+    "lastEventSequence": 39,
+    "events": [
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:1",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 1,
+        "occurredAtUtc": "2026-07-19T08:57:57.232Z",
+        "type": "ARENA_READY",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:2",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 2,
+        "occurredAtUtc": "2026-07-18T21:00:13.751Z",
+        "type": "CHECKPOINT_OPENED",
+        "checkpointId": "KICKOFF",
+        "payload": {
+          "snapshot": {
+            "schemaVersion": 1,
+            "snapshotId": "ef15d6a8bec73a78107e5e3bf3c4447b445ef6b22f669c7cdf606d6de2fb859c",
+            "snapshotHash": "96eeb9d7f22f1db688dfe0ec64f0b2bce11e702d08f67d7c89b4ea783d860d86",
+            "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+            "fixtureId": "18257865",
+            "checkpointId": "KICKOFF",
+            "observedAtUtc": "2026-07-18T21:00:13.751Z",
+            "source": "TXLINE_RECORDED",
+            "match": {
+              "status": "LIVE",
+              "minute": 0,
+              "addedTime": 0,
+              "homeScore": 0,
+              "awayScore": 0
+            },
+            "priceMicros": {
+              "HOME": 565027,
+              "DRAW": 221552,
+              "AWAY": 213421
+            },
+            "freshness": {
+              "marketUpdatedAtUtc": "2026-07-18T21:00:12.229Z",
+              "delayed": true,
+              "suspended": false
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:3",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 3,
+        "occurredAtUtc": "2026-07-18T21:00:13.751Z",
+        "type": "AGENTS_ANALYZING",
+        "checkpointId": "KICKOFF",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:4",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 4,
+        "occurredAtUtc": "2026-07-18T21:00:13.751Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "KICKOFF",
+        "agentId": "alpha",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:5",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 5,
+        "occurredAtUtc": "2026-07-18T21:00:13.751Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "KICKOFF",
+        "agentId": "beta",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:6",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 6,
+        "occurredAtUtc": "2026-07-18T21:00:13.751Z",
+        "type": "ROUND_REVEALED",
+        "checkpointId": "KICKOFF",
+        "payload": {
+          "decisions": {
+            "alpha": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+              "snapshotId": "ef15d6a8bec73a78107e5e3bf3c4447b445ef6b22f669c7cdf606d6de2fb859c",
+              "checkpointId": "KICKOFF",
+              "agentId": "alpha",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            },
+            "beta": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+              "snapshotId": "ef15d6a8bec73a78107e5e3bf3c4447b445ef6b22f669c7cdf606d6de2fb859c",
+              "checkpointId": "KICKOFF",
+              "agentId": "beta",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            }
+          },
+          "failures": [],
+          "portfoliosBefore": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            }
+          },
+          "portfoliosAfter": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:7",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 7,
+        "occurredAtUtc": "2026-07-18T21:00:13.751Z",
+        "type": "ROUND_COMPLETE",
+        "checkpointId": "KICKOFF",
+        "payload": {
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            }
+          },
+          "nextCheckpointId": "M15"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:8",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 8,
+        "occurredAtUtc": "2026-07-18T21:15:14.316Z",
+        "type": "CHECKPOINT_OPENED",
+        "checkpointId": "M15",
+        "payload": {
+          "snapshot": {
+            "schemaVersion": 1,
+            "snapshotId": "949957bf0a7ddf16581a309a85830e564d00def8b4cd2b71e0ba5620d7e8387f",
+            "snapshotHash": "38102265dc44438a271c24c77ed1d591fb526dfc128fbecaca61b15902431c6c",
+            "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+            "fixtureId": "18257865",
+            "checkpointId": "M15",
+            "observedAtUtc": "2026-07-18T21:15:14.316Z",
+            "source": "TXLINE_RECORDED",
+            "match": {
+              "status": "LIVE",
+              "minute": 15,
+              "addedTime": 0,
+              "homeScore": 0,
+              "awayScore": 1
+            },
+            "priceMicros": {
+              "HOME": 350870,
+              "DRAW": 253732,
+              "AWAY": 395398
+            },
+            "freshness": {
+              "marketUpdatedAtUtc": "2026-07-18T21:15:11.850Z",
+              "delayed": true,
+              "suspended": false
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:9",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 9,
+        "occurredAtUtc": "2026-07-18T21:15:14.316Z",
+        "type": "AGENTS_ANALYZING",
+        "checkpointId": "M15",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:10",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 10,
+        "occurredAtUtc": "2026-07-18T21:15:14.316Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M15",
+        "agentId": "alpha",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:11",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 11,
+        "occurredAtUtc": "2026-07-18T21:15:14.316Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M15",
+        "agentId": "beta",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:12",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 12,
+        "occurredAtUtc": "2026-07-18T21:15:14.316Z",
+        "type": "ROUND_REVEALED",
+        "checkpointId": "M15",
+        "payload": {
+          "decisions": {
+            "alpha": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+              "snapshotId": "949957bf0a7ddf16581a309a85830e564d00def8b4cd2b71e0ba5620d7e8387f",
+              "checkpointId": "M15",
+              "agentId": "alpha",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            },
+            "beta": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+              "snapshotId": "949957bf0a7ddf16581a309a85830e564d00def8b4cd2b71e0ba5620d7e8387f",
+              "checkpointId": "M15",
+              "agentId": "beta",
+              "publicExplanation": "AWAY scored once but remains priced at 395398 micros.",
+              "action": "TARGET_ALLOCATION",
+              "targetAllocationBps": {
+                "cash": 2000,
+                "HOME": 1000,
+                "DRAW": 1000,
+                "AWAY": 6000
+              }
+            }
+          },
+          "failures": [],
+          "portfoliosBefore": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "KICKOFF"
+            }
+          },
+          "portfoliosAfter": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M15"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "28500584",
+                "DRAW": "39411662",
+                "AWAY": "151745835"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M15"
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:13",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 13,
+        "occurredAtUtc": "2026-07-18T21:15:14.316Z",
+        "type": "ROUND_COMPLETE",
+        "checkpointId": "M15",
+        "payload": {
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M15"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "28500584",
+                "DRAW": "39411662",
+                "AWAY": "151745835"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M15"
+            }
+          },
+          "nextCheckpointId": "M30"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:14",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 14,
+        "occurredAtUtc": "2026-07-18T21:30:14.672Z",
+        "type": "CHECKPOINT_OPENED",
+        "checkpointId": "M30",
+        "payload": {
+          "snapshot": {
+            "schemaVersion": 1,
+            "snapshotId": "a503b5c1b22c6fd44fc76cd786700c78986cde321e1cc1c47d4595867f6b3ed2",
+            "snapshotHash": "2adbf43c9ecf4eeb823f918b394b936fbd7f835331b4315a722e5ce9b8aa45cb",
+            "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+            "fixtureId": "18257865",
+            "checkpointId": "M30",
+            "observedAtUtc": "2026-07-18T21:30:14.672Z",
+            "source": "TXLINE_RECORDED",
+            "match": {
+              "status": "LIVE",
+              "minute": 30,
+              "addedTime": 0,
+              "homeScore": 0,
+              "awayScore": 2
+            },
+            "priceMicros": {
+              "HOME": 153492,
+              "DRAW": 188956,
+              "AWAY": 657552
+            },
+            "freshness": {
+              "marketUpdatedAtUtc": "2026-07-18T21:29:57.731Z",
+              "delayed": true,
+              "suspended": false
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:15",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 15,
+        "occurredAtUtc": "2026-07-18T21:30:14.672Z",
+        "type": "AGENTS_ANALYZING",
+        "checkpointId": "M30",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:16",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 16,
+        "occurredAtUtc": "2026-07-18T21:30:14.672Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M30",
+        "agentId": "alpha",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:17",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 17,
+        "occurredAtUtc": "2026-07-18T21:30:14.672Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M30",
+        "agentId": "beta",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:18",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 18,
+        "occurredAtUtc": "2026-07-18T21:30:14.672Z",
+        "type": "ROUND_REVEALED",
+        "checkpointId": "M30",
+        "payload": {
+          "decisions": {
+            "alpha": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+              "snapshotId": "a503b5c1b22c6fd44fc76cd786700c78986cde321e1cc1c47d4595867f6b3ed2",
+              "checkpointId": "M30",
+              "agentId": "alpha",
+              "publicExplanation": "The deterministic policy signal requires NO_TRADE because no approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            },
+            "beta": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+              "snapshotId": "a503b5c1b22c6fd44fc76cd786700c78986cde321e1cc1c47d4595867f6b3ed2",
+              "checkpointId": "M30",
+              "agentId": "beta",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            }
+          },
+          "failures": [],
+          "portfoliosBefore": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M15"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "28500584",
+                "DRAW": "39411662",
+                "AWAY": "151745835"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M15"
+            }
+          },
+          "portfoliosAfter": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M30"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "28500584",
+                "DRAW": "39411662",
+                "AWAY": "151745835"
+              },
+              "navMicros": "131602461",
+              "returnBps": 3160,
+              "updatedAtCheckpoint": "M30"
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:19",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 19,
+        "occurredAtUtc": "2026-07-18T21:30:14.672Z",
+        "type": "ROUND_COMPLETE",
+        "checkpointId": "M30",
+        "payload": {
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M30"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "28500584",
+                "DRAW": "39411662",
+                "AWAY": "151745835"
+              },
+              "navMicros": "131602461",
+              "returnBps": 3160,
+              "updatedAtCheckpoint": "M30"
+            }
+          },
+          "nextCheckpointId": "HALFTIME"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:20",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 20,
+        "occurredAtUtc": "2026-07-18T21:53:59.724Z",
+        "type": "CHECKPOINT_OPENED",
+        "checkpointId": "HALFTIME",
+        "payload": {
+          "snapshot": {
+            "schemaVersion": 1,
+            "snapshotId": "400d3ddf1d77e4ace3ce5135ff264dcb4fe71bf3786597f35d5a734f910b9f5f",
+            "snapshotHash": "febb17289f0dea37dae9616a9ab3e16c100b2e64f947349da37233e498413b51",
+            "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+            "fixtureId": "18257865",
+            "checkpointId": "HALFTIME",
+            "observedAtUtc": "2026-07-18T21:53:59.724Z",
+            "source": "TXLINE_RECORDED",
+            "match": {
+              "status": "HALFTIME",
+              "minute": 45,
+              "addedTime": 4,
+              "homeScore": 0,
+              "awayScore": 4
+            },
+            "priceMicros": {
+              "HOME": 13333,
+              "DRAW": 29507,
+              "AWAY": 957160
+            },
+            "freshness": {
+              "marketUpdatedAtUtc": "2026-07-18T21:53:48.071Z",
+              "delayed": true,
+              "suspended": false
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:21",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 21,
+        "occurredAtUtc": "2026-07-18T21:53:59.724Z",
+        "type": "AGENTS_ANALYZING",
+        "checkpointId": "HALFTIME",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:22",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 22,
+        "occurredAtUtc": "2026-07-18T21:53:59.724Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "HALFTIME",
+        "agentId": "alpha",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:23",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 23,
+        "occurredAtUtc": "2026-07-18T21:53:59.724Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "HALFTIME",
+        "agentId": "beta",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:24",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 24,
+        "occurredAtUtc": "2026-07-18T21:53:59.724Z",
+        "type": "ROUND_REVEALED",
+        "checkpointId": "HALFTIME",
+        "payload": {
+          "decisions": {
+            "alpha": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+              "snapshotId": "400d3ddf1d77e4ace3ce5135ff264dcb4fe71bf3786597f35d5a734f910b9f5f",
+              "checkpointId": "HALFTIME",
+              "agentId": "alpha",
+              "publicExplanation": "The deterministic policy requiredAction is NO_TRADE because no approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            },
+            "beta": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+              "snapshotId": "400d3ddf1d77e4ace3ce5135ff264dcb4fe71bf3786597f35d5a734f910b9f5f",
+              "checkpointId": "HALFTIME",
+              "agentId": "beta",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            }
+          },
+          "failures": [],
+          "portfoliosBefore": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M30"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "28500584",
+                "DRAW": "39411662",
+                "AWAY": "151745835"
+              },
+              "navMicros": "131602461",
+              "returnBps": 3160,
+              "updatedAtCheckpoint": "M30"
+            }
+          },
+          "portfoliosAfter": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "HALFTIME"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "28500584",
+                "DRAW": "39411662",
+                "AWAY": "151745835"
+              },
+              "navMicros": "166787963",
+              "returnBps": 6678,
+              "updatedAtCheckpoint": "HALFTIME"
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:25",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 25,
+        "occurredAtUtc": "2026-07-18T21:53:59.724Z",
+        "type": "ROUND_COMPLETE",
+        "checkpointId": "HALFTIME",
+        "payload": {
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "HALFTIME"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "28500584",
+                "DRAW": "39411662",
+                "AWAY": "151745835"
+              },
+              "navMicros": "166787963",
+              "returnBps": 6678,
+              "updatedAtCheckpoint": "HALFTIME"
+            }
+          },
+          "nextCheckpointId": "M60"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:26",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 26,
+        "occurredAtUtc": "2026-07-18T22:23:03.950Z",
+        "type": "CHECKPOINT_OPENED",
+        "checkpointId": "M60",
+        "payload": {
+          "snapshot": {
+            "schemaVersion": 1,
+            "snapshotId": "3a2af2eeb74ec76c116f6fbf5f381d8d29cb8c2541a7c4c44a1a777f3ecad57d",
+            "snapshotHash": "f6d9aaeb6fcfd7325c926540b4b0f8b714afb43f85be7f4a43e41a38fff3ea7d",
+            "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+            "fixtureId": "18257865",
+            "checkpointId": "M60",
+            "observedAtUtc": "2026-07-18T22:23:03.950Z",
+            "source": "TXLINE_RECORDED",
+            "match": {
+              "status": "LIVE",
+              "minute": 60,
+              "addedTime": 0,
+              "homeScore": 2,
+              "awayScore": 4
+            },
+            "priceMicros": {
+              "HOME": 119049,
+              "DRAW": 186880,
+              "AWAY": 694071
+            },
+            "freshness": {
+              "marketUpdatedAtUtc": "2026-07-18T22:23:03.821Z",
+              "delayed": true,
+              "suspended": false
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:27",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 27,
+        "occurredAtUtc": "2026-07-18T22:23:03.950Z",
+        "type": "AGENTS_ANALYZING",
+        "checkpointId": "M60",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:28",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 28,
+        "occurredAtUtc": "2026-07-18T22:23:03.950Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M60",
+        "agentId": "alpha",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:29",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 29,
+        "occurredAtUtc": "2026-07-18T22:23:03.950Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M60",
+        "agentId": "beta",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:30",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 30,
+        "occurredAtUtc": "2026-07-18T22:23:03.950Z",
+        "type": "ROUND_REVEALED",
+        "checkpointId": "M60",
+        "payload": {
+          "decisions": {
+            "alpha": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+              "snapshotId": "3a2af2eeb74ec76c116f6fbf5f381d8d29cb8c2541a7c4c44a1a777f3ecad57d",
+              "checkpointId": "M60",
+              "agentId": "alpha",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint, so the policy required action is NO_TRADE.",
+              "action": "NO_TRADE"
+            },
+            "beta": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+              "snapshotId": "3a2af2eeb74ec76c116f6fbf5f381d8d29cb8c2541a7c4c44a1a777f3ecad57d",
+              "checkpointId": "M60",
+              "agentId": "beta",
+              "publicExplanation": "No approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            }
+          },
+          "failures": [],
+          "portfoliosBefore": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "HALFTIME"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "28500584",
+                "DRAW": "39411662",
+                "AWAY": "151745835"
+              },
+              "navMicros": "166787963",
+              "returnBps": 6678,
+              "updatedAtCheckpoint": "HALFTIME"
+            }
+          },
+          "portfoliosAfter": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M60"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "28500584",
+                "DRAW": "39411662",
+                "AWAY": "151745835"
+              },
+              "navMicros": "136080603",
+              "returnBps": 3608,
+              "updatedAtCheckpoint": "M60"
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:31",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 31,
+        "occurredAtUtc": "2026-07-18T22:23:03.950Z",
+        "type": "ROUND_COMPLETE",
+        "checkpointId": "M60",
+        "payload": {
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M60"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "28500584",
+                "DRAW": "39411662",
+                "AWAY": "151745835"
+              },
+              "navMicros": "136080603",
+              "returnBps": 3608,
+              "updatedAtCheckpoint": "M60"
+            }
+          },
+          "nextCheckpointId": "M75"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:32",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 32,
+        "occurredAtUtc": "2026-07-18T22:38:09.270Z",
+        "type": "CHECKPOINT_OPENED",
+        "checkpointId": "M75",
+        "payload": {
+          "snapshot": {
+            "schemaVersion": 1,
+            "snapshotId": "c48ee1c95d11e73b00e46ef26bde8548481c145b5b1f9a0845142432a07f17a0",
+            "snapshotHash": "3a1d5fa4bfe807c65754ca667a4dac0daf51fdf13028fb1a49cf4ff69240cb96",
+            "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+            "fixtureId": "18257865",
+            "checkpointId": "M75",
+            "observedAtUtc": "2026-07-18T22:38:09.270Z",
+            "source": "TXLINE_RECORDED",
+            "match": {
+              "status": "LIVE",
+              "minute": 75,
+              "addedTime": 0,
+              "homeScore": 3,
+              "awayScore": 4
+            },
+            "priceMicros": {
+              "HOME": 252595,
+              "DRAW": 332457,
+              "AWAY": 414948
+            },
+            "freshness": {
+              "marketUpdatedAtUtc": "2026-07-18T22:38:08.092Z",
+              "delayed": true,
+              "suspended": false
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:33",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 33,
+        "occurredAtUtc": "2026-07-18T22:38:09.270Z",
+        "type": "AGENTS_ANALYZING",
+        "checkpointId": "M75",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:34",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 34,
+        "occurredAtUtc": "2026-07-18T22:38:09.270Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M75",
+        "agentId": "alpha",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:35",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 35,
+        "occurredAtUtc": "2026-07-18T22:38:09.270Z",
+        "type": "DECISION_RECEIVED",
+        "checkpointId": "M75",
+        "agentId": "beta",
+        "payload": {
+          "status": "RECEIVED"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:36",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 36,
+        "occurredAtUtc": "2026-07-18T22:38:09.270Z",
+        "type": "ROUND_REVEALED",
+        "checkpointId": "M75",
+        "payload": {
+          "decisions": {
+            "alpha": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+              "snapshotId": "c48ee1c95d11e73b00e46ef26bde8548481c145b5b1f9a0845142432a07f17a0",
+              "checkpointId": "M75",
+              "agentId": "alpha",
+              "publicExplanation": "The policy signal required action is NO_TRADE because no approved strategy signal is active at this checkpoint.",
+              "action": "NO_TRADE"
+            },
+            "beta": {
+              "schemaVersion": 1,
+              "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+              "snapshotId": "c48ee1c95d11e73b00e46ef26bde8548481c145b5b1f9a0845142432a07f17a0",
+              "checkpointId": "M75",
+              "agentId": "beta",
+              "publicExplanation": "The deterministic policy signals a TOWARD action for HOME because HOME scored once but remains priced at 252595 micros.",
+              "action": "TARGET_ALLOCATION",
+              "targetAllocationBps": {
+                "cash": 1000,
+                "HOME": 5000,
+                "DRAW": 2000,
+                "AWAY": 2000
+              }
+            }
+          },
+          "failures": [],
+          "portfoliosBefore": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M60"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "20000003",
+              "unitMicros": {
+                "HOME": "28500584",
+                "DRAW": "39411662",
+                "AWAY": "151745835"
+              },
+              "navMicros": "136080603",
+              "returnBps": 3608,
+              "updatedAtCheckpoint": "M60"
+            }
+          },
+          "portfoliosAfter": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M75"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "10326845",
+              "unitMicros": {
+                "HOME": "204415012",
+                "DRAW": "62124376",
+                "AWAY": "49774150"
+              },
+              "navMicros": "103268420",
+              "returnBps": 326,
+              "updatedAtCheckpoint": "M75"
+            }
+          }
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:37",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 37,
+        "occurredAtUtc": "2026-07-18T22:38:09.270Z",
+        "type": "ROUND_COMPLETE",
+        "checkpointId": "M75",
+        "payload": {
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "M75"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "10326845",
+              "unitMicros": {
+                "HOME": "204415012",
+                "DRAW": "62124376",
+                "AWAY": "49774150"
+              },
+              "navMicros": "103268420",
+              "returnBps": 326,
+              "updatedAtCheckpoint": "M75"
+            }
+          },
+          "nextCheckpointId": "FINAL"
+        }
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:38",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 38,
+        "occurredAtUtc": "2026-07-18T22:38:09.270Z",
+        "type": "FINALIZING",
+        "checkpointId": "FINAL",
+        "payload": {}
+      },
+      {
+        "schemaVersion": 1,
+        "eventId": "world-cup-2026-france-england-third-place-recovery-replay-01:39",
+        "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+        "sequence": 39,
+        "occurredAtUtc": "2026-07-19T17:25:32.893Z",
+        "type": "COMPLETED",
+        "checkpointId": "FINAL",
+        "payload": {
+          "result": {
+            "schemaVersion": 2,
+            "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+            "winnerRule": "FINAL_NAV_ONLY_V1",
+            "winningAssetId": "AWAY",
+            "winner": "alpha",
+            "alphaFinalNavMicros": "100000000",
+            "betaFinalNavMicros": "60100995",
+            "terminalEvidence": {
+              "schemaVersion": 1,
+              "providerSequence": 1196,
+              "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+              "fixtureId": "18257865",
+              "observedAtUtc": "2026-07-18T23:06:54.839Z",
+              "sourceEventId": "txline-score:18257865:1195",
+              "source": "TXLINE_RECORDED",
+              "match": {
+                "status": "FINISHED",
+                "minute": 98,
+                "addedTime": 7,
+                "homeScore": 4,
+                "awayScore": 6
+              },
+              "winningAssetId": "AWAY",
+              "terminalEvidenceHash": "72461c8bf6aa2c0f54c29e97e620f1806f39941bf106c048207fa6f2e38d95b3"
+            },
+            "completedEventSequence": 39,
+            "preSettlementEventLogHash": "5b9a03048492892b0c46a775608517a71a93b13ab23787f606b8de3ec3592162",
+            "finalResultHash": "a21af08f09c4e8878befcd28837dc431683ff256bdee44b8725ca32f0a972ad3"
+          },
+          "portfolios": {
+            "alpha": {
+              "agentId": "alpha",
+              "cashMicros": "100000000",
+              "unitMicros": {
+                "HOME": "0",
+                "DRAW": "0",
+                "AWAY": "0"
+              },
+              "navMicros": "100000000",
+              "returnBps": 0,
+              "updatedAtCheckpoint": "FINAL"
+            },
+            "beta": {
+              "agentId": "beta",
+              "cashMicros": "10326845",
+              "unitMicros": {
+                "HOME": "204415012",
+                "DRAW": "62124376",
+                "AWAY": "49774150"
+              },
+              "navMicros": "60100995",
+              "returnBps": -3989,
+              "updatedAtCheckpoint": "FINAL"
+            }
+          }
+        }
+      }
+    ]
+  }
+}

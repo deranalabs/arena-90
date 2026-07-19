@@ -15,7 +15,7 @@ export default function LandingPage() {
   const featured = FEATURED_ARENA;
   const thirdPlace = resolveFeaturedArena("WORLD_CUP_THIRD_PLACE");
   const final = resolveFeaturedArena("WORLD_CUP_FINAL");
-  const semifinalReplays = listRecordedReplayArtifacts();
+  const replayArchives = listRecordedReplayArtifacts();
   const arenaCatalog = [
     {
       arena: thirdPlace,
@@ -35,7 +35,7 @@ export default function LandingPage() {
       detail: "Recorded match data running through the same autonomous competition engine.",
       available: true,
     },
-    ...semifinalReplays.map((replay) => ({
+    ...replayArchives.map((replay) => ({
       arena: {
         ...resolveFeaturedArena("FOUNDATION_REPLAY"),
         arenaId: replay.arenaId,
@@ -48,7 +48,7 @@ export default function LandingPage() {
         proofHref: replay.proofHref,
       },
       status: "ARCHIVED" as const,
-      detail: `Completed autonomous replay · ${replay.winner === "DRAW" ? "draw" : `Agent ${replay.winner === "alpha" ? "Alpha" : "Beta"} winner`}.`,
+      detail: replay.disclosure ?? `Completed autonomous replay · ${replay.winner === "DRAW" ? "draw" : `Agent ${replay.winner === "alpha" ? "Alpha" : "Beta"} winner`}.`,
       available: true,
     })),
   ] as const;
@@ -200,7 +200,11 @@ export default function LandingPage() {
               </time>
               {available ? (
                 <Link href={arena.watchHref}>
-                  {arena.mode === "LIVE" ? "Enter Live Arena" : "Run Autonomous Replay"} →
+                  {arena.mode === "LIVE"
+                    ? "Enter Live Arena"
+                    : status === "ARCHIVED"
+                      ? "View Replay Archive"
+                      : "Run Autonomous Replay"} →
                 </Link>
               ) : (
                 <span className="home-arena-board__pending">Awaiting arena activation</span>

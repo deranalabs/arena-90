@@ -287,8 +287,16 @@ Configuration:
 ARENA90_AGENT_TIMEOUT_MS
 ARENA90_MAX_REPAIR_ATTEMPTS=1
 ZEROCLAW_BIN
-ZEROCLAW_CONFIG_DIR
+ZEROCLAW_ALPHA_CONFIG_DIR
+ZEROCLAW_BETA_CONFIG_DIR
 ```
+
+Alpha and Beta must use separate writable ZeroClaw configuration/state
+directories so their first invocation can remain parallel without competing
+for workspace or session initialization. Both directories may contain the same
+provider and authentication configuration. `ZEROCLAW_CONFIG_DIR` remains a
+legacy fallback for environments that inject adapters or guarantee no
+concurrent ZeroClaw processes.
 
 Tests may use fake adapters. The integration path must call ZeroClaw and must not substitute scripted decisions when it fails.
 
@@ -432,6 +440,27 @@ Only data source and scheduling differ:
 - Replay consumes recorded provider-compatible events and generates new decisions.
 
 Replay must not load old agent decisions as current decisions.
+
+### 11.1 Completed Replay export acceptance
+
+A completed Replay artifact is accepted when:
+
+- the lifecycle phase is `COMPLETED` with a valid final result;
+- Alpha has one accepted decision at each of the six decision checkpoints;
+- Beta has one accepted decision at each of the six decision checkpoints;
+- no checkpoint failure or `MISSED_DECISION_ROUND` exists;
+- exactly one terminal `COMPLETED` event exists.
+
+`NO_TRADE` is an accepted autonomous decision and does not make a Replay
+invalid. Export acceptance must not require either agent to have market
+exposure.
+
+Artifact identity uses a canonical SHA-256 semantic hash of the validated
+persisted lifecycle `state` and ordered `events`. Durable-store envelope fields
+such as `fencingSequence`, lease owner, process ID, token, and expiry are
+operational metadata and are excluded. Reopening an already completed Replay
+may advance `fencingSequence`; it must not change lifecycle state, events, the
+semantic hash, or the exported artifact hash.
 
 ## 12. Minimal HTTP API
 

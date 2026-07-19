@@ -1040,7 +1040,7 @@ describe("TxLINE live data adapter", () => {
       fixture: 1,
       score: 1,
       oddsSnapshot: 1,
-      oddsUpdates: 1,
+      oddsUpdates: 0,
       now: 1,
     });
   });
@@ -1089,5 +1089,37 @@ describe("TxLINE live data adapter", () => {
     expect(() => adapter.getSnapshot("KICKOFF")).toThrow(
       "Missing live decision checkpoint: KICKOFF",
     );
+  });
+
+  describe("Issue #14: PROVIDER_RESPONSE_LIMIT", () => {
+    it("does not call getOddsUpdates and throws TxlineDataError on PROVIDER_RESPONSE_LIMIT in live mode", async () => {
+      let updatesCalled = false;
+      const adapter = createTxlineLiveDataAdapter({
+        arenaId: "arena-live-001",
+        fixtureBinding,
+        delayed: false, // Must be live mode
+        client: createClient({
+          getOddsSnapshot: async () => {
+            const error: any = new Error("Provider limit reached in snapshot");
+            error.code = "PROVIDER_RESPONSE_LIMIT";
+            throw error;
+          },
+          getOddsUpdates: async () => {
+            updatesCalled = true;
+            return [];
+          },
+        }),
+        nowMs: () => 1_783_164_010_000,
+      });
+
+      await expect(
+        adapter.refreshCheckpoint("KICKOFF", new AbortController().signal)
+      ).rejects.toMatchObject({
+        code: "PROVIDER_RESPONSE_LIMIT"
+      });
+
+      // Ensure we don't proceed to call getOddsUpdates
+      expect(updatesCalled).toBe(false);
+    });
   });
 });

@@ -129,12 +129,12 @@ function createLiveClient(
     },
     async getOddsSnapshot() {
       onCall("odds-snapshot");
-      return [];
+      marketSequence += 1;
+      return [marketRow(`odds-${marketSequence}`)];
     },
     async getOddsUpdates() {
       onCall("odds-updates");
-      marketSequence += 1;
-      return [marketRow(`odds-${marketSequence}`)];
+      return [];
     },
     async getScoreSnapshot() {
       onCall("score-snapshot");
@@ -455,22 +455,16 @@ describe("Node arena lifecycle composition", () => {
         "fixture",
         "score-snapshot",
         "odds-snapshot",
-        "odds-updates",
         "score-stream",
         "odds-snapshot",
-        "odds-updates",
         "score-stream",
         "odds-snapshot",
-        "odds-updates",
         "score-stream",
         "odds-snapshot",
-        "odds-updates",
         "score-stream",
         "odds-snapshot",
-        "odds-updates",
         "score-stream",
         "odds-snapshot",
-        "odds-updates",
         "score-stream",
       ],
     });
@@ -598,11 +592,10 @@ describe("Node arena lifecycle composition", () => {
         "fixture",
         "score-snapshot",
         "odds-snapshot",
-        "odds-updates",
       ],
       firstResumedProviderIndex: 2,
       resumedKickoffCalls: ["agent:alpha:KICKOFF", "agent:beta:KICKOFF"],
-      resumedOddsRefreshes: 5,
+      resumedOddsRefreshes: 0,
     });
   });
 

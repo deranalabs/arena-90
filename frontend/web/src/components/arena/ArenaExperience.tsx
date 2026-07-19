@@ -378,11 +378,11 @@ export function ArenaExperience({
         scoreLabel={terminalEvidence ? `Final score ${terminalEvidence.match.homeScore} to ${terminalEvidence.match.awayScore} at ${terminalEvidence.match.minute} minutes` : undefined}
         source={displaySource}
         statement={
-          experience === "archive"
+          state.manifest.replayDisclosure ?? (experience === "archive"
             ? "Archived completed run. The event playback below does not invoke the agents again."
             : experience === "replay"
               ? "The match is recorded. New decisions are generated during this Replay session."
-              : undefined
+              : undefined)
         }
       />
 

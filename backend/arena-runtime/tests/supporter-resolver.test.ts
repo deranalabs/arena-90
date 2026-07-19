@@ -109,10 +109,15 @@ describe("supporter resolver supervisor", () => {
     );
   });
 
-  it("never invokes chain adapter for Replay", async () => {
+  it("never invokes chain adapter for the disclosed Recovery Replay", async () => {
     const adapter = resolver();
     const supervisor = createSupporterResolverSupervisor(adapter);
-    const replay = { ...liveManifest, mode: "REPLAY" as const };
+    const replay = {
+      ...liveManifest,
+      arenaId: "world-cup-2026-france-england-third-place-recovery-replay-01",
+      mode: "REPLAY" as const,
+      replayDisclosure: "RECOVERY REPLAY — recorded data, not live execution" as const,
+    };
     const signal = new AbortController().signal;
 
     await expect(supervisor.prepare(replay, signal)).resolves.toBe(

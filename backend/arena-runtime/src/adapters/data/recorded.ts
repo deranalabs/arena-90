@@ -20,9 +20,19 @@ const recordedCheckpointSchema = z
     checkpointId: checkpointIdSchema,
     snapshotId: nonBlankStringSchema,
     sourceEventId: nonBlankStringSchema,
+    marketMessageId: nonBlankStringSchema.optional(),
     observedAtUtc: utcDateTimeSchema,
     match: canonicalSnapshotSchema.shape.match,
-    priceMicros: canonicalSnapshotSchema.shape.priceMicros,
+    marketAvailable: z.boolean().optional().default(true),
+    providerPrices: z
+      .object({
+        HOME: z.number().int().positive(),
+        DRAW: z.number().int().positive(),
+        AWAY: z.number().int().positive(),
+      })
+      .strict()
+      .optional(),
+    priceMicros: canonicalSnapshotSchema.shape.priceMicros.optional(),
     freshness: canonicalSnapshotSchema.shape.freshness,
     finalResult: arenaAssetIdSchema.optional(),
   })
@@ -108,6 +118,21 @@ const recordedFixtureSchema = z
         });
       }
 
+      if (record.checkpointId !== "FINAL" && (!record.marketAvailable || record.priceMicros === undefined)) {
+        context.addIssue({
+          code: "custom",
+          path: ["records", index, "priceMicros"],
+          message: "Decision checkpoints require an available canonical market",
+        });
+      }
+      if (record.marketAvailable !== (record.priceMicros !== undefined)) {
+        context.addIssue({
+          code: "custom",
+          path: ["records", index, "marketAvailable"],
+          message: "Market availability must match canonical price presence",
+        });
+      }
+
       if (record.checkpointId === "FINAL") {
         const scoreResult =
           record.match.homeScore > record.match.awayScore
@@ -141,6 +166,9 @@ export function createRecordedDataAdapter(input: unknown): RecordedDataAdapter {
 
       if (record === undefined || record.checkpointId === "FINAL") {
         throw new RangeError(`Missing decision checkpoint: ${checkpointId}`);
+      }
+      if (record.priceMicros === undefined) {
+        throw new RangeError(`Missing decision market: ${checkpointId}`);
       }
 
       const hashInput = {

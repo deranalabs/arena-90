@@ -18,6 +18,7 @@ import {
 } from "../services/lifecycle-store.js";
 import { createJsonArenaLifecycleStore } from "../services/json-lifecycle-store.js";
 import { createNodeArenaLifecycleComposition } from "./node-lifecycle.js";
+import { resolveZeroClawConfigDirectory } from "./zeroclaw-config.js";
 
 export type LifecycleReplaySmokeStatus =
   | "PASSED"
@@ -112,7 +113,7 @@ function resolveAgents(
         continue;
       }
 
-      const configDir = env["ZEROCLAW_CONFIG_DIR"];
+      const configDir = resolveZeroClawConfigDirectory(env, agentId);
       const binaryPath = env["ZEROCLAW_BIN"] ?? "zeroclaw";
       if (
         configDir === undefined ||

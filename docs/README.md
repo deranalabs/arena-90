@@ -77,6 +77,10 @@ requirements.
   - native devnet SOL supporter positions and lifecycle;
   - TxLINE terminal-proof receipts and runtime-result binding;
   - settlement, payout, claim, refund, fee, and Action interfaces.
+- `specs/05-TxLINE-Recovery-Replay.md`
+  - evidence-preserving fallback for an incomplete Live run;
+  - historical score/odds ordering, clock, finality, and tombstone rules;
+  - honest Replay disclosure and isolation from supporter settlement.
 
 Technical specifications translate approved product decisions into
 implementation contracts. They must not override approved product decisions.

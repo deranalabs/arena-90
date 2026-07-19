@@ -1,11 +1,8 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname } from "node:path";
 
-import {
-  projectArenaEventHistory,
-  projectArenaState,
-} from "../dist/api/index.js";
 import { createNodeHttpRuntimeComposition } from "../dist/runtime/node-http.js";
+import { createRecordedReplayArtifact } from "../dist/runtime/replay-artifact.js";
 
 const exportFile = process.env.ARENA90_REPLAY_EXPORT_FILE;
 const recordingFile = process.env.ARENA90_REPLAY_RECORDING_FILE;
@@ -37,23 +34,6 @@ try {
   ) {
     throw new Error("incomplete replay");
   }
-  const revealedRounds = persisted.state.checkpoints;
-  const failures = revealedRounds.flatMap((checkpoint) => checkpoint.failures);
-  const agentsWithExposure = new Set(
-    revealedRounds.flatMap((checkpoint) =>
-      Object.entries(checkpoint.revealedDecisions)
-        .filter(([, decision]) => decision?.action === "TARGET_ALLOCATION")
-        .map(([agentId]) => agentId),
-    ),
-  );
-  if (
-    revealedRounds.length !== 6 ||
-    failures.length !== 0 ||
-    !agentsWithExposure.has("alpha") ||
-    !agentsWithExposure.has("beta")
-  ) {
-    throw new Error("replay failed clean competition acceptance");
-  }
   const recording = JSON.parse(await readFile(recordingFile, "utf8"));
   const provenance = recording?.provenance;
   if (
@@ -70,9 +50,9 @@ try {
   ) {
     throw new Error("recording provenance unavailable");
   }
-  const artifact = {
-    schemaVersion: 1,
-    recordedSource: {
+  const artifact = createRecordedReplayArtifact({
+    persistence: persisted,
+    source: {
       label: "RECORDED TxLINE DATA",
       fixtureId: composition.manifest.fixtureId,
       matchDateUtc: provenance.sourceKickoffUtc,
@@ -81,9 +61,7 @@ try {
       oddsUpdateCount: provenance.oddsUpdateCount,
       inputHash: provenance.inputHash,
     },
-    state: projectArenaState(persisted.state),
-    history: projectArenaEventHistory(persisted.state, persisted.events, 0),
-  };
+  });
   await mkdir(dirname(exportFile), { recursive: true });
   await writeFile(exportFile, `${JSON.stringify(artifact, null, 2)}\n`, {
     mode: 0o644,
@@ -95,6 +73,7 @@ try {
       checkpoints: completed.checkpoints.length,
       events: persisted.events.length,
       winner: completed.finalResult.winner,
+      semanticHash: artifact.semanticHash,
     }),
   );
 } catch (error) {

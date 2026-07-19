@@ -51,6 +51,57 @@ function decisionAgent(
 }
 
 describe("full lifecycle Replay smoke", () => {
+  it("runs the first Alpha/Beta invocation concurrently with isolated ZeroClaw state", async () => {
+    const configuredDirectories: Record<string, string> = {};
+    const kickoffStarts: string[] = [];
+    let releaseKickoff: (() => void) | undefined;
+    const bothKickoffsStarted = new Promise<void>((resolve) => {
+      releaseKickoff = resolve;
+    });
+
+    const result = await runLifecycleReplaySmoke({
+      env: {
+        ZEROCLAW_BIN: "zeroclaw",
+        ZEROCLAW_ALPHA_CONFIG_DIR: "/isolated/zeroclaw-alpha",
+        ZEROCLAW_BETA_CONFIG_DIR: "/isolated/zeroclaw-beta",
+      },
+      readFixture: recordedFixtureText,
+      zeroClawAgentFactory(config) {
+        configuredDirectories[config.agentId] = config.configDir;
+        return {
+          agentId: config.agentId,
+          async invoke(request) {
+            if (request.snapshot.checkpointId === "KICKOFF") {
+              kickoffStarts.push(config.agentId);
+              if (kickoffStarts.length === 2) releaseKickoff?.();
+              await bothKickoffsStarted;
+            }
+            return {
+              schemaVersion: 1 as const,
+              arenaId: request.snapshot.arenaId,
+              snapshotId: request.snapshot.snapshotId,
+              checkpointId: request.snapshot.checkpointId,
+              agentId: config.agentId,
+              action: "NO_TRADE" as const,
+              publicExplanation: "Hold the current portfolio.",
+            };
+          },
+        };
+      },
+      store: createInMemoryArenaLifecycleStore({ nowMs: Date.now }),
+      overallTimeoutMs: 1_000,
+    });
+
+    expect({ result, configuredDirectories, kickoffStarts: kickoffStarts.sort() }).toEqual({
+      result: { status: "PASSED" },
+      configuredDirectories: {
+        alpha: "/isolated/zeroclaw-alpha",
+        beta: "/isolated/zeroclaw-beta",
+      },
+      kickoffStarts: ["alpha", "beta"],
+    });
+  });
+
   it("reopens atomic JSON and proves completed recovery is idempotent", async () => {
     const directory = await mkdtemp(join(tmpdir(), "arena90-smoke-restart-"));
     onTestFinished(() => rm(directory, { recursive: true, force: true }));

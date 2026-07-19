@@ -91,7 +91,8 @@ GET /api/scores/historical/{fixtureId}
 ```
 
 The score stream and historical score replay are SSE. Historical replay is
-used only for tests and provider resynchronization.
+used for tests, provider resynchronization, and the separately disclosed
+Recovery Replay defined by `05-TxLINE-Recovery-Replay.md`.
 
 The adapter must not define or call a per-fixture scores-updates endpoint. Provider
 access must accept `AbortSignal`, use bounded timeouts, and keep authentication
@@ -234,9 +235,13 @@ MarketParameters = null or absent
 one value for each outcome. `Participant1IsHome` controls whether `part1` maps
 to HOME or AWAY. `draw` always maps to DRAW.
 
-Merge valid odds snapshot and odds updates payloads. A valid empty odds
-snapshot may use valid updates. A failed or malformed snapshot request is not
-an empty snapshot and invalidates the refresh.
+Merge valid odds snapshot and odds updates payloads when both endpoints are
+configured and available. The current World Cup Live integration is explicitly
+snapshot-only because the subscribed provider surface does not expose a
+separate odds-update response for that feed; in that mode the adapter must not
+fabricate an endpoint call or label a failed request as `[]`. A valid empty
+configured endpoint may use data from the other configured endpoint. A failed
+or malformed configured request is never equivalent to an empty payload.
 
 Deduplicate merged rows by `MessageId`:
 

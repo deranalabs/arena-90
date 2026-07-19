@@ -28,6 +28,9 @@ const arenaAssetSchema = z
   })
   .strict();
 
+export const RECOVERY_REPLAY_DISCLOSURE =
+  "RECOVERY REPLAY — recorded data, not live execution" as const;
+
 export const arenaManifestSchema = z
   .object({
     schemaVersion: z.literal(1),
@@ -42,10 +45,18 @@ export const arenaManifestSchema = z
     currency: z.literal("VIRTUAL_USD_MICROS"),
     assets: z.array(arenaAssetSchema),
     checkpoints: z.array(checkpointIdSchema),
+    replayDisclosure: z.literal(RECOVERY_REPLAY_DISCLOSURE).optional(),
     createdAtUtc: utcDateTimeSchema,
   })
   .strict()
   .superRefine((manifest, context) => {
+    if (manifest.replayDisclosure !== undefined && manifest.mode !== "REPLAY") {
+      context.addIssue({
+        code: "custom",
+        path: ["replayDisclosure"],
+        message: "Recovery Replay disclosure requires REPLAY mode",
+      });
+    }
     for (const assetId of ARENA_ASSET_IDS) {
       const occurrences = manifest.assets.filter((asset) => asset.id === assetId).length;
       if (occurrences !== 1) {
@@ -99,6 +110,9 @@ export function canonicalArenaManifestJson(input: ArenaManifest): string {
       label: asset.label,
     })),
     checkpoints: [...manifest.checkpoints],
+    ...(manifest.replayDisclosure === undefined
+      ? {}
+      : { replayDisclosure: manifest.replayDisclosure }),
     createdAtUtc: manifest.createdAtUtc,
   });
 }
