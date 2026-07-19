@@ -54,7 +54,18 @@ describe("Arena90 homepage", () => {
     );
     expect(main).not.toHaveTextContent(/state completed/i);
     expect(screen.getByRole("heading", { name: "World Cup arenas" })).toBeInTheDocument();
-    expect(screen.getByRole("article", { name: "France vs England" })).toHaveTextContent(/UPCOMING|UNAVAILABLE/);
+    const franceEngland = screen.getAllByRole("article", { name: "France vs England" });
+    expect(franceEngland.some((article) => /UPCOMING|UNAVAILABLE/.test(article.textContent ?? ""))).toBe(true);
+    expect(franceEngland.some((article) => /ARCHIVED/.test(article.textContent ?? ""))).toBe(true);
+    expect(
+      screen
+        .getAllByRole("link", { name: "View Replay Archive →" })
+        .some(
+          (link) =>
+            link.getAttribute("href") ===
+            "/arena/world-cup-2026-france-england-third-place-recovery-replay-01/archive",
+        ),
+    ).toBe(true);
     expect(screen.getByRole("article", { name: "Spain vs Argentina" })).toHaveTextContent(/UPCOMING|UNAVAILABLE/);
     expect(screen.getByRole("article", { name: "Home FC vs Away FC" })).toHaveTextContent("REPLAY");
     expect(main).not.toHaveTextContent(/backing open/i);

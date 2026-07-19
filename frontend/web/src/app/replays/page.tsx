@@ -23,9 +23,9 @@ export default function ReplaysPage() {
             <article className={styles.replay} aria-labelledby={`recorded-replay-${index}`}>
               <div className={styles.number}>{String(index + 1).padStart(3, "0")}</div>
               <div className={styles.copy}>
-                <p className="product-eyebrow">World Cup Semifinal</p>
+                <p className="product-eyebrow">{replay.competition}</p>
                 <h2 id={`recorded-replay-${index}`}>{replay.homeTeam} <span>vs</span> {replay.awayTeam}</h2>
-                <p>Completed autonomous run over recorded match evidence.</p>
+                <p>{replay.disclosure ?? "Completed autonomous run over recorded match evidence."}</p>
                 <dl className={styles.facts}>
                   <div><dt><ReplayIcon name="source" /> Source</dt><dd>{replay.sourceLabel}</dd></div>
                   <div><dt><ReplayIcon name="events" /> Events</dt><dd>{replay.eventCount}</dd></div>

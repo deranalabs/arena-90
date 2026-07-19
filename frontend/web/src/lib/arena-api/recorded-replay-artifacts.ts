@@ -1,4 +1,5 @@
 import englandArgentinaInput from "@/data/replays/world-cup-2026-england-argentina-semifinal-replay.json";
+import franceEnglandRecoveryInput from "@/data/replays/world-cup-2026-france-england-third-place-recovery-replay-01.json";
 import franceSpainInput from "@/data/replays/world-cup-2026-france-spain-semifinal-replay.json";
 
 import {
@@ -91,7 +92,7 @@ export function parseRecordedReplayArtifact(
 }
 
 const artifacts = new Map<string, RecordedReplayArtifact>(
-  [franceSpainInput, englandArgentinaInput].map((input) => {
+  [franceSpainInput, englandArgentinaInput, franceEnglandRecoveryInput].map((input) => {
     const artifact = parseRecordedReplayArtifact(input);
     return [artifact.state.manifest.arenaId, artifact];
   }),
@@ -106,6 +107,7 @@ export function listRecordedReplayArtifacts() {
       awayTeam: artifact.state.manifest.awayTeam.name,
       matchDateUtc: artifact.recordedSource.matchDateUtc,
       sourceLabel: artifact.recordedSource.label,
+      disclosure: artifact.state.manifest.replayDisclosure,
       eventCount: artifact.history.events.length,
       inputHash: artifact.recordedSource.inputHash,
       winner: artifact.state.finalResult?.winner ?? "DRAW",

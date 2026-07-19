@@ -39,12 +39,18 @@ describe("Arena90 public product routes", () => {
     expect(screen.getByRole("img", { name: "Agent Beta portrait" })).toBeInTheDocument();
   });
 
-  it("lists both recorded World Cup semifinals without presenting them as live", () => {
+  it("lists recorded World Cup arenas and labels the Recovery Replay honestly", () => {
     render(<ReplaysPage />);
 
     expect(screen.getByRole("heading", { name: "France vs Spain" })).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: "England vs Argentina" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "France vs England" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("RECOVERY REPLAY — recorded data, not live execution"),
     ).toBeInTheDocument();
     expect(screen.getAllByText("RECORDED TxLINE DATA").length).toBeGreaterThan(1);
     expect(screen.queryByText("DATA LIVE")).not.toBeInTheDocument();
