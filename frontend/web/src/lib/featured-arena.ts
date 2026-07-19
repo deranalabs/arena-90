@@ -44,7 +44,7 @@ const presets = {
     competition: "World Cup 2026 · Final",
     homeTeam: "Spain",
     awayTeam: "Argentina",
-    kickoffUtc: "2026-07-19T19:00:00.000Z",
+    kickoffUtc: "2026-07-19T19:05:00.000Z",
     sourceLabel: "TxLINE + TxODDS live",
   },
 } as const;

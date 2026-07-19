@@ -41,6 +41,24 @@ function selectFixture(
 
   const matches: NormalizedTxlineFixture[] = [];
   for (const row of input) {
+    if (typeof row !== "object" || row === null || Array.isArray(row)) continue;
+    const raw = row as Record<string, unknown>;
+    const pascalFixtureId = raw["FixtureId"];
+    const camelFixtureId = raw["fixtureId"];
+    if (
+      pascalFixtureId !== undefined &&
+      camelFixtureId !== undefined &&
+      pascalFixtureId !== camelFixtureId
+    ) {
+      if (
+        pascalFixtureId === binding.fixtureId ||
+        camelFixtureId === binding.fixtureId
+      ) {
+        throw invalidInput("Invalid TxLINE fixture snapshot");
+      }
+      continue;
+    }
+    if ((pascalFixtureId ?? camelFixtureId) !== binding.fixtureId) continue;
     try {
       matches.push(validateTxlineFixtureBinding(row, binding));
     } catch (error) {

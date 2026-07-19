@@ -114,6 +114,25 @@ describe("TxLINE live data adapter", () => {
     expect(adapter.getSnapshot("KICKOFF").fixtureId).toBe("18185036");
   });
 
+  it("ignores malformed rows for unrelated fixtures in the global snapshot", async () => {
+    const adapter = createTxlineLiveDataAdapter({
+      arenaId: "arena-live-001",
+      fixtureBinding,
+      delayed: false,
+      client: createClient({
+        getFixtureSnapshot: async () => [
+          { FixtureId: 99_999_999, malformed: true },
+          fixtureRow(),
+        ],
+      }),
+      nowMs: () => 1_783_164_010_000,
+    });
+
+    await adapter.refreshCheckpoint("KICKOFF", new AbortController().signal);
+
+    expect(adapter.getSnapshot("KICKOFF").fixtureId).toBe("18185036");
+  });
+
   it("prepares a deterministic canonical KICKOFF snapshot", async () => {
     const adapter = createTxlineLiveDataAdapter({
       arenaId: "arena-live-001",

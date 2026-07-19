@@ -5,6 +5,8 @@ import type {
 import { TxlineDataError } from "./domain.js";
 import { fixtureBindingSchema, parseRawFixture } from "./raw.js";
 
+export const MAX_FIXTURE_START_TIME_DRIFT_MS = 30 * 60 * 1_000;
+
 export function validateTxlineFixtureBinding(
   input: unknown,
   binding: TxlineFixtureBinding,
@@ -28,7 +30,7 @@ export function validateTxlineFixtureBinding(
     );
   }
 
-  const fixture = {
+  const providerFixture = {
     fixtureId: parsedFixture.fixtureId,
     participant1Id: parsedFixture.participant1Id,
     participant2Id: parsedFixture.participant2Id,
@@ -37,11 +39,12 @@ export function validateTxlineFixtureBinding(
   } as const;
 
   if (
-    fixture.fixtureId !== parsedBinding.data.fixtureId ||
-    fixture.participant1Id !== parsedBinding.data.participant1Id ||
-    fixture.participant2Id !== parsedBinding.data.participant2Id ||
-    fixture.participant1IsHome !== parsedBinding.data.participant1IsHome ||
-    fixture.startTime !== parsedBinding.data.startTime
+    providerFixture.fixtureId !== parsedBinding.data.fixtureId ||
+    providerFixture.participant1Id !== parsedBinding.data.participant1Id ||
+    providerFixture.participant2Id !== parsedBinding.data.participant2Id ||
+    providerFixture.participant1IsHome !== parsedBinding.data.participant1IsHome ||
+    Math.abs(providerFixture.startTime - parsedBinding.data.startTime) >
+      MAX_FIXTURE_START_TIME_DRIFT_MS
   ) {
     throw new TxlineDataError(
       "FIXTURE_BINDING_MISMATCH",
@@ -49,5 +52,5 @@ export function validateTxlineFixtureBinding(
     );
   }
 
-  return Object.freeze(fixture);
+  return Object.freeze(parsedBinding.data);
 }

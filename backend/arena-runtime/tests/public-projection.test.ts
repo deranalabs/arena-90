@@ -590,6 +590,32 @@ describe("Arena public projection", () => {
     expect(JSON.stringify(projected)).not.toContain("private-terminal-log");
   });
 
+  it("projects a snapshotless checkpoint missed by a late LIVE start", () => {
+    const base = revealedState();
+    const committed = base.checkpoints[0];
+    if (committed === undefined) throw new Error("Missing test checkpoint");
+    const state = {
+      ...base,
+      checkpoints: [
+        {
+          ...committed,
+          outcome: "GLOBAL_MISSED",
+          snapshot: undefined,
+          revealedDecisions: {},
+          failures: [
+            { scope: "GLOBAL", reason: "CHECKPOINT_WINDOW_MISSED" },
+          ],
+        },
+      ],
+    } as unknown as ArenaRunStateV1;
+
+    const projected = projectArenaState(state);
+
+    expect(projected.checkpoints[0]?.failures).toEqual([
+      { scope: "GLOBAL", reason: "CHECKPOINT_WINDOW_MISSED" },
+    ]);
+  });
+
   it("projects historical events from their matching historical checkpoint", () => {
     const first = revealedState();
     const firstCheckpoint = first.checkpoints[0];

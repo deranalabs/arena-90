@@ -147,8 +147,13 @@ The adapter configuration locks:
 - fixture start time.
 
 Every fixture and dependent score or odds record must match the configured
-fixture. Participant identity, home/away designation, or start-time mismatch is
-invalid provider data.
+fixture. Participant identity or home/away designation mismatch is invalid
+provider data. When TxLINE reschedules an unchanged fixture before kickoff,
+fixture caches and dependent score history may retain nearby earlier or later
+start times. Start-time drift is accepted only within 30 minutes of the locked
+manifest and only when the fixture ID, both participant IDs, and home/away
+designation still match exactly. The adapter normalizes accepted drift back to
+the locked start time. Drift outside that bound remains invalid provider data.
 
 These checks remain adapter configuration. The adapter must not expand the
 canonical arena manifest.

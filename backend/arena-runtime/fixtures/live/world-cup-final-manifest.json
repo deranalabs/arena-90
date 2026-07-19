@@ -6,7 +6,7 @@
   "fixtureId": "18257739",
   "homeTeam": { "name": "Spain", "code": "ESP" },
   "awayTeam": { "name": "Argentina", "code": "ARG" },
-  "kickoffUtc": "2026-07-19T19:00:00.000Z",
+  "kickoffUtc": "2026-07-19T19:05:00.000Z",
   "startingBankrollMicros": "100000000",
   "currency": "VIRTUAL_USD_MICROS",
   "assets": [

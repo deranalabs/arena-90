@@ -171,6 +171,7 @@ export const publicAgentFailureReasonV1Schema = z.enum([
 export const publicGlobalFailureReasonV1Schema = z.enum([
   "DATA_UNAVAILABLE",
   "SUSPENDED_MARKET",
+  "CHECKPOINT_WINDOW_MISSED",
 ]);
 
 export const publicFailureV1Schema = z.discriminatedUnion("scope", [

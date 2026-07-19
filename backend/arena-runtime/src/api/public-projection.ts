@@ -155,6 +155,8 @@ function projectFailure(failure: CheckpointFailureV1): PublicFailureV1 {
       return { scope: "GLOBAL", reason: "DATA_UNAVAILABLE" };
     case "SUSPENDED_SNAPSHOT":
       return { scope: "GLOBAL", reason: "SUSPENDED_MARKET" };
+    case "CHECKPOINT_WINDOW_MISSED":
+      return { scope: "GLOBAL", reason: "CHECKPOINT_WINDOW_MISSED" };
     default:
       throw new PublicProjectionError("INVALID_STATE");
   }
@@ -276,12 +278,14 @@ function eventAgentFailureReason(
 
 function eventGlobalFailureReason(
   value: unknown,
-): "DATA_UNAVAILABLE" | "SUSPENDED_MARKET" {
+): "DATA_UNAVAILABLE" | "SUSPENDED_MARKET" | "CHECKPOINT_WINDOW_MISSED" {
   switch (value) {
     case "DATA_FAILURE":
       return "DATA_UNAVAILABLE";
     case "SUSPENDED_SNAPSHOT":
       return "SUSPENDED_MARKET";
+    case "CHECKPOINT_WINDOW_MISSED":
+      return "CHECKPOINT_WINDOW_MISSED";
     default:
       throw new PublicProjectionError("INCONSISTENT_EVENT");
   }

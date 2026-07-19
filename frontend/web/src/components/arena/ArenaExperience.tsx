@@ -95,6 +95,7 @@ function failureLabel(reason: string) {
     INVALID_OUTPUT: "Decision failed validation",
     DATA_UNAVAILABLE: "Verified data unavailable",
     SUSPENDED_MARKET: "Market snapshot suspended",
+    CHECKPOINT_WINDOW_MISSED: "Checkpoint passed before live tracking began",
   };
   return labels[reason] ?? "Decision round unavailable";
 }

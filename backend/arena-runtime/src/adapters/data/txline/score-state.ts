@@ -6,6 +6,7 @@ import type {
   TxlineScoreStateReducer,
 } from "./domain.js";
 import { TxlineDataError } from "./domain.js";
+import { MAX_FIXTURE_START_TIME_DRIFT_MS } from "./fixture.js";
 import {
   parseRawScoreEvent,
   type NormalizedTxlineClock,
@@ -51,7 +52,12 @@ function validateFixture(
       event.participant2Id !== fixture.participant2Id) ||
     (event.participant1IsHome !== undefined &&
       event.participant1IsHome !== fixture.participant1IsHome) ||
-    (event.startTime !== undefined && event.startTime !== fixture.startTime)
+    // TxLINE preserves score history across official kickoff reschedules and
+    // may serve nearby cached fixture times. Identity remains exact and the
+    // bounded start-time drift prevents accepting a different fixture window.
+    (event.startTime !== undefined &&
+      Math.abs(event.startTime - fixture.startTime) >
+        MAX_FIXTURE_START_TIME_DRIFT_MS)
   ) {
     throw new TxlineDataError(
       "FIXTURE_BINDING_MISMATCH",

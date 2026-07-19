@@ -98,6 +98,36 @@ describe("validateTxlineFixtureBinding", () => {
     ).toEqual(fixtureBinding);
   });
 
+  it("normalizes bounded official kickoff reschedule drift to the locked binding", () => {
+    expect(
+      validateTxlineFixtureBinding(
+        {
+          FixtureId: 18_185_036,
+          Participant1Id: 101,
+          Participant2Id: 202,
+          Participant1IsHome: true,
+          StartTime: fixtureBinding.startTime + 10 * 60_000,
+        },
+        fixtureBinding,
+      ),
+    ).toEqual(fixtureBinding);
+  });
+
+  it("rejects kickoff drift outside the bounded reschedule window", () => {
+    expect(() =>
+      validateTxlineFixtureBinding(
+        {
+          FixtureId: 18_185_036,
+          Participant1Id: 101,
+          Participant2Id: 202,
+          Participant1IsHome: true,
+          StartTime: fixtureBinding.startTime + 31 * 60_000,
+        },
+        fixtureBinding,
+      ),
+    ).toThrow(expect.objectContaining({ code: "FIXTURE_BINDING_MISMATCH" }));
+  });
+
   it("rejects conflicting fixture aliases with a deterministic error", () => {
     expect(() =>
       validateTxlineFixtureBinding(
@@ -406,6 +436,39 @@ describe("selectTxlineMarket", () => {
 });
 
 describe("createTxlineScoreStateReducer", () => {
+  it("accepts score history from before an official kickoff delay", () => {
+    const fixture = normalizedFixture();
+    const reducer = createTxlineScoreStateReducer({
+      fixture,
+      bootstrapEvents: [
+        scoreEvent({
+          StartTime: fixture.startTime - 300_000,
+          StatusId: 2,
+          Clock: { Running: true, Seconds: 2_700 },
+        }),
+      ],
+    });
+
+    expect(reducer.getState()).toMatchObject({
+      fixtureId: fixture.fixtureId,
+      status: "LIVE",
+      minute: 0,
+    });
+  });
+
+  it("rejects score history with a start time later than the locked fixture", () => {
+    const fixture = normalizedFixture();
+
+    expect(() =>
+      createTxlineScoreStateReducer({
+        fixture,
+        bootstrapEvents: [
+          scoreEvent({ StartTime: fixture.startTime + 31 * 60_000 }),
+        ],
+      }),
+    ).toThrow(expect.objectContaining({ code: "FIXTURE_BINDING_MISMATCH" }));
+  });
+
   it("does not expose score state until an explicit valid phase is known", () => {
     const fixture = normalizedFixture();
     const reducer = createTxlineScoreStateReducer({
