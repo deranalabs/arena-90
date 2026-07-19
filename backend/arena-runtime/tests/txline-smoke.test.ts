@@ -54,7 +54,7 @@ describe("TxLINE connectivity smoke", () => {
       "TxLINE connectivity smoke passed; live score event received.",
     );
     expect(readPaths).toEqual(["/outside-git/credentials.json"]);
-    expect(requests).toHaveLength(6);
+    expect(requests).toHaveLength(4);
     for (const request of requests) {
       expect(
         String(request.input).startsWith(

@@ -107,20 +107,22 @@ export async function runTxlineConnectivitySmoke(
     });
     const signal = new AbortController().signal;
 
+    // ISSUE #14: Bounded connectivity smoke. Only fixture-scoped snapshot
+    // endpoints are exercised here. getOddsUpdates (time-bucket, not
+    // fixture-scoped) and getHistoricalScoreReplay (unbounded historical
+    // pull) are intentionally excluded; they are not part of the Live
+    // checkpoint path and previously triggered PROVIDER_RESPONSE_LIMIT.
     const fixtureSnapshot = await client.getFixtureSnapshot(signal);
     const oddsSnapshot = await client.getOddsSnapshot(fixtureId, signal);
-    const oddsUpdates = await client.getOddsUpdates(fixtureId, signal);
     const scoreSnapshot = await client.getScoreSnapshot(fixtureId, signal);
     if (
       !Array.isArray(fixtureSnapshot) ||
       !Array.isArray(oddsSnapshot) ||
-      !Array.isArray(oddsUpdates) ||
       !Array.isArray(scoreSnapshot)
     ) {
       throw new SmokeInvalidResponse();
     }
 
-    await client.getHistoricalScoreReplay(fixtureId, signal);
     const streamController = new AbortController();
     let streamTimedOut = false;
     const streamTimeout = setTimeout(() => {
