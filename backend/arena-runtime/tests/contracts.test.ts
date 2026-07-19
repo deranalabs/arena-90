@@ -86,6 +86,29 @@ describe("arenaManifestSchema", () => {
     expect(arenaManifestSchema.parse(validManifest)).toEqual(validManifest);
   });
 
+  it("allows only the exact Recovery Replay disclosure in REPLAY mode", () => {
+    const disclosure = "RECOVERY REPLAY — recorded data, not live execution";
+    expect(
+      arenaManifestSchema.safeParse({
+        ...validManifest,
+        replayDisclosure: disclosure,
+      }).success,
+    ).toBe(true);
+    expect(
+      arenaManifestSchema.safeParse({
+        ...validManifest,
+        mode: "LIVE",
+        replayDisclosure: disclosure,
+      }).success,
+    ).toBe(false);
+    expect(
+      arenaManifestSchema.safeParse({
+        ...validManifest,
+        replayDisclosure: "recorded-ish",
+      }).success,
+    ).toBe(false);
+  });
+
   it("rejects a manifest missing a required 1X2 asset", () => {
     const result = arenaManifestSchema.safeParse({
       ...validManifest,

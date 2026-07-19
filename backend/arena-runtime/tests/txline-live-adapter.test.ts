@@ -1117,7 +1117,7 @@ describe("TxLINE live data adapter", () => {
       ).rejects.toMatchObject({
         code: "PROVIDER_RESPONSE_LIMIT"
       });
-      
+
       // Ensure we don't proceed to call getOddsUpdates
       expect(updatesCalled).toBe(false);
     });

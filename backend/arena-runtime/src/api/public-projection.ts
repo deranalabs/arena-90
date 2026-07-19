@@ -59,6 +59,9 @@ function projectManifest(manifest: ArenaManifest): PublicManifestV1 {
       label: asset.label,
     })),
     checkpoints: [...manifest.checkpoints],
+    ...(manifest.replayDisclosure === undefined
+      ? {}
+      : { replayDisclosure: manifest.replayDisclosure }),
     createdAtUtc: manifest.createdAtUtc,
   };
 }

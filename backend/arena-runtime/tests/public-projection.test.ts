@@ -194,6 +194,18 @@ function revealedState(): ArenaRunStateV1 {
 }
 
 describe("Arena public projection", () => {
+  it("preserves the honest Recovery Replay disclosure", () => {
+    const disclosure = "RECOVERY REPLAY — recorded data, not live execution";
+    const state = revealedState();
+    const projected = projectArenaState({
+      ...state,
+      manifest: { ...state.manifest, replayDisclosure: disclosure },
+    });
+
+    expect(projected.manifest.replayDisclosure).toBe(disclosure);
+    expect(publicArenaStateV1Schema.parse(projected)).toEqual(projected);
+  });
+
   it("projects pending lifecycle state without private decisions or internals", () => {
     const snapshot = kickoffSnapshot();
     const state = {

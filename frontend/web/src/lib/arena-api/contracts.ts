@@ -29,6 +29,8 @@ const nonBlankStringSchema = z
   .refine((value) => value.trim() === value && value.trim().length > 0);
 const nonNegativeIntegerStringSchema = z.string().regex(/^(?:0|[1-9]\d*)$/);
 const positiveIntegerStringSchema = z.string().regex(/^[1-9]\d*$/);
+const recoveryReplayDisclosure =
+  "RECOVERY REPLAY — recorded data, not live execution" as const;
 
 const publicTeamV1Schema = z
   .object({ name: nonBlankStringSchema, code: nonBlankStringSchema })
@@ -56,9 +58,14 @@ export const publicManifestV1Schema = z
     currency: z.literal("VIRTUAL_USD_MICROS"),
     assets: z.array(publicAssetV1Schema),
     checkpoints: z.array(checkpointIdSchema),
+    replayDisclosure: z.literal(recoveryReplayDisclosure).optional(),
     createdAtUtc: utcDateTimeSchema,
   })
-  .strict();
+  .strict()
+  .refine(
+    (manifest) => manifest.replayDisclosure === undefined || manifest.mode === "REPLAY",
+    { path: ["replayDisclosure"] },
+  );
 
 const publicPriceMicrosV1Schema = z
   .object({
@@ -387,7 +394,7 @@ export const publicArenaStateV1Schema = z
   .object({
     schemaVersion: z.literal(1),
     manifest: publicManifestV1Schema,
-    phase: z.enum(["READY", "RUNNING", "FINALIZING", "COMPLETED"]),
+    phase: z.enum(["READY", "RUNNING", "FINALIZING", "COMPLETED", "DEGRADED"]),
     runtimeVersions: publicRuntimeVersionsV1Schema,
     currentSnapshot: publicSnapshotV1Schema.optional(),
     portfolios: publicAgentPortfoliosV1Schema,

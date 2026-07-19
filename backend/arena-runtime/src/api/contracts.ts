@@ -9,6 +9,7 @@ import {
   moneyMicrosSchema,
   nonBlankStringSchema,
   positiveIntegerStringSchema,
+  RECOVERY_REPLAY_DISCLOSURE,
   terminalEvidenceV1Schema,
   unitMicrosSchema,
   utcDateTimeSchema,
@@ -47,9 +48,14 @@ export const publicManifestV1Schema = z
     currency: z.literal("VIRTUAL_USD_MICROS"),
     assets: z.array(publicAssetV1Schema),
     checkpoints: z.array(checkpointIdSchema),
+    replayDisclosure: z.literal(RECOVERY_REPLAY_DISCLOSURE).optional(),
     createdAtUtc: utcDateTimeSchema,
   })
-  .strict();
+  .strict()
+  .refine(
+    (manifest) => manifest.replayDisclosure === undefined || manifest.mode === "REPLAY",
+    { path: ["replayDisclosure"], message: "Recovery Replay disclosure requires REPLAY mode" },
+  );
 
 export type PublicManifestV1 = z.infer<typeof publicManifestV1Schema>;
 

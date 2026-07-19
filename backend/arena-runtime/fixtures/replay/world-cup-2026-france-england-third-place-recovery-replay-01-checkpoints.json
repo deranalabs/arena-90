@@ -1,0 +1,224 @@
+{
+  "provider": "TXLINE_RECORDED",
+  "arenaId": "world-cup-2026-france-england-third-place-recovery-replay-01",
+  "fixtureId": "18257865",
+  "provenance": {
+    "source": "TXLINE_HISTORICAL_API",
+    "sourceFixtureId": 18257865,
+    "sourceKickoffUtc": "2026-07-18T21:00:00.000Z",
+    "capturedAtUtc": "2026-07-19T08:57:57.232Z",
+    "scoreEventCount": 1197,
+    "oddsUpdateCount": 75650,
+    "inputHash": "86d369302ad3c19103c3271dba5dc3850e40207b0c91c02d84b715397a227147"
+  },
+  "records": [
+    {
+      "providerSequence": 17,
+      "checkpointId": "KICKOFF",
+      "snapshotId": "ef15d6a8bec73a78107e5e3bf3c4447b445ef6b22f669c7cdf606d6de2fb859c",
+      "sourceEventId": "txline-score:18257865:16",
+      "marketMessageId": "1838383284:00003:001816-10021-stab",
+      "marketAvailable": true,
+      "observedAtUtc": "2026-07-18T21:00:13.751Z",
+      "match": {
+        "status": "LIVE",
+        "minute": 0,
+        "addedTime": 0,
+        "homeScore": 0,
+        "awayScore": 0
+      },
+      "providerPrices": {
+        "HOME": 1770,
+        "DRAW": 4514,
+        "AWAY": 4686
+      },
+      "priceMicros": {
+        "HOME": 565027,
+        "DRAW": 221552,
+        "AWAY": 213421
+      },
+      "freshness": {
+        "marketUpdatedAtUtc": "2026-07-18T21:00:12.229Z",
+        "delayed": true,
+        "suspended": false
+      }
+    },
+    {
+      "providerSequence": 218,
+      "checkpointId": "M15",
+      "snapshotId": "949957bf0a7ddf16581a309a85830e564d00def8b4cd2b71e0ba5620d7e8387f",
+      "sourceEventId": "txline-score:18257865:217",
+      "marketMessageId": "1838384875:00003:000501-10021-stab",
+      "marketAvailable": true,
+      "observedAtUtc": "2026-07-18T21:15:14.316Z",
+      "match": {
+        "status": "LIVE",
+        "minute": 15,
+        "addedTime": 0,
+        "homeScore": 0,
+        "awayScore": 1
+      },
+      "providerPrices": {
+        "HOME": 2850,
+        "DRAW": 3941,
+        "AWAY": 2529
+      },
+      "priceMicros": {
+        "HOME": 350870,
+        "DRAW": 253732,
+        "AWAY": 395398
+      },
+      "freshness": {
+        "marketUpdatedAtUtc": "2026-07-18T21:15:11.850Z",
+        "delayed": true,
+        "suspended": false
+      }
+    },
+    {
+      "providerSequence": 368,
+      "checkpointId": "M30",
+      "snapshotId": "a503b5c1b22c6fd44fc76cd786700c78986cde321e1cc1c47d4595867f6b3ed2",
+      "sourceEventId": "txline-score:18257865:367",
+      "marketMessageId": "1838386432:00003:001868-10021-stab",
+      "marketAvailable": true,
+      "observedAtUtc": "2026-07-18T21:30:14.672Z",
+      "match": {
+        "status": "LIVE",
+        "minute": 30,
+        "addedTime": 0,
+        "homeScore": 0,
+        "awayScore": 2
+      },
+      "providerPrices": {
+        "HOME": 6516,
+        "DRAW": 5293,
+        "AWAY": 1521
+      },
+      "priceMicros": {
+        "HOME": 153492,
+        "DRAW": 188956,
+        "AWAY": 657552
+      },
+      "freshness": {
+        "marketUpdatedAtUtc": "2026-07-18T21:29:57.731Z",
+        "delayed": true,
+        "suspended": false
+      }
+    },
+    {
+      "providerSequence": 605,
+      "checkpointId": "HALFTIME",
+      "snapshotId": "400d3ddf1d77e4ace3ce5135ff264dcb4fe71bf3786597f35d5a734f910b9f5f",
+      "sourceEventId": "txline-score:18257865:604",
+      "marketMessageId": "1838388990:00003:000033-10021-stab",
+      "marketAvailable": true,
+      "observedAtUtc": "2026-07-18T21:53:59.724Z",
+      "match": {
+        "status": "HALFTIME",
+        "minute": 45,
+        "addedTime": 4,
+        "homeScore": 0,
+        "awayScore": 4
+      },
+      "providerPrices": {
+        "HOME": 75000,
+        "DRAW": 33900,
+        "AWAY": 1045
+      },
+      "priceMicros": {
+        "HOME": 13333,
+        "DRAW": 29507,
+        "AWAY": 957160
+      },
+      "freshness": {
+        "marketUpdatedAtUtc": "2026-07-18T21:53:48.071Z",
+        "delayed": true,
+        "suspended": false
+      }
+    },
+    {
+      "providerSequence": 804,
+      "checkpointId": "M60",
+      "snapshotId": "3a2af2eeb74ec76c116f6fbf5f381d8d29cb8c2541a7c4c44a1a777f3ecad57d",
+      "sourceEventId": "txline-score:18257865:803",
+      "marketMessageId": "1838392039:00003:000115-10021-stab",
+      "marketAvailable": true,
+      "observedAtUtc": "2026-07-18T22:23:03.950Z",
+      "match": {
+        "status": "LIVE",
+        "minute": 60,
+        "addedTime": 0,
+        "homeScore": 2,
+        "awayScore": 4
+      },
+      "providerPrices": {
+        "HOME": 8401,
+        "DRAW": 5352,
+        "AWAY": 1441
+      },
+      "priceMicros": {
+        "HOME": 119049,
+        "DRAW": 186880,
+        "AWAY": 694071
+      },
+      "freshness": {
+        "marketUpdatedAtUtc": "2026-07-18T22:23:03.821Z",
+        "delayed": true,
+        "suspended": false
+      }
+    },
+    {
+      "providerSequence": 955,
+      "checkpointId": "M75",
+      "snapshotId": "c48ee1c95d11e73b00e46ef26bde8548481c145b5b1f9a0845142432a07f17a0",
+      "sourceEventId": "txline-score:18257865:954",
+      "marketMessageId": "1838393617:00003:000144-10021-stab",
+      "marketAvailable": true,
+      "observedAtUtc": "2026-07-18T22:38:09.270Z",
+      "match": {
+        "status": "LIVE",
+        "minute": 75,
+        "addedTime": 0,
+        "homeScore": 3,
+        "awayScore": 4
+      },
+      "providerPrices": {
+        "HOME": 3959,
+        "DRAW": 3008,
+        "AWAY": 2410
+      },
+      "priceMicros": {
+        "HOME": 252595,
+        "DRAW": 332457,
+        "AWAY": 414948
+      },
+      "freshness": {
+        "marketUpdatedAtUtc": "2026-07-18T22:38:08.092Z",
+        "delayed": true,
+        "suspended": false
+      }
+    },
+    {
+      "providerSequence": 1196,
+      "checkpointId": "FINAL",
+      "snapshotId": "7c488c28c569a5fc759d6175886a4ad530683d90855ee19bc7cf418e6096e39f",
+      "sourceEventId": "txline-score:18257865:1195",
+      "marketMessageId": "1838395930:00003:000029-1-10021-stab",
+      "marketAvailable": false,
+      "observedAtUtc": "2026-07-18T23:06:54.839Z",
+      "match": {
+        "status": "FINISHED",
+        "minute": 98,
+        "addedTime": 7,
+        "homeScore": 4,
+        "awayScore": 6
+      },
+      "freshness": {
+        "marketUpdatedAtUtc": "2026-07-18T23:00:13.162Z",
+        "delayed": true,
+        "suspended": true
+      },
+      "finalResult": "AWAY"
+    }
+  ]
+}

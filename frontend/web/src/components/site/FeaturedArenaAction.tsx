@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 
 import { createRuntimeTransport } from "@/lib/arena-api/transport";
 
-type ArenaPhase = "READY" | "RUNNING" | "FINALIZING" | "COMPLETED";
+type ArenaPhase = "READY" | "RUNNING" | "FINALIZING" | "COMPLETED" | "DEGRADED";
 
 type FeaturedArenaActionProps = Readonly<{
   arenaHref: string;

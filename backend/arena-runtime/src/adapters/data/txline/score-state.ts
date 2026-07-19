@@ -63,7 +63,13 @@ function validateFixture(
 function calculateMinute(
   statusId: number | undefined,
   clock: NormalizedTxlineClock | undefined,
+  semantics: NonNullable<CreateTxlineScoreStateReducerInput["semantics"]>,
 ): number {
+  if (semantics === "HISTORICAL_REPLAY") {
+    if (statusId === 3) return 45;
+    if (clock === undefined) return statusId === 1 || statusId === undefined ? 0 : 90;
+    return Math.floor(clock.seconds / 60);
+  }
   if (statusId === 2 || statusId === 4) {
     if (clock === undefined) throw scoreError();
     const periodMinute = Math.floor((2_700 - clock.seconds) / 60);
@@ -78,6 +84,7 @@ function calculateMinute(
 function applyMaterial(
   state: MutableScoreState,
   event: NormalizedTxlineScoreEvent,
+  semantics: NonNullable<CreateTxlineScoreStateReducerInput["semantics"]>,
 ): void {
   const previousStatusId = state.statusId;
   const dataStatusId = event.data?.statusId;
@@ -100,10 +107,14 @@ function applyMaterial(
     throw scoreError();
   }
 
-  if (event.action === "clock_adjustment") {
+  const terminalClockReset =
+    semantics === "HISTORICAL_REPLAY" &&
+    effectiveStatusId === 5 &&
+    (adjustmentClock?.seconds === 0 || event.clock?.seconds === 0);
+  if (event.action === "clock_adjustment" && !terminalClockReset) {
     if (adjustmentClock === undefined) throw scoreError();
     state.clock = adjustmentClock;
-  } else if (event.clock !== undefined) {
+  } else if (event.clock !== undefined && !terminalClockReset) {
     state.clock = event.clock;
   }
 
@@ -113,14 +124,26 @@ function applyMaterial(
   if (event.stats?.["2"] !== undefined) {
     state.participant2Score = event.stats["2"];
   }
+  if (semantics === "HISTORICAL_REPLAY" && effectiveStatusId === 2) {
+    state.participant1Score ??= 0;
+    state.participant2Score ??= 0;
+  }
 
-  if (effectiveStatusId === 5 || effectiveStatusId === 100) {
-    if (event.action !== "game_finalised") throw scoreError();
+  if (effectiveStatusId === 100 && event.action !== "game_finalised") {
+    throw scoreError();
+  }
+  if (
+    semantics === "LIVE" &&
+    effectiveStatusId === 5 &&
+    event.action !== "game_finalised"
+  ) {
+    throw scoreError();
   }
   if (
     event.action === "game_finalised" &&
-    effectiveStatusId !== 5 &&
-    effectiveStatusId !== 100
+    (semantics === "HISTORICAL_REPLAY"
+      ? effectiveStatusId !== 100
+      : effectiveStatusId !== 5 && effectiveStatusId !== 100)
   ) {
     throw scoreError();
   }
@@ -160,9 +183,14 @@ function applyMaterial(
     }
   }
 
-  state.minute = calculateMinute(state.statusId, state.clock);
+  state.minute = calculateMinute(state.statusId, state.clock, semantics);
   if (event.action === "halftime_finalised") state.halftimeFinalised = true;
-  if (event.action === "game_finalised") state.finalised = true;
+  if (
+    event.action === "game_finalised" &&
+    (semantics === "LIVE" || effectiveStatusId === 100)
+  ) {
+    state.finalised = true;
+  }
 
   const midMatch =
     (state.status === "LIVE" || state.status === "HALFTIME") && !state.finalised;
@@ -210,6 +238,7 @@ function parseEvent(input: unknown): NormalizedTxlineScoreEvent {
 export function createTxlineScoreStateReducer(
   input: CreateTxlineScoreStateReducerInput,
 ): TxlineScoreStateReducer {
+  const semantics = input.semantics ?? "LIVE";
   if (!Array.isArray(input.bootstrapEvents) || input.bootstrapEvents.length === 0) {
     throw new TxlineDataError(
       "INVALID_PROVIDER_INPUT",
@@ -246,7 +275,7 @@ export function createTxlineScoreStateReducer(
     halftimeFinalised: false,
     finalised: false,
   };
-  for (const event of uniqueEvents) applyMaterial(state, event);
+  for (const event of uniqueEvents) applyMaterial(state, event, semantics);
 
   function getState(): TxlineScoreState {
     if (
@@ -305,7 +334,7 @@ export function createTxlineScoreStateReducer(
       }
 
       const candidateState = { ...state };
-      applyMaterial(candidateState, event);
+      applyMaterial(candidateState, event, semantics);
       Object.assign(state, candidateState);
       seen.set(event.seq, event);
       return "APPLIED";

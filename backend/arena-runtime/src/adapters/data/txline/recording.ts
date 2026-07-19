@@ -7,14 +7,12 @@ import {
 } from "../../../contracts/index.js";
 import type {
   NormalizedTxlineFixture,
-  SelectedTxlineMarket,
   TxlineScoreState,
 } from "./domain.js";
 import { TxlineDataError } from "./domain.js";
-import { selectTxlineMarket } from "./market.js";
+import { createHistoricalMarketReducer } from "./historical-market.js";
 import {
   fixtureBindingSchema,
-  parseRawOddsEndpoint,
   parseRawScoreEvent,
 } from "./raw.js";
 import { createTxlineScoreStateReducer } from "./score-state.js";
@@ -33,6 +31,7 @@ interface RecordedCheckpoint {
   readonly snapshotId: string;
   readonly sourceEventId: string;
   readonly marketMessageId: string;
+  readonly marketAvailable: boolean;
   readonly observedAtUtc: string;
   readonly match: Readonly<{
     status: TxlineScoreState["status"];
@@ -41,7 +40,8 @@ interface RecordedCheckpoint {
     homeScore: number;
     awayScore: number;
   }>;
-  readonly priceMicros: Readonly<{ HOME: number; DRAW: number; AWAY: number }>;
+  readonly providerPrices?: Readonly<{ HOME: number; DRAW: number; AWAY: number }>;
+  readonly priceMicros?: Readonly<{ HOME: number; DRAW: number; AWAY: number }>;
   readonly freshness: Readonly<{
     marketUpdatedAtUtc: string;
     delayed: true;
@@ -120,15 +120,9 @@ export function compileRecordedTxlineFixture(
   }
 
   let scoreEvents;
-  let oddsUpdates;
   try {
     scoreEvents = input.scoreEvents
-      .map((raw) => ({ raw, normalized: parseRawScoreEvent(raw) }))
-      .sort((left, right) => left.normalized.seq - right.normalized.seq);
-    oddsUpdates = parseRawOddsEndpoint(input.oddsUpdates).sort((left, right) => {
-      if (left.Ts !== right.Ts) return left.Ts - right.Ts;
-      return left.MessageId.localeCompare(right.MessageId);
-    });
+      .map((raw) => ({ raw, normalized: parseRawScoreEvent(raw) }));
   } catch {
     throw new TxlineDataError(
       "INVALID_PROVIDER_INPUT",
@@ -142,14 +136,27 @@ export function compileRecordedTxlineFixture(
       "TxLINE historical recording has no score events",
     );
   }
+  for (const [index, scoreEvent] of scoreEvents.entries()) {
+    if (scoreEvent.normalized.seq !== index) {
+      throw new TxlineDataError(
+        "INVALID_PROVIDER_INPUT",
+        `Invalid historical score sequence at capture index ${index}`,
+      );
+    }
+  }
+
+  const historicalMarkets = createHistoricalMarketReducer(
+    input.fixture,
+    input.oddsUpdates,
+  );
 
   const reducer = createTxlineScoreStateReducer({
     fixture: input.fixture,
     bootstrapEvents: [first.raw],
+    semantics: "HISTORICAL_REPLAY",
   });
   const records: RecordedCheckpoint[] = [];
   let checkpointIndex = 0;
-  let lastDecisionMarket: SelectedTxlineMarket | undefined;
 
   for (const [index, scoreEvent] of scoreEvents.entries()) {
     if (index > 0) {
@@ -182,43 +189,10 @@ export function compileRecordedTxlineFixture(
     }
     if (!eligible(checkpointId, state)) continue;
 
-    const historicalMarket = oddsUpdates
-      .filter(
-        (row) =>
-          row.Ts <= state.timestampMs &&
-          row.FixtureId === input.fixture.fixtureId &&
-          row.BookmakerId === 10_021 &&
-          row.Bookmaker === "TXLineStablePriceDemargined" &&
-          row.SuperOddsType === "1X2_PARTICIPANT_RESULT" &&
-          (row.MarketPeriod === null || row.MarketPeriod === undefined) &&
-          (row.MarketParameters === null || row.MarketParameters === undefined),
-      )
-      .sort((left, right) => {
-        if (left.Ts !== right.Ts) return right.Ts - left.Ts;
-        return right.MessageId.localeCompare(left.MessageId);
-      })[0];
-    let market: SelectedTxlineMarket;
-    try {
-      market = selectTxlineMarket({
-        fixture: input.fixture,
-        snapshot: [],
-        updates: historicalMarket === undefined ? [] : [historicalMarket],
-      });
-    } catch (error) {
-      if (
-        error instanceof TxlineDataError &&
-        (error.code === "NO_APPROVED_MARKET" || error.code === "INVALID_MARKET")
-      ) {
-        if (checkpointId === "FINAL" && lastDecisionMarket !== undefined) {
-          market = lastDecisionMarket;
-        } else {
-          continue;
-        }
-      } else {
-        throw error;
-      }
+    const market = historicalMarkets.advanceThrough(state.timestampMs);
+    if (market === undefined || (!market.available && checkpointId !== "FINAL")) {
+      continue;
     }
-    if (checkpointId !== "FINAL") lastDecisionMarket = market;
 
     const observedAtUtc = new Date(state.timestampMs).toISOString();
     const record: RecordedCheckpoint = {
@@ -232,6 +206,7 @@ export function compileRecordedTxlineFixture(
       ),
       sourceEventId: state.sourceEventId,
       marketMessageId: market.messageId,
+      marketAvailable: market.available,
       observedAtUtc,
       match: {
         status: state.status,
@@ -240,11 +215,14 @@ export function compileRecordedTxlineFixture(
         homeScore: state.homeScore,
         awayScore: state.awayScore,
       },
-      priceMicros: market.priceMicros,
+      ...(market.providerPrices === undefined
+        ? {}
+        : { providerPrices: market.providerPrices }),
+      ...(market.priceMicros === undefined ? {} : { priceMicros: market.priceMicros }),
       freshness: {
         marketUpdatedAtUtc: new Date(market.timestampMs).toISOString(),
         delayed: true,
-        suspended: state.suspended,
+        suspended: state.suspended || !market.available,
       },
       ...(checkpointId === "FINAL" ? { finalResult: resultFrom(state) } : {}),
     };
@@ -271,11 +249,11 @@ export function compileRecordedTxlineFixture(
       sourceKickoffUtc: new Date(input.fixture.startTime).toISOString(),
       capturedAtUtc: new Date(input.capturedAtUtc).toISOString(),
       scoreEventCount: scoreEvents.length,
-      oddsUpdateCount: oddsUpdates.length,
+      oddsUpdateCount: historicalMarkets.count,
       inputHash: hash({
         fixture: input.fixture,
         scoreEvents: scoreEvents.map(({ normalized }) => normalized),
-        oddsUpdates,
+        oddsUpdates: input.oddsUpdates,
       }),
     },
     records,

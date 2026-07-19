@@ -39,6 +39,26 @@ describe("browser-safe Arena90 public contracts", () => {
     ).toThrow();
   });
 
+  it("accepts DEGRADED Recovery Replay state without weakening strict schemas", () => {
+    const state = publicState();
+    const recovery = {
+      ...state,
+      phase: "DEGRADED",
+      manifest: {
+        ...state.manifest,
+        replayDisclosure: "RECOVERY REPLAY — recorded data, not live execution",
+      },
+    };
+
+    expect(publicArenaStateV1Schema.parse(recovery)).toEqual(recovery);
+    expect(() =>
+      publicArenaStateV1Schema.parse({
+        ...recovery,
+        manifest: { ...recovery.manifest, mode: "LIVE" },
+      }),
+    ).toThrow();
+  });
+
   it("maps every current public event variant with strict payloads", () => {
     const events = [
       publicEvent(1),
