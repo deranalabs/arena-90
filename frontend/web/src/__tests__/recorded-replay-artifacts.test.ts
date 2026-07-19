@@ -2,12 +2,47 @@
 
 import {
   listRecordedReplayArtifacts,
+  parseRecordedReplayArtifact,
   serveRecordedReplayRequest,
 } from "@/lib/arena-api/recorded-replay-artifacts";
+import franceSpainInput from "@/data/replays/world-cup-2026-france-spain-semifinal-replay.json";
 
 const franceSpain = "world-cup-2026-france-spain-semifinal-replay";
 
 describe("recorded Replay artifacts", () => {
+  it("accepts six clean NO_TRADE decisions as valid Alpha participation", () => {
+    const input = structuredClone(franceSpainInput);
+    input.semanticHash = "b".repeat(64);
+    for (const checkpoint of input.state.checkpoints) {
+      const decision = checkpoint.revealedDecisions.alpha;
+      if (decision === undefined) throw new Error("Missing Alpha decision");
+      checkpoint.revealedDecisions.alpha = {
+        schemaVersion: decision.schemaVersion,
+        arenaId: decision.arenaId,
+        snapshotId: decision.snapshotId,
+        checkpointId: decision.checkpointId,
+        agentId: decision.agentId,
+        action: "NO_TRADE",
+        publicExplanation: "Keep the accepted portfolio unchanged.",
+      };
+    }
+
+    expect(parseRecordedReplayArtifact(input)).toMatchObject({
+      semanticHash: "b".repeat(64),
+      state: {
+        phase: "COMPLETED",
+        checkpoints: expect.arrayContaining([
+          expect.objectContaining({
+            revealedDecisions: {
+              alpha: expect.objectContaining({ action: "NO_TRADE" }),
+              beta: expect.any(Object),
+            },
+          }),
+        ]),
+      },
+    });
+  });
+
   it("serves completed state and cursor-safe history through the runtime contract", async () => {
     const stateResponse = serveRecordedReplayRequest(
       new Request(`http://frontend.local/api/arenas/${franceSpain}`),

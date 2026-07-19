@@ -441,6 +441,27 @@ Only data source and scheduling differ:
 
 Replay must not load old agent decisions as current decisions.
 
+### 11.1 Completed Replay export acceptance
+
+A completed Replay artifact is accepted when:
+
+- the lifecycle phase is `COMPLETED` with a valid final result;
+- Alpha has one accepted decision at each of the six decision checkpoints;
+- Beta has one accepted decision at each of the six decision checkpoints;
+- no checkpoint failure or `MISSED_DECISION_ROUND` exists;
+- exactly one terminal `COMPLETED` event exists.
+
+`NO_TRADE` is an accepted autonomous decision and does not make a Replay
+invalid. Export acceptance must not require either agent to have market
+exposure.
+
+Artifact identity uses a canonical SHA-256 semantic hash of the validated
+persisted lifecycle `state` and ordered `events`. Durable-store envelope fields
+such as `fencingSequence`, lease owner, process ID, token, and expiry are
+operational metadata and are excluded. Reopening an already completed Replay
+may advance `fencingSequence`; it must not change lifecycle state, events, the
+semantic hash, or the exported artifact hash.
+
 ## 12. Minimal HTTP API
 
 ```text

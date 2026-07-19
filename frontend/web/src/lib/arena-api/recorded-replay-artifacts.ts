@@ -9,6 +9,7 @@ import {
 } from "./contracts";
 
 type RecordedReplayArtifact = Readonly<{
+  semanticHash?: string;
   recordedSource: Readonly<{
     label: "RECORDED TxLINE DATA";
     fixtureId: string;
@@ -22,11 +23,20 @@ type RecordedReplayArtifact = Readonly<{
   history: PublicEventHistoryV1;
 }>;
 
-function parseArtifact(input: unknown): RecordedReplayArtifact {
+export function parseRecordedReplayArtifact(
+  input: unknown,
+): RecordedReplayArtifact {
   if (typeof input !== "object" || input === null || Array.isArray(input)) {
     throw new TypeError("Invalid recorded Replay artifact");
   }
   const record = input as Record<string, unknown>;
+  const semanticHash = record["semanticHash"];
+  if (
+    semanticHash !== undefined &&
+    (typeof semanticHash !== "string" || !/^[a-f0-9]{64}$/u.test(semanticHash))
+  ) {
+    throw new TypeError("Invalid recorded Replay semantic hash");
+  }
   const source = record["recordedSource"];
   if (typeof source !== "object" || source === null || Array.isArray(source)) {
     throw new TypeError("Invalid recorded Replay source");
@@ -63,23 +73,26 @@ function parseArtifact(input: unknown): RecordedReplayArtifact {
     state.phase !== "COMPLETED" ||
     state.checkpoints.length !== 6 ||
     state.checkpoints.some((checkpoint) => checkpoint.failures.length > 0) ||
-    !state.checkpoints.some(
+    state.checkpoints.some(
       (checkpoint) =>
-        checkpoint.revealedDecisions.alpha?.action === "TARGET_ALLOCATION",
+        checkpoint.revealedDecisions.alpha === undefined ||
+        checkpoint.revealedDecisions.beta === undefined,
     ) ||
-    !state.checkpoints.some(
-      (checkpoint) =>
-        checkpoint.revealedDecisions.beta?.action === "TARGET_ALLOCATION",
-    )
+    history.events.some((event) => event.type === "MISSED_DECISION_ROUND")
   ) {
     throw new TypeError("Inconsistent recorded Replay artifact");
   }
-  return Object.freeze({ recordedSource, state, history });
+  return Object.freeze({
+    ...(semanticHash === undefined ? {} : { semanticHash }),
+    recordedSource,
+    state,
+    history,
+  });
 }
 
 const artifacts = new Map<string, RecordedReplayArtifact>(
   [franceSpainInput, englandArgentinaInput].map((input) => {
-    const artifact = parseArtifact(input);
+    const artifact = parseRecordedReplayArtifact(input);
     return [artifact.state.manifest.arenaId, artifact];
   }),
 );
