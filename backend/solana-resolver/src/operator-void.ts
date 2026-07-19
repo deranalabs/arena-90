@@ -120,17 +120,46 @@ export function deriveArenaAddress(programId: PublicKey, identityHash: Uint8Arra
   )[0];
 }
 
+/**
+ * Void reason codes are a client-side convention only. The on-chain program
+ * (handle_void_arena) accepts any nonzero u16 and attaches no semantics to
+ * the value beyond nonzero -- see ArenaError::InvalidVoidReason. This
+ * operator script enforces a stricter, documented convention so that every
+ * void performed through this CLI is backed by a known, reviewed scenario.
+ *
+ *   Reason 4 -- OPEN, pre-kickoff arena. Backing must be unwound before the
+ *               match starts (e.g. cancelled fixture, setup error) and no
+ *               Live run has occurred.
+ *   Reason 5 -- LOCKED, post-kickoff arena whose Live run failed and will
+ *               not be resumed as the original Live execution (see issue
+ *               #14). Supporter positions are refunded in full; a Recovery
+ *               Replay may be created separately under a new arena id.
+ */
+const OPEN_PRE_KICKOFF_REASON = 4;
+const LOCKED_FAILED_LIVE_RUN_REASON = 5;
+
 export function assertVoidCandidate(
   account: ArenaAccount,
   positions: readonly SupporterPositionAccount[],
   request: VoidArenaRequest,
   chainTime: bigint,
 ): void {
-  if (account.state !== "OPEN") {
-    throw new Error("Reason 4 requires an OPEN arena");
-  }
-  if (chainTime >= account.backingDeadline) {
-    throw new Error("Reason 4 requires a pre-kickoff arena");
+  if (request.reason === OPEN_PRE_KICKOFF_REASON) {
+    if (account.state !== "OPEN") {
+      throw new Error("Reason 4 requires an OPEN arena");
+    }
+    if (chainTime >= account.backingDeadline) {
+      throw new Error("Reason 4 requires a pre-kickoff arena");
+    }
+  } else if (request.reason === LOCKED_FAILED_LIVE_RUN_REASON) {
+    if (account.state !== "LOCKED") {
+      throw new Error("Reason 5 requires a LOCKED arena");
+    }
+    if (chainTime < account.backingDeadline) {
+      throw new Error("Reason 5 requires a post-kickoff arena");
+    }
+  } else {
+    throw new Error("Unsupported void reason code for this operator script");
   }
   if (
     account.alphaPool !== request.expectedAlphaPool ||

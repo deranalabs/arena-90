@@ -99,6 +99,65 @@ test("permits reason 4 only for reconciled OPEN pre-kickoff state", () => {
   );
 });
 
+const lockedReasonArguments = [
+  "--arena",
+  arena.toBase58(),
+  "--identity-hash",
+  identityHash.toString("hex"),
+  "--fixture-id",
+  "18257865",
+  "--reason",
+  "5",
+  "--expected-alpha-pool",
+  "50000000",
+  "--expected-beta-pool",
+  "0",
+  "--expected-position-count",
+  "1",
+] as const;
+
+test("permits reason 5 only for reconciled LOCKED post-kickoff state", () => {
+  const request = parseVoidArenaArguments(lockedReasonArguments);
+  assert.doesNotThrow(() =>
+    assertVoidCandidate(arenaAccount("LOCKED"), [position()], request, 2_000n),
+  );
+  assert.throws(
+    () => assertVoidCandidate(arenaAccount("OPEN"), [position()], request, 2_000n),
+    /requires a LOCKED arena/,
+  );
+  assert.throws(
+    () => assertVoidCandidate(arenaAccount("LOCKED"), [position()], request, 1_000n),
+    /requires a post-kickoff arena/,
+  );
+  assert.throws(
+    () => assertVoidCandidate({ ...arenaAccount("LOCKED"), alphaPool: 1n }, [position()], request, 2_000n),
+    /pools do not match/,
+  );
+});
+
+test("rejects void reason codes outside the documented convention", () => {
+  const request = parseVoidArenaArguments([
+    "--arena",
+    arena.toBase58(),
+    "--identity-hash",
+    identityHash.toString("hex"),
+    "--fixture-id",
+    "18257865",
+    "--reason",
+    "1",
+    "--expected-alpha-pool",
+    "50000000",
+    "--expected-beta-pool",
+    "0",
+    "--expected-position-count",
+    "1",
+  ]);
+  assert.throws(
+    () => assertVoidCandidate(arenaAccount("OPEN"), [position()], request, 1_000n),
+    /Unsupported void reason code/,
+  );
+});
+
 test("rejects missing, duplicate, unknown, and unbounded constraints", () => {
   assert.throws(() => parseVoidArenaArguments([]), /--identity-hash is required/);
   assert.throws(
