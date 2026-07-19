@@ -289,6 +289,10 @@ function parseStreamFrames(
   }
 }
 
+function isScoreStreamHeartbeat(event: TxlineSseEvent): boolean {
+  return event.event === "heartbeat";
+}
+
 export function createTxlineProviderClient(
   config: TxlineProviderClientConfig,
 ): TxlineProviderClient {
@@ -419,6 +423,7 @@ export function createTxlineProviderClient(
           if (next === undefined || next.done === true) break;
           for (const event of parseStreamFrames(() => parser.push(next.value))) {
             if (callerSignal.aborted) throw new AttemptInterrupted("ABORTED");
+            if (isScoreStreamHeartbeat(event)) continue;
             emitted = true;
             yield event;
           }
@@ -426,6 +431,7 @@ export function createTxlineProviderClient(
 
         for (const event of parseStreamFrames(() => parser.finish())) {
           if (callerSignal.aborted) throw new AttemptInterrupted("ABORTED");
+          if (isScoreStreamHeartbeat(event)) continue;
           emitted = true;
           yield event;
         }

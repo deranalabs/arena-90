@@ -572,7 +572,7 @@ describe("TxLINE provider client", () => {
     ).rejects.toMatchObject({ code: "PROVIDER_RESPONSE_LIMIT" });
   });
 
-  it("streams parsed score events across arbitrary UTF-8 chunk boundaries", async () => {
+  it("streams score events across arbitrary UTF-8 chunks and ignores named heartbeats", async () => {
     const requests: TxlineHttpRequest[] = [];
     let bufferedRequests = 0;
     const streamText = [
@@ -580,6 +580,11 @@ describe("TxLINE provider client", () => {
       "id: stream-0\r\n",
       "event: score\r\n",
       'data: {"Seq":0,"team":"Garuda 🦅"}\r\n\r\n',
+      "id: heartbeat-0\r\n",
+      "event: heartbeat\r\n",
+      'data: {"Ts":1784494481}\r\n\r\n',
+      "id: stream-1\r\n",
+      "event: score\r\n",
       'data: {"Seq":1}\n\n',
     ].join("");
     const bytes = new TextEncoder().encode(streamText);
@@ -608,7 +613,11 @@ describe("TxLINE provider client", () => {
         event: "score",
         data: { Seq: 0, team: "Garuda 🦅" },
       },
-      { cursor: "stream-0", data: { Seq: 1 } },
+      {
+        cursor: "stream-1",
+        event: "score",
+        data: { Seq: 1 },
+      },
     ]);
     expect(bufferedRequests).toBe(0);
     expect(requests[0]).toMatchObject({
@@ -618,6 +627,28 @@ describe("TxLINE provider client", () => {
         "X-Api-Token": "injected-api-token",
       },
     });
+  });
+
+  it("does not ignore stream frames with other event names", async () => {
+    const client = createTxlineProviderClient({
+      ...createConfig(),
+      sseTransport: async function* () {
+        yield new TextEncoder().encode(
+          'event: keepalive\ndata: {"Ts":1784494481}\n\n',
+        );
+      },
+    });
+
+    await expect(
+      collect(
+        client.getScoreStream(18_185_036, new AbortController().signal),
+      ),
+    ).resolves.toEqual([
+      {
+        event: "keepalive",
+        data: { Ts: 1_784_494_481 },
+      },
+    ]);
   });
 
   it("enforces the streaming byte limit inside the client parser", async () => {
