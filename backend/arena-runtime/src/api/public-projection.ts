@@ -576,7 +576,10 @@ export function projectArenaEventHistory(
   }
 }
 
-export function projectArenaState(state: ArenaRunStateV1): PublicArenaStateV1 {
+export function projectArenaState(
+  state: ArenaRunStateV1,
+  isDegraded = false,
+): PublicArenaStateV1 {
   try {
     if (
       state.portfolios.alpha.agentId !== "alpha" ||
@@ -590,14 +593,16 @@ export function projectArenaState(state: ArenaRunStateV1): PublicArenaStateV1 {
     const betaNav = BigInt(beta.navMicros);
     const result =
       alphaNav > betaNav ? "alpha" : betaNav > alphaNav ? "beta" : "DRAW";
+    const effectivePhase =
+      isDegraded && state.phase !== "COMPLETED" ? "DEGRADED" : state.phase;
     const nextCheckpointId =
-      state.phase === "COMPLETED"
+      effectivePhase === "COMPLETED"
         ? undefined
         : CHECKPOINT_IDS[state.checkpoints.length];
     const projected = {
       schemaVersion: 1 as const,
       manifest: projectManifest(state.manifest),
-      phase: state.phase,
+      phase: effectivePhase,
       runtimeVersions: {
         runtimeVersion: state.runtimeMetadata.runtimeVersion,
         executionRuleVersion: state.runtimeMetadata.executionRuleVersion,
@@ -620,7 +625,7 @@ export function projectArenaState(state: ArenaRunStateV1): PublicArenaStateV1 {
       portfolios: { alpha, beta },
       checkpoints: state.checkpoints.map(projectCheckpoint),
       ...(nextCheckpointId === undefined ? {} : { nextCheckpointId }),
-      leader: { result, provisional: state.phase !== "COMPLETED" },
+      leader: { result, provisional: effectivePhase !== "COMPLETED" },
       ...(state.finalResult === undefined
         ? {}
         : { finalResult: projectFinalResult(state.finalResult) }),

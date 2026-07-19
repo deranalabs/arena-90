@@ -257,7 +257,7 @@ export const publicArenaStateV1Schema = z
   .object({
     schemaVersion: z.literal(1),
     manifest: publicManifestV1Schema,
-    phase: z.enum(["READY", "RUNNING", "FINALIZING", "COMPLETED"]),
+    phase: z.enum(["READY", "RUNNING", "FINALIZING", "COMPLETED", "DEGRADED"]),
     runtimeVersions: publicRuntimeVersionsV1Schema,
     currentSnapshot: publicSnapshotV1Schema.optional(),
     portfolios: publicAgentPortfoliosV1Schema,

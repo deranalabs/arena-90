@@ -492,6 +492,46 @@ describe("Node HTTP runtime composition", () => {
     }
   });
 
+  it("exposes DEGRADED on public arena state when a non-retryable Live failure ends the managed run before COMPLETED", async () => {
+    const liveManifest = lockedLiveManifest(
+      "arena-live-supervisor-degraded-projection-001",
+    );
+    const client = failingBootstrapClient(
+      new TxlineDataError(
+        "PROVIDER_AUTHENTICATION_FAILURE",
+        "TxLINE provider authentication failed",
+      ),
+      () => {},
+    );
+    const composition = await createNodeHttpRuntimeComposition({
+      env: liveEnv,
+      readFile: liveFiles(liveManifest),
+      agents: { alpha: agent("alpha"), beta: agent("beta") },
+      store: testStore(),
+      txlineClientFactory: () => client,
+    });
+
+    try {
+      const address = await composition.listen({ port: 0 });
+      await vi.waitFor(() => expect(composition.isReady()).toBe(false));
+      const publicState = await fetch(
+        `http://${address.host}:${address.port}/api/arenas/${liveManifest.arenaId}`,
+      );
+      const body = (await publicState.json()) as { phase: unknown };
+
+      expect({
+        status: publicState.status,
+        phase: body.phase,
+      }).toEqual({
+        status: 200,
+        phase: "DEGRADED",
+      });
+      expect(publicArenaStateV1Schema.safeParse(body).success).toBe(true);
+    } finally {
+      await composition.shutdown();
+    }
+  });
+
   it("composes one locked Replay lifecycle and HTTP runtime without external calls", async () => {
     const composition = await createNodeHttpRuntimeComposition({
       env: replayEnv,
