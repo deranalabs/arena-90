@@ -76,4 +76,27 @@ describe("acceptance preflight", () => {
     expect(result.status).toBe(2);
     expect(result.stderr).toContain("ARENA90_AUTOSTART");
   });
+
+  describe("Issue #14: Final preflight seam", () => {
+    it("rejects configuration without TXLINE_PROVIDER_LIMIT config keys for Live mode", () => {
+      const result = runPreflight({
+        ARENA90_RUNTIME_MODE: "LIVE",
+        ARENA90_AUTOSTART: "true",
+        ARENA90_MANIFEST_FILE: resolve(
+          "fixtures/live/world-cup-third-place-manifest.json",
+        ),
+        ARENA90_LIVE_FIXTURE_BINDING_FILE: resolve(
+          "fixtures/live/world-cup-third-place-binding.json",
+        ),
+        ARENA90_LIVE_DELAYED: "false",
+        TXLINE_BASE_URL: "https://example.invalid",
+        TXLINE_JWT: "preflight-only",
+        TXLINE_API_TOKEN: "preflight-only",
+        // Missing newly required PROVIDER_LIMIT config
+      });
+
+      expect(result.status).not.toBe(0);
+      expect(result.stderr).toMatch(/TXLINE_PROVIDER_LIMIT|BLOCKED_CONFIG/);
+    });
+  });
 });

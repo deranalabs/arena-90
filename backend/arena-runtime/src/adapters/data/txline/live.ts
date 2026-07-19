@@ -463,10 +463,9 @@ export function createTxlineLiveDataAdapter(
 
         const state = await eligibleState(checkpointId, signal);
         if (fixture === undefined) throw invalidInput("TxLINE fixture unavailable");
-        const [oddsSnapshot, oddsUpdates] = await Promise.all([
-          client.getOddsSnapshot(fixture.fixtureId, signal),
-          client.getOddsUpdates(fixture.fixtureId, signal),
-        ]);
+        // ISSUE #14: Bounded ingestion hotfix. Do not request unbounded historical odds updates in LIVE mode.
+        const oddsSnapshot = await client.getOddsSnapshot(fixture.fixtureId, signal);
+        const oddsUpdates: unknown[] = [];
         const market = selectTxlineMarket({
           fixture,
           snapshot: oddsSnapshot,

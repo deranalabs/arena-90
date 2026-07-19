@@ -269,12 +269,12 @@ function completingLiveClient(
     },
     async getOddsSnapshot() {
       onCall("provider:odds-snapshot");
-      return [];
+      marketSequence += 1;
+      return [liveMarketRow(`odds-${marketSequence}`)];
     },
     async getOddsUpdates() {
       onCall("provider:odds-updates");
-      marketSequence += 1;
-      return [liveMarketRow(`odds-${marketSequence}`)];
+      return [];
     },
     async getScoreSnapshot() {
       onCall("provider:score-snapshot");
@@ -901,9 +901,8 @@ describe("Node HTTP runtime composition", () => {
         checkpointSources: Array.from({ length: 6 }, () => "TXLINE_LIVE"),
         firstProviderCalls: [
           "provider:fixture",
-          "provider:score-snapshot",
-          "provider:odds-snapshot",
-          "provider:odds-updates",
+        "provider:score-snapshot",
+        "provider:odds-snapshot",
         ],
         firstResumedProviderIndex: 2,
         resumedKickoffCalls: ["agent:alpha:KICKOFF", "agent:beta:KICKOFF"],
