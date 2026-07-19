@@ -89,8 +89,9 @@ function applyMaterial(
     throw scoreError();
   }
   const effectiveStatusId = dataStatusId ?? event.statusId;
+  const adjustmentClock = event.data?.clock ?? event.clock;
   const suppliedClock =
-    event.action === "clock_adjustment" ? event.data?.clock : event.clock;
+    event.action === "clock_adjustment" ? adjustmentClock : event.clock;
   if (
     (effectiveStatusId === 2 || effectiveStatusId === 4) &&
     effectiveStatusId !== previousStatusId &&
@@ -100,8 +101,8 @@ function applyMaterial(
   }
 
   if (event.action === "clock_adjustment") {
-    if (event.data?.clock === undefined) throw scoreError();
-    state.clock = event.data.clock;
+    if (adjustmentClock === undefined) throw scoreError();
+    state.clock = adjustmentClock;
   } else if (event.clock !== undefined) {
     state.clock = event.clock;
   }
