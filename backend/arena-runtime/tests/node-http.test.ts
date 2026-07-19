@@ -293,6 +293,33 @@ function completingLiveClient(
 }
 
 describe("Node HTTP runtime composition", () => {
+  it("creates Alpha and Beta adapters with isolated ZeroClaw state", async () => {
+    const configuredDirectories: Record<string, string> = {};
+    const composition = await createNodeHttpRuntimeComposition({
+      env: {
+        ...replayEnv,
+        ZEROCLAW_BIN: "zeroclaw",
+        ZEROCLAW_ALPHA_CONFIG_DIR: "/isolated/zeroclaw-alpha",
+        ZEROCLAW_BETA_CONFIG_DIR: "/isolated/zeroclaw-beta",
+      },
+      readFile: replayFiles(),
+      zeroClawAgentFactory(config) {
+        configuredDirectories[config.agentId] = config.configDir;
+        return agent(config.agentId);
+      },
+      store: testStore(),
+    });
+
+    try {
+      expect(configuredDirectories).toEqual({
+        alpha: "/isolated/zeroclaw-alpha",
+        beta: "/isolated/zeroclaw-beta",
+      });
+    } finally {
+      await composition.shutdown();
+    }
+  });
+
   it("waits until locked kickoff before autonomously polling LIVE evidence", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(liveBinding.startTime - 1_000);
